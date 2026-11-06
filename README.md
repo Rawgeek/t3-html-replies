@@ -50,13 +50,13 @@ Restart the provider session after adding it.
 
 ## More examples
 
-| Working reply | Mobile |
+| Waiting reply | Mobile |
 | --- | --- |
-| ![Working reply](screenshots/reply-progress.png) | <img src="screenshots/reply-mobile.png" width="260" alt="Mobile reply"> |
+| ![Waiting reply](screenshots/overview.png) | <img src="screenshots/reply-mobile.png" width="260" alt="Mobile reply"> |
 
 ![Component gallery](screenshots/gallery.png)
 
-The gallery has 60 examples across 20 families: benchmarks, graphs, tables, task progress, reports, PR queues, Slack messages, GitHub PRs, progress bars, buttons, timelines, layouts, metrics, callouts, checklists, states, and status panels.
+Preview images are generated from the current renderer, so they cannot drift from the code.
 
 ## Layout
 
@@ -64,9 +64,10 @@ The gallery has 60 examples across 20 families: benchmarks, graphs, tables, task
 SKILL.md                 Skill entrypoint
 agents/openai.yaml       Skill metadata
 assets/mcp-app.html      Native MCP app shell
-scripts/                 MCP server and self-test
+scripts/                 MCP server, self-test, preview capture
 ui-library/              CSS, renderer, validator, gallery, examples
-screenshots/             README examples
+hooks/pre-commit         Regenerates README previews
+screenshots/             Generated README previews
 ```
 
 Inside `ui-library/`:
@@ -78,6 +79,15 @@ Inside `ui-library/`:
 - `library.css`: shared styles and fixed heights.
 - `verify.mjs`: validation and generated-file checks.
 - `reply-example.json`, `complete-example.json`: starting points.
+
+## Previews
+
+The pre-commit hook regenerates `screenshots/overview.png`, `screenshots/reply-mobile.png`, and `screenshots/gallery.png` whenever the library changes:
+
+    git config core.hooksPath hooks
+    node scripts/previews.mjs
+
+Set `CHROME_PATH` when Chrome lives elsewhere. Skip it with `git commit --no-verify`.
 
 ## Develop
 

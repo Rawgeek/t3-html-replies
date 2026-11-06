@@ -22,10 +22,23 @@ const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
-const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions','columns'];
+const flowSpans={2:[3,3],3:[1,1,1],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
+const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 
 const fail=message=>{throw Error(message);};
+const inferType=(section)=>{
+  if(Array.isArray(section.done)||Array.isArray(section.todo))return 'changes';
+  if(Array.isArray(section.columns)&&Array.isArray(section.rows))return 'table';
+  if(!Array.isArray(section.items))return 'list';
+  const first=section.items[0];
+  if(!first||typeof first!=='object')return 'list';
+  if('before' in first&&'after' in first)return 'compare';
+  if('value' in first&&'label' in first)return 'facts';
+  if('time' in first&&'label' in first)return 'swimlane';
+  if('state' in first&&'label' in first)return section.items.length>=5?'swimlane':'cards';
+  return 'list';
+};
 const present=value=>value!==undefined&&value!==null&&String(value).trim()!=='';
 const assertKeys=(value,allowed,field)=>{
   if(!value||typeof value!=='object'||Array.isArray(value))fail(`${field} must be an object.`);
@@ -127,7 +140,7 @@ function validateActions(value){
 function validateSection(section,index){
   const name=`Sections[${index}]`;
   if(!section||typeof section!=='object'||Array.isArray(section))fail(`${name} must be an object.`);
-  const type=section.type;
+  const type=section.type??inferType(section);
   if(!SECTION_TYPES.has(type))fail(`${name} type must be facts, list, table, swimlane, bars, changes, compare, or cards.`);
   const title=field(section.title,`${name} title`,LIMITS.sectionTitle);
   let result;
@@ -294,7 +307,7 @@ function renderSection(section){
     const max=Math.max(...section.items.map(item=>item.value),1);
     body=`<div class="reply-bars">${section.items.map(item=>`<div class="reply-bar"><div class="reply-bar-head"><span>${e(item.label)}</span><strong>${e(item.display)}</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:${item.value/max*100}%"></span></div>${item.note?`<p class="metric-note">${e(item.note)}</p>`:''}</div>`).join('')}</div>`;
   }
-  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}"><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
+  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
 }
 
 export async function renderReply(data){
@@ -306,8 +319,6 @@ export async function renderReply(data){
   const done=state==='complete';
   const title=field(data.title,'Title',LIMITS.title);
   const summary=field(data.summary,'Summary',LIMITS.summary,{optional:true});
-  const columns=data.columns===undefined?2:Number(data.columns);
-  if(!Number.isInteger(columns)||![2,3].includes(columns))fail('Columns must be 2 or 3.');
   const results=present(data.results)?facts(data.results,'Results',1):[];
   if(done&&!results.length)fail('Complete replies require result facts.');
   const sections=present(data.sections)?array(data.sections,'Sections',1,LIMITS.sections).map(validateSection):[];
@@ -346,8 +357,8 @@ export async function renderReply(data){
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
   const supporting=sections.filter(section=>section!==swimlaneSection);
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection)}<div class="reply-flow" data-count="${supporting.length}">${supporting.map(renderSection).join('')}</div></section>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}" style="--flow-columns:${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection)}<div class="reply-flow" data-count="${supporting.length}">${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]})).join('')}</div></section>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {

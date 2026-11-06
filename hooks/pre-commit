@@ -1,0 +1,10 @@
+#!/bin/sh
+# Regenerate README previews whenever the library changes.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if git diff --cached --name-only | grep -qE '^(ui-library/|scripts/previews\.mjs)'; then
+  node scripts/previews.mjs >/dev/null
+  git add screenshots
+fi
+

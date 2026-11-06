@@ -81,9 +81,9 @@ await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',
 await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',columns:['A','B'],rows:[['A','B'],['C','D'],['E','F'],['G','H']]}]}),/must contain 2 to 3 items/);
 const actionTable=await renderReply({...base,...withBlocks({title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'Reply',icon:'message-square',send:'Reply to this mail.'}],['Alert',{label:'Check',icon:'clock',send:'Check this alert.'}]]})});
 assert(actionTable.includes('data-t3-send="Reply to this mail."')&&actionTable.includes('class="btn compact"'),'Table cells render send actions');
-const detailTable=await renderReply({...base,columns:2,...withBlocks({title:'Queue',type:'table',columns:['Item','Next'],rows:[{cells:['Mail',{label:'Reply',send:'Reply to this mail.'}],detail:'Hover detail'},{cells:['Alert','Check']}]})});
-assert(detailTable.includes('data-columns="2"')&&detailTable.includes('title="Hover detail"'),'Two columns and row details render');
-await assert.rejects(renderReply({...base,columns:4}),/Columns must be 2 or 3/);
+const detailTable=await renderReply({...base,...withBlocks({title:'Queue',type:'table',columns:['Item','Next'],rows:[{cells:['Mail',{label:'Reply',send:'Reply to this mail.'}],detail:'Hover detail'},{cells:['Alert','Check']}]})});
+assert(detailTable.includes('title="Hover detail"'),'Row details render');
+await assert.rejects(renderReply({...base,columns:4}),/unsupported fields: columns/);
 await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['A','B'],rows:[{cells:['A','B'],detail:'x'.repeat(261)},{cells:['C','D']}]}]}),/detail exceeds 260 characters/);
 await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'Reply',send:'x',href:'https://example.com'}],['Alert','Check']]}]}),/unsupported fields: href/);
 await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'x'.repeat(15),send:'x'}],['Alert','Check']]}]}),/label exceeds 14 characters/);
@@ -115,7 +115,7 @@ assert(reply.includes('class="compare-bar before"')&&reply.includes('class="comp
 assert(reply.includes('reply-card')&&reply.includes('>Checked<'),'Cards render a readable status pill');
 assert((reply.match(/class="status-gates"/g)||[]).length===1,'Progress tile carries milestone gates');
 assert(reply.includes('data-layout="side"')&&reply.includes('class="reply-flow"'),'The swimlane sits beside one packed block area');
-assert(css.includes('.reply-flow .reply-section-tile:last-child:nth-child(odd)'),'An odd supporting block fills the row so no space is left');
+assert(css.includes('.reply-flow > [data-span="3"]')&&css.includes('repeat(3,minmax(0,1fr))'),'A final lone block spans the three flow columns');
 assert(css.includes('min-height:376px'),'The swimlane matches two rows of supporting blocks');
 assert(reply.includes('data-count="7"'),'The flow records how many blocks it packs');
 const replyTemplate=await readFile(join(root,'reply-template.html'),'utf8');
@@ -125,7 +125,7 @@ assert.equal(completeTemplate,await renderReply(JSON.parse(await readFile(join(r
 const sectionHeights=[...reply.matchAll(/class="component-tile reply-section-tile" data-height="([a-z]+)"/g)].map(match=>match[1]);
 assert.equal(sectionHeights.length,8,'Structured blocks render');
 assert.deepEqual(sectionHeights,['tall',...Array(7).fill('small')],'The swimlane is taller and every other block shares one height');
-assert(!reply.includes('data-span='),'Sections use one grid column');
+assert([...reply.matchAll(/data-span="(\d)"/g)].every(match=>['1','2','3'].includes(match[1])),'Every block declares a legal span');
 assert(css.includes(':last-child:nth-child(3n+1)')&&css.includes(':last-child:nth-child(3n+2)')&&css.includes(':last-child:nth-child(odd)'),'The last row fills automatically');
 assert(!reply.includes('<details>')&&!reply.includes('<summary')&&!reply.includes('wake-dot')&&!reply.includes('class="status-details"'));
 console.log(JSON.stringify({passed:true,examples:catalog.length,families:families.length,guidance:catalog.length*2,standaloneSnippets:catalog.length,gridOnly:true,offline:true,scriptSyntax:true}));

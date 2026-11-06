@@ -59,9 +59,11 @@ The renderer rejects replies above 1200 visible characters.
 
 ## Section blocks
 
-Every section is a fixed 184px tile. The swimlane sits in a 376px tall side column and the other blocks fill the flow area beside it. The renderer rejects a size field on a section.
+The page is always a four column grid at 1024px: the swimlane fills one column and three flow columns hold the supporting blocks. The renderer decides each block span and the flow never leaves a cell empty. Every section is a fixed 184px tile, and the renderer rejects a size or span field.
 
-The flow fills every cell: with exactly two blocks they stack, and with an odd count the last block spans the row. Never leave an empty cell.
+The flow fills every cell: two blocks stack full width, three sit side by side, and a leftover block spans what remains. Leave the arrangement to the renderer.
+
+The type is optional. When it is missing the renderer picks the block from the shape: done and todo lists become changes, columns and rows become a table, before and after become compare, label and value become facts, five or more timed steps become a swimlane, fewer state items become cards, and plain strings become a list.
 
 | Type | Fields and limits |
 | --- | --- |
