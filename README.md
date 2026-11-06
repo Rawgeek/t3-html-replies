@@ -100,6 +100,7 @@ cd ~/.codex/skills/t3-html-replies
 node ui-library/build.mjs
 node ui-library/verify.mjs
 node scripts/selftest.mjs
+node scripts/layout-check.mjs
 ```
 
 Generated gallery files, snippets, logic files, and preview templates are checked in so the repo works offline.
