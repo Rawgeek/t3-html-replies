@@ -139,7 +139,7 @@ assert(!/\.reply-card p\s*\{[^}]*display\s*:\s*none/.test(css),'No rule hides ca
 const zoned=await renderReply({title:'Waiting',state:'waiting',progress:'78%',next:'Finish the review',eta:'Unknown',wake:'Not armed',zone:'UTC',milestones,sections:[swimlane,changes,cost]});
 assert(zoned.includes('Times UTC'),'An explicit zone keeps generated output deterministic');
 await assert.rejects(renderReply({...base,next:'Deploy'}),/must set Next to None/);
-await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges,cost,{title:'Cards',type:'cards',items:[{label:'Build',state:'done'},{label:'Review',state:'pending'}]}]}),/cannot keep a pending card/);
+await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges,cost,{title:'Cards',type:'cards',items:[{label:'Build',state:'done'},{label:'Review',state:'pending'}]}]}),/cannot keep the pending card "Review"/);
 await assert.rejects(renderReply({...base,zone:'Mars/Olympus'}),/IANA name/);
 await assert.rejects(renderReply({...base,sections:[{title:'Steps',type:'swimlane',items:[{label:'One',state:'pending'},{label:'Two',state:'done'},{label:'Three',state:'done'},{label:'Four',state:'done'},{label:'Five',state:'done'}]},doneChanges,cost]}),/done steps first/);
 assert([...reply.matchAll(/data-span="(\d)"/g)].every(match=>['1','2','3'].includes(match[1])),'Every block declares a legal span');

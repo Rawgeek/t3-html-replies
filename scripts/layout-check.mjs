@@ -49,9 +49,9 @@ const base = {
       title: 'Cards',
       type: 'cards',
       items: [
-        { label: 'Reconciliation run', state: 'done', note: '1,248 pass' },
-        { label: 'Second gate', state: 'waiting', note: 'Owner reads' },
-        { label: 'Third gate', state: 'pending', note: 'After review' }
+        { label: 'ReconciliationName', state: 'done', note: 'Maximum daily throughput in every queue!' },
+        { label: 'Second review gate', state: 'waiting', note: 'Maximum daily throughput in every queue!' },
+        { label: 'Third release gate', state: 'pending', note: 'Maximum daily throughput in every queue!' }
       ]
     },
     {
@@ -72,10 +72,10 @@ const base = {
       title: 'Facts',
       type: 'facts',
       items: [
-        { label: 'One', value: '1' },
-        { label: 'Two', value: '2' },
-        { label: 'Three', value: '3' },
-        { label: 'Four', value: '4' }
+        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
+        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
+        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
+        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' }
       ]
     }
   ]
@@ -180,7 +180,7 @@ try {
       if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles');
       if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
-      if (width > 900 && report.heights.some((height) => height !== 184)) failures.push(name + '@' + width + ': non-184px flow tiles');
+      if (report.heights.some((height) => height !== 184)) failures.push(name + '@' + width + ': non-184px flow tiles');
     }
   }
   if (failures.length) {

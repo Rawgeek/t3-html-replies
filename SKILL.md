@@ -7,6 +7,16 @@ description: "Render every T3 main-session update, question, and final reply as 
 
 Apply this skill to every message shown to the user in a T3 main session, including progress updates and final answers. Subagents follow their own response contract.
 
+## Hard gate
+
+Every user-facing message must come out of the renderer. Markdown, plain text, and hand-written HTML are all invalid, including a one-line status, an apology, or an error note.
+
+1. Build the reply data, then run node ui-library/ui.mjs check and node ui-library/ui.mjs reply. Send only that rendered file through the MCP app or T3's HTML renderer.
+2. If validation fails, shorten the field or add a block and render again.
+3. If rendering still fails, send a rendered error card naming the validator message. Never fall back to chat text.
+
+An answer that was not rendered is a failed turn, even when its content is correct.
+
 ## Contract
 
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
@@ -47,7 +57,7 @@ The grid never leaves a hole. Supporting blocks fill the three flow columns besi
 
 ## Validation
 
-The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits. In an installed skill the library lives at ~/.codex/templates/t3-ui-library.
+The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits.
 
 The renderer enforces the limits on every field before writing HTML. It rejects missing fields, unknown fields, long values, opaque references, expandable content, and replies above the total size limit. On failure, shorten the field or move the information into another block. Never bypass validation.
 
@@ -64,8 +74,8 @@ Using the index first keeps replies consistent and avoids rewriting markup. Use 
 ## Workflow
 
 1. Apply the unslop skill at ~/.codex/skills/unslop/SKILL.md.
-2. From the ui-library directory, run node ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
-3. Run node ui.mjs check to validate in one line, then node ui.mjs reply to render.
+2. From the skill checkout, run node ui-library/ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
+3. Run node ui-library/ui.mjs check to validate in one line, then node ui-library/ui.mjs reply to render.
 4. Preview at 728px and 390px only when the reply is new or its layout changed.
 5. When the t3-html-replies render_reply MCP tool is available, call it with the absolute dataPath. The server validates the JSON and renders it. Otherwise call T3's html_render tool with the rendered file. Keep source markup out of model context.
 
@@ -97,6 +107,7 @@ or:
 ## Final check
 
 - No text outside the HTML page.
+- The page came from node ui-library/ui.mjs reply or render_reply, not from a hand-written string.
 - No dropdown or collapsible content.
 - No field over its limit.
 - No clipping, overflow, or avoidable gap.

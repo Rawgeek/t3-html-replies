@@ -227,7 +227,7 @@ function validateSection(section,index){
       };
     });
     const order=items.map(item=>item.state).join('');
-    if(!/^(?:done)*(?:waiting)?(?:pending)*$/.test(order))fail(`${name} must list done steps first, then the current step, then pending steps.`);
+    if(!/^(?:done)*(?:waiting)?(?:pending)*$/.test(order))fail(`${name} "${title}" must list done steps first, then the current step, then pending steps.`);
     result={type,title,items};
   }else{
     assertKeys(section,['title','type','items'],name);
@@ -329,8 +329,8 @@ export async function renderReply(data){
   if(!done&&!changes[0].todo.length)fail('A pending reply needs at least one to do change.');
   if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Remove the remaining items or keep the reply unfinished.');
   if(done){
-    const open=sections.filter(section=>section.type==='cards').flatMap(section=>section.items).find(item=>item.state!=='done');
-    if(open)fail(`A complete reply cannot keep a ${open.state} card. Mark every card done or keep the reply unfinished.`);
+    const open=sections.filter(section=>section.type==='cards').flatMap(section=>section.items.map(item=>({...item,section:section.title}))).find(item=>item.state!=='done');
+    if(open)fail(`A complete reply cannot keep the ${open.state} card "${open.label}" in ${open.section}. Mark every card done or keep the reply unfinished.`);
   }
   const status=validateStatus(data,done);
   if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
