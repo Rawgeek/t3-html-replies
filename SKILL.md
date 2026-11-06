@@ -67,14 +67,14 @@ Using the index first keeps replies consistent and avoids rewriting markup. Use 
 2. Run node ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
 3. Run node ui.mjs check to validate in one line, then node ui.mjs reply to render.
 4. Preview at 728px and 390px only when the reply is new or its layout changed.
-5. When the t3-html-replies render_reply MCP tool is available, call it with the absolute htmlPath. Otherwise call T3's html_render tool. Keep source markup out of model context.
+5. When the t3-html-replies render_reply MCP tool is available, call it with the absolute dataPath. The server validates the JSON and renders it. Otherwise call T3's html_render tool with the rendered file. Keep source markup out of model context.
 
 ## Native action transport
 
-The skill includes a local MCP server named t3_html_replies. Its render_reply tool shows the validated HTML as a native MCP app. Action buttons can call T3's ui/message bridge and send their instruction into the current thread.
+The skill includes a local MCP server named t3_html_replies. Its render_reply tool validates reply JSON, renders it, and shows the result as a native MCP app. Action buttons can call T3's ui/message bridge and send their instruction into the current thread.
 
 - Use render_reply when that tool is in the current tool catalog.
-- Pass {"htmlPath":"/absolute/path/reply.html"}.
+- Pass {"dataPath":"/absolute/path/reply.json"}. The server rejects HTML and invalid reply data.
 - T3 asks the user to confirm each ui/message action. That confirmation is part of the native bridge. Do not add another approval control.
 - Use action.send for buttons such as Mark read, Ignore once, Ignore forever, and Snooze. Keep each send value under 400 characters and write one clear instruction with the affected scope.
 - Plain html_render cannot call ui/message. In that fallback, use action.href only and do not emit send buttons.

@@ -6,6 +6,7 @@
   "next": "None",
   "eta": "Complete",
   "wake": "Not needed",
+  "zone": "Asia/Bangkok",
   "milestones": [
     "Scope",
     "Build",

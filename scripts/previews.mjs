@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, rm, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -20,7 +20,8 @@ const shot = async (page, width, maxHeight, file) => {
   const waiters = new Map();
   const send = (method, params = {}) => new Promise((done, fail) => {
     const call = ++id;
-    waiters.set(call, { done, fail });
+    const timer = setTimeout(() => { waiters.delete(call); fail(Error(method + ' timed out.')); }, 15000);
+    waiters.set(call, { done: (value) => { clearTimeout(timer); done(value); }, fail: (error) => { clearTimeout(timer); fail(error); } });
     ws.send(JSON.stringify({ id: call, method, params }));
   });
   ws.addEventListener('message', (event) => {
@@ -31,7 +32,10 @@ const shot = async (page, width, maxHeight, file) => {
     if (message.error) waiter.fail(Error(message.error.message));
     else waiter.done(message.result);
   });
-  await new Promise((done) => ws.addEventListener('open', done, { once: true }));
+  await new Promise((done, fail) => {
+    const timer = setTimeout(() => fail(Error('Chrome did not answer for ' + page)), 15000);
+    ws.addEventListener('open', () => { clearTimeout(timer); done(); }, { once: true });
+  });
   await send('Page.enable');
   await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', { width, height: maxHeight, deviceScaleFactor: 1, mobile: false });
@@ -52,15 +56,30 @@ const shot = async (page, width, maxHeight, file) => {
   console.log(file, width + 'x' + height);
 };
 
+const newer = async (output, sources) => {
+  const target = (await stat(output)).mtimeMs;
+  for (const source of sources) {
+    if ((await stat(source)).mtimeMs > target + 1000) {
+      throw Error(output + ' is older than ' + source + '. Run ui-library/build.mjs first.');
+    }
+  }
+};
+
+const lib = join(root, 'ui-library');
+await newer(join(lib, 'reply-template.html'), ['render-reply.mjs', 'library.css', 'components.mjs', 'parse.mjs', 'reply-example.json'].map((name) => join(lib, name)));
+await newer(join(lib, 'index.html'), ['library.css', 'gallery.js', 'catalog.mjs', 'shell.mjs'].map((name) => join(lib, name)));
+
 if (!process.argv.includes('--check')) {
   await mkdir(shots, { recursive: true });
   const server = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
     '--remote-debugging-port=' + port, '--user-data-dir=' + profile, 'about:blank'], { stdio: 'ignore' });
   const quit = () => { server.kill(); rm(profile, { recursive: true, force: true }).catch(() => {}); };
   try {
-    for (let tries = 0; tries < 40; tries += 1) {
-      try { await fetch(`http://127.0.0.1:${port}/json/version`); break; } catch { await new Promise((r) => setTimeout(r, 150)); }
+    let ready = false;
+    for (let tries = 0; tries < 40 && !ready; tries += 1) {
+      try { await fetch(`http://127.0.0.1:${port}/json/version`); ready = true; } catch { await new Promise((r) => setTimeout(r, 150)); }
     }
+    if (!ready) throw Error('Chrome did not start on port ' + port + '. Set CHROME_PATH.');
     const page = (name) => pathToFileURL(join(root, name)).href;
     await shot(page('ui-library/reply-template.html'), 1024, 1600, 'overview.png');
     await shot(page('ui-library/reply-template.html'), 390, 2000, 'reply-mobile.png');

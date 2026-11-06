@@ -1,5 +1,6 @@
 import { icon } from './icons.mjs';
 import { heights } from './heights.mjs';
+import { percentValue } from './parse.mjs';
 export { icon } from './icons.mjs';
 export const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const e = escapeHTML;
@@ -29,7 +30,7 @@ const markdown = text => text.split(/\n\n/).map(part => {
   return part.startsWith('## ')?`<h4>${e(part.slice(3))}</h4>`:`<p class="copy-text">${formatted}</p>`;
 }).join('');
 export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake='Not armed',state='working',milestones=[]}={}) {
-  const matches=String(progress).match(/(\d+(?:\.\d+)?)\s*%/),value=matches?Math.max(0,Math.min(100,Number(matches[1]))):null;
+  const value=percentValue(progress,'Progress');
   const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
   const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
   const shorts={'None':'Done','Run the full checks':'Full checks','Wait for the review':'Review','Verify the released flow':'Verify flow','Complete CI and review':'CI + review','Choose an example':'Pick one','Finish the review':'Review','Fix the check':'Fix check'};

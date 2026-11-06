@@ -8,12 +8,12 @@ The renderer turns short JSON into one self-contained HTML page. Replies use a d
 
 ## What it does
 
-- 3-column grid at 1024px, 2 columns on tablets, 1 on phones.
-- Results and status use 88px tiles. Reply sections share 184px; the swimlane is a full-width 376px band.
-- 8 sections max, 3 items per block, 1,600 visible characters.
-- Every reply carries a swimlane of five or six steps, a done and to do changes block, and two to four progress milestones.
+- Four-column grid at 1024px: one rail and three flow columns. Blocks stack on tablets and phones.
+- Results and status use 88px tiles. Reply sections share 184px; the swimlane is a tall side rail at least 376px high.
+- 8 sections max, 3 items per block, 1,200 visible characters.
+- Every reply carries a swimlane of five to seven steps, a done and to do changes block, and two to four progress milestones.
 - Numbers sit in a visual: compare bars for before and after, facts for single values, bars for groups.
-- 2-column tables, 3 rows. The last row fills automatically, so no orphan blocks.
+- The renderer picks each block span, so the flow fills every cell with no orphan blocks or holes.
 - Progress shows one segment per milestone, labelled under the track.
 - The renderer rejects long fields, unknown fields, mixed heights, hashes, and opaque IDs.
 
@@ -35,6 +35,10 @@ node ui-library/ui.mjs reply ui-library/reply-example.json output/reply.html
 ```
 
 Open `ui-library/index.html` for the full gallery.
+
+Render a reply through the MCP tool with the JSON path, not HTML:
+
+    {"dataPath": "/absolute/path/reply.json"}
 
 ## Optional MCP actions
 
@@ -82,7 +86,7 @@ Inside `ui-library/`:
 
 ## Previews
 
-The pre-commit hook regenerates `screenshots/overview.png`, `screenshots/reply-mobile.png`, and `screenshots/gallery.png` whenever the library changes:
+The pre-commit hook rebuilds the library, runs verification and the MCP self-test, then regenerates `screenshots/overview.png`, `screenshots/reply-mobile.png`, and `screenshots/gallery.png`. It stages only generated outputs:
 
     git config core.hooksPath hooks
     node scripts/previews.mjs

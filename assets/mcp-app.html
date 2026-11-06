@@ -73,7 +73,6 @@ body { padding: 0 0 1px; }
   const pending = new Map();
   let nextId = 1;
   let initialized = false;
-  let toolArguments = null;
   let rendered = false;
   let lastHeight = 0;
   let sizeFrame = 0;
@@ -150,12 +149,9 @@ body { padding: 0 0 1px; }
       button.type = 'button';
       button.addEventListener('click', async () => {
         const text = button.dataset.t3Send || '';
-        if (!text || button.disabled) return;
+        if (!text) return;
         const actions = button.closest('.actions');
         const feedback = actions ? feedbackFor(actions) : null;
-        const label = button.querySelector('span');
-        const original = label ? label.textContent : button.textContent;
-        button.disabled = true;
         button.setAttribute('aria-busy', 'true');
         if (feedback) {
           feedback.dataset.tone = '';
@@ -166,17 +162,11 @@ body { padding: 0 0 1px; }
             role: 'user',
             content: [{ type: 'text', text }]
           });
-          if (label) label.textContent = 'Sent';
-          else button.textContent = 'Sent';
           if (feedback) {
             feedback.dataset.tone = 'ok';
             feedback.textContent = 'Sent to chat.';
           }
-          for (const other of buttons) other.disabled = true;
         } catch (error) {
-          button.disabled = false;
-          if (label) label.textContent = original;
-          else button.textContent = original;
           if (feedback) {
             feedback.dataset.tone = 'error';
             feedback.textContent = messageFor(error);
@@ -249,11 +239,7 @@ body { padding: 0 0 1px; }
       return;
     }
 
-    if (message.method === 'ui/notifications/tool-input') {
-      toolArguments = message.params && message.params.arguments;
-      if (toolArguments && typeof toolArguments.html === 'string') render(toolArguments.html);
-      return;
-    }
+    if (message.method === 'ui/notifications/tool-input') return;
     if (message.method === 'ui/notifications/tool-result') {
       const params = message.params || {};
       const structured = params.structuredContent || {};

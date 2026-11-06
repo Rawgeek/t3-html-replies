@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { dirname, resolve } from 'node:path';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -38,6 +40,47 @@ function rpc(method, params = {}) {
   });
 }
 
+const reply = {
+  title: 'Self test reply',
+  state: 'working',
+  summary: 'Exercises the rendered reply path.',
+  progress: '40%',
+  next: 'Run checks',
+  eta: '2 min',
+  wake: 'Not armed',
+  milestones: ['Read', 'Build', 'Ship'],
+  sections: [
+    {
+      title: 'Stages',
+      type: 'swimlane',
+      items: [
+        { label: 'Read', note: 'Done', time: '09:10', state: 'done' },
+        { label: 'Plan', note: 'Done', time: '09:20', state: 'done' },
+        { label: 'Build', note: 'Running', time: 'Now', state: 'waiting', progress: '40%' },
+        { label: 'Check', note: 'Next', time: 'Next', state: 'pending' },
+        { label: 'Ship', note: 'Later', time: 'Later', state: 'pending' }
+      ]
+    },
+    { title: 'Changes', type: 'changes', done: ['Renderer updated'], todo: ['Run checks'] },
+    {
+      title: 'Proof',
+      type: 'facts',
+      items: [
+        { label: 'Checks', value: '8', note: 'Passing' },
+        { label: 'Files', value: '3', note: 'Changed' }
+      ]
+    },
+    {
+      title: 'Work',
+      type: 'cards',
+      items: [
+        { label: 'Code', state: 'done', note: 'Merged' },
+        { label: 'Tests', state: 'pending', note: 'Queued' }
+      ]
+    }
+  ]
+};
+
 try {
   const initialized = await rpc('initialize', {
     protocolVersion: '2026-01-26',
@@ -51,23 +94,34 @@ try {
   if (tool?._meta?.ui?.resourceUri !== 'ui://t3-html-replies/reply.html') {
     throw Error('render_reply does not advertise the app resource.');
   }
-
-  const called = await rpc('tools/call', {
-    name: 'render_reply',
-    arguments: { html: '<!doctype html><html><body><main class="t3lib reply"><section class="status-board">Self test</section></main></body></html>' }
-  });
-  if (called.structuredContent?.html?.includes('Self test') !== true) {
-    throw Error('render_reply did not return its HTML payload.');
+  if (!tool.inputSchema?.properties?.data || tool.inputSchema?.properties?.html) {
+    throw Error('render_reply must accept reply data, not HTML.');
   }
 
-  const { writeFile, mkdtemp } = await import('node:fs/promises');
-  const { tmpdir } = await import('node:os');
-  const { join } = await import('node:path');
   const dir = await mkdtemp(join(tmpdir(), 't3-reply-'));
-  const replyPath = join(dir, 'reply.html');
-  await writeFile(replyPath, '<!doctype html><html><body><main class="t3lib reply"><section class="status-board">Path check</section></main></body></html>');
-  const fromPath = await rpc('tools/call', { name: 'render_reply', arguments: { htmlPath: replyPath } });
-  if (!fromPath.structuredContent?.html?.includes('Path check')) throw Error('htmlPath rendering failed.');
+  const dataPath = join(dir, 'reply.json');
+  await writeFile(dataPath, JSON.stringify(reply));
+
+  const fromPath = await rpc('tools/call', { name: 'render_reply', arguments: { dataPath } });
+  if (fromPath.structuredContent?.html?.includes('Self test reply') !== true) {
+    throw Error('dataPath rendering failed.');
+  }
+  const inline = await rpc('tools/call', { name: 'render_reply', arguments: { data: reply } });
+  if (inline.structuredContent?.html?.includes('Self test reply') !== true) {
+    throw Error('Inline data rendering failed.');
+  }
+
+  let rejected = false;
+  try {
+    await rpc('tools/call', {
+      name: 'render_reply',
+      arguments: { data: { title: 'Fake', state: 'working', progress: '40%' } }
+    });
+  } catch (error) {
+    rejected = /swimlane/i.test(error.message);
+  }
+  if (!rejected) throw Error('render_reply accepted reply data without a swimlane.');
+
   const resource = await rpc('resources/read', {
     uri: 'ui://t3-html-replies/reply.html'
   });

@@ -49,6 +49,7 @@ Top-level fields:
 | next | Up to 18 characters |
 | eta | Up to 16 characters |
 | wake | Up to 20 characters |
+| zone | Optional IANA timezone, up to 32 characters. Defaults to the rendering machine. Set it only for fixtures and examples that must be identical everywhere. |
 | milestones | Required, 2 to 4 labels with 8 characters each. They label the progress segments. |
 | actions | Optional, 1 to 3 buttons. Label up to 14 characters. Exactly one HTTPS link or send message up to 400. |
 
@@ -60,7 +61,9 @@ The renderer rejects replies above 1200 visible characters.
 
 The page is always a four column grid at 1024px: the swimlane fills one column and three flow columns hold the supporting blocks. The renderer decides each block span and the flow never leaves a cell empty. Every section is a fixed 184px tile, and the renderer rejects a size or span field.
 
-The flow fills every cell: two blocks stack full width, three sit side by side, and a leftover block spans what remains. Leave the arrangement to the renderer.
+The flow fills every cell: two blocks stack full width, three use spans of 2, 1, and 3, and four use three single cells plus one full row. Up to seven blocks each get a span that fills the row. Leave the arrangement to the renderer.
+
+Every block stays fully visible. Notes wrap inside cards; no block hides content to fit.
 
 The type is optional. When it is missing the renderer picks the block from the shape: done and todo lists become changes, columns and rows become a table, before and after become compare, label and value become facts, five or more timed steps become a swimlane, fewer state items become cards, and plain strings become a list.
 

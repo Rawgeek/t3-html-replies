@@ -6,6 +6,7 @@
   "next": "Finish the review",
   "eta": "Unknown",
   "wake": "PR watch 10m",
+  "zone": "Asia/Bangkok",
   "milestones": [
     "Scope",
     "Build",

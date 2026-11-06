@@ -125,6 +125,17 @@ assert.equal(completeTemplate,await renderReply(JSON.parse(await readFile(join(r
 const sectionHeights=[...reply.matchAll(/class="component-tile reply-section-tile" data-height="([a-z]+)"/g)].map(match=>match[1]);
 assert.equal(sectionHeights.length,8,'Structured blocks render');
 assert.deepEqual(sectionHeights,['tall',...Array(7).fill('small')],'The swimlane is taller and every other block shares one height');
+const pendingReply=await renderReply({title:'Waiting',state:'waiting',progress:'78%',next:'Finish the review',eta:'Unknown',wake:'Not armed',milestones,sections:[swimlane,changes,cost]});
+const railOf=html=>html.slice(html.indexOf('<ol class="swimlane">'),html.indexOf('</ol>',html.indexOf('<ol class="swimlane">')));
+const rail=railOf(pendingReply);
+assert(rail.includes('<small>62%</small>'),'The rail shows the current step percentage');
+assert.equal((rail.match(/<small>62%<\/small>/g)||[]).length,1,'The rail shows the step percentage exactly once');
+const evenReply=await renderReply({title:'Waiting',state:'waiting',progress:'62%',next:'Finish the review',eta:'Unknown',wake:'Not armed',milestones,sections:[swimlane,changes,cost]});
+assert(railOf(evenReply).includes('<small>62%</small>'),'The rail keeps the step percentage when it equals overall progress');
+assert(!/\.reply-card p\s*\{[^}]*display\s*:\s*none/.test(css),'No rule hides card notes');
+const zoned=await renderReply({title:'Waiting',state:'waiting',progress:'78%',next:'Finish the review',eta:'Unknown',wake:'Not armed',zone:'UTC',milestones,sections:[swimlane,changes,cost]});
+assert(zoned.includes('Times UTC'),'An explicit zone keeps generated output deterministic');
+await assert.rejects(renderReply({...base,next:'Deploy'}),/must set Next to None/);
 assert([...reply.matchAll(/data-span="(\d)"/g)].every(match=>['1','2','3'].includes(match[1])),'Every block declares a legal span');
 assert(css.includes(':last-child:nth-child(3n+1)')&&css.includes(':last-child:nth-child(3n+2)')&&css.includes(':last-child:nth-child(odd)'),'The last row fills automatically');
 assert(!reply.includes('<details>')&&!reply.includes('<summary')&&!reply.includes('wake-dot')&&!reply.includes('class="status-details"'));
