@@ -36,7 +36,7 @@ Carry authorized work end to end. Continue through implementation, checks, revie
 
 Every reply ships three required elements. The renderer rejects a reply without them.
 
-- The swimlane is a timeline of five or six steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step carries its own progress number.
+- The swimlane is a timeline of five to seven steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step carries its own progress number.
 - The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
 - Two to four milestones label the segments of the progress bar.
 - At least two supporting blocks sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
@@ -63,12 +63,11 @@ Using the index first keeps replies consistent and avoids rewriting markup. Use 
 
 ## Workflow
 
-1. Read the reply guide and apply [unslop](/Users/rawgeek/.codex/skills/unslop/SKILL.md).
-2. Pick the closest element from the tree index.
-3. Write compact JSON. Split information across visible blocks. Use at most 8 sections and 1600 visible characters.
-4. Render with node ui.mjs reply data.json /task/output/reply.html. The command prints the absolute path.
-5. Verify the path, then preview at 728px and 390px. Fix overflow, gaps, clipping, or unclear status.
-6. When the t3-html-replies render_reply MCP tool is available, call it with the absolute htmlPath. Otherwise call T3's html_render tool. Keep source markup out of model context.
+1. Apply [unslop](/Users/rawgeek/.codex/skills/unslop/SKILL.md).
+2. Run node ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
+3. Run node ui.mjs check to validate in one line, then node ui.mjs reply to render.
+4. Preview at 728px and 390px only when the reply is new or its layout changed.
+5. When the t3-html-replies render_reply MCP tool is available, call it with the absolute htmlPath. Otherwise call T3's html_render tool. Keep source markup out of model context.
 
 ## Native action transport
 

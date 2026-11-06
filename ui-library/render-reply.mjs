@@ -8,7 +8,7 @@ const LIMITS=Object.freeze({
   sections:8,sectionTitle:24,
   factsItems:4,listItems:3,listItem:48,
   tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,rowDetail:260,
-  swimlaneItems:6,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
+  swimlaneItems:7,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
   changeItems:3,changeItem:44,
   compareItems:3,compareLabel:18,compareValue:10,compareDelta:12,
   cardItems:3,cardLabel:18,cardNote:40,

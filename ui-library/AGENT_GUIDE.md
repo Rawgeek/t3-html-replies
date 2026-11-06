@@ -17,7 +17,7 @@ Start with [ELEMENT_INDEX.md](ELEMENT_INDEX.md), then open the closest sample.
 
 Every reply carries three things. The renderer rejects a reply that leaves one out.
 
-1. A swimlane. Five or six steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%.
+1. A swimlane. Five to seven steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%.
 2. A changes block. What is done and what is still to do. A finished reply ships with no waiting step and may leave the to do list empty.
 3. Two to four milestones. They label the segments of the progress bar in the status strip.
 4. At least two supporting blocks beside the swimlane. The renderer rejects a reply that would leave an empty cell in the grid.
@@ -68,7 +68,7 @@ The grid fills the last row automatically. A lone final block spans the full wid
 | facts | title 24; 2 to 4 items with label 14, value 14, note 24 |
 | list | title 24; 2 to 3 items, 48 characters each |
 | table | title 24; 2 columns and 2 to 3 rows; heading 14, cell 18. A cell may be a send action. A row may be {cells, detail} for a hover tooltip. |
-| swimlane | title 24; 5 to 6 items; label 30, note 32, time 8; state done, waiting, or pending. Only the waiting item may carry progress, such as 62%. |
+| swimlane | title 24; 5 to 7 items; label 30, note 32, time 8; state done, waiting, or pending. Only the waiting item may carry progress, such as 62%. |
 | bars | title 24; 2 to 3 items; label 18, note 22, value up to 12 characters |
 | changes | title 24; done and todo lists with up to 3 items of 44 characters each. Two items minimum together. |
 | compare | title 24; 1 to 3 items; label 18, before 10, after 10, delta 12. Each item draws a before bar and an after bar on one shared scale. |
@@ -88,12 +88,18 @@ Numbers appear with a visual. A before and after pair uses compare, a single mea
 
 ## Workflow
 
-1. Read this guide and apply [unslop](/Users/rawgeek/.codex/skills/unslop/SKILL.md).
-2. Choose a sample from [ELEMENT_INDEX.md](ELEMENT_INDEX.md). Run node ui.mjs show ID for use and avoid guidance.
-3. Write compact JSON. Split information across visible blocks. Keep every field short.
-4. Save under the task output folder, never /tmp. The CLI creates folders and prints the absolute path.
-5. Preview at 728px and 390px. Fix overflow, clipping, gaps, or unclear status.
-6. Use the t3-html-replies render_reply MCP tool with htmlPath when available. Otherwise use T3's HTML render tool. Do not print the HTML source into model context.
+Fast path, three commands:
+
+    node ui.mjs new /task/output/reply.json
+    node ui.mjs check /task/output/reply.json
+    node ui.mjs reply /task/output/reply.json /task/output/reply.html
+
+1. Run new to write a valid starter, then fill the fields. No guide reading needed for a routine reply.
+2. Run check after each edit. It prints one line: valid, or the exact field that failed.
+3. Render, then preview at 728px and 390px only when the reply is new or changed layout.
+4. Send the absolute htmlPath to the t3-html-replies render_reply MCP tool when it is available. Otherwise use T3's HTML render tool. Keep the HTML source out of model context.
+
+Read [ELEMENT_INDEX.md](ELEMENT_INDEX.md) only when the starter blocks do not fit the content.
 
 ## Actions
 

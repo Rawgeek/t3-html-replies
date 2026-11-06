@@ -82,7 +82,7 @@ await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',
 await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'Reply',send:'x',href:'https://example.com'}],['Alert','Check']]}]}),/unsupported fields: href/);
 await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'x'.repeat(15),send:'x'}],['Alert','Check']]}]}),/label exceeds 14 characters/);
 await assert.rejects(renderReply({...base,...withBlocks({title:'Steps',type:'swimlane',items:[{label:'Built',note:'x'.repeat(33),state:'done'},{label:'Two',note:'Short',state:'done'},{label:'Three',note:'Short',state:'done'},{label:'Four',note:'Short',state:'pending'},{label:'Five',note:'Short',state:'pending'}]})}),/note exceeds 32 characters/);
-await assert.rejects(renderReply({...base,...withBlocks({title:'Steps',type:'swimlane',items:[{label:'Built',state:'done'},{label:'Two',state:'done'},{label:'Three',state:'pending'}]})}),/must contain 5 to 6 items/);
+await assert.rejects(renderReply({...base,...withBlocks({title:'Steps',type:'swimlane',items:[{label:'Built',state:'done'},{label:'Two',state:'done'},{label:'Three',state:'pending'}]})}),/must contain 5 to 7 items/);
 await assert.rejects(renderReply({...base,sections:[changes]}),/exactly one swimlane/);
 await assert.rejects(renderReply({...base,sections:[completeSwimlane]}),/exactly one changes block/);
 await assert.rejects(renderReply({...base,sections:[swimlane,changes]}),/complete reply cannot keep a waiting step/);

@@ -12,6 +12,22 @@ async function save(html) {
   await writeFile(path,html);console.log(path);
 }
 const item=()=>{const found=catalog.find(x=>x.id===id);if(!found)throw Error('Unknown example. Use list <type>.');return found;};
+const starter={
+  title:'Task title',state:'waiting',summary:'One sentence on the outcome.',
+  progress:'40% estimate',next:'Next action',eta:'Unknown',wake:'Not armed',
+  milestones:['Scope','Build','Review','Ship'],
+  sections:[
+    {title:'Stages',type:'swimlane',items:[
+      {label:'Step done',note:'Short note',time:'09:10',state:'done'},
+      {label:'Step done',note:'Short note',time:'09:24',state:'done'},
+      {label:'Current step',note:'What is running',time:'Now',state:'waiting',progress:'40%'},
+      {label:'Next step',note:'What follows',time:'Next',state:'pending'},
+      {label:'Later step',note:'What closes it',time:'Later',state:'pending'}]},
+    {title:'Changes',type:'changes',done:['What shipped'],todo:['What is left']},
+    {title:'Proof',type:'facts',items:[{label:'Metric',value:'1',note:'Compared with'},{label:'Metric',value:'2',note:'Compared with'}]},
+    {title:'Work',type:'cards',items:[{label:'Area',state:'done',note:'Short note'},{label:'Area',state:'pending',note:'Short note'}]}
+  ]
+};
 switch(command) {
   case 'list':
     console.log(id?catalog.filter(x=>x.family===id).map(x=>`${x.id} ${x.height}`).join('\n'):families.map(x=>x.id).join(' '));break;
@@ -25,5 +41,11 @@ switch(command) {
   }
   case 'reply':
     if(!id||!output)throw Error('Use reply <data.json> <output.html>');await save(await renderReply(JSON.parse(await readFile(id,'utf8'))));break;
-  default: throw Error('Use list, show, render, reply, or html.');
+  case 'check':
+    if(!id)throw Error('Use check <data.json>');await renderReply(JSON.parse(await readFile(id,'utf8')));console.log('Valid reply.');break;
+  case 'new': {
+    if(!id)throw Error('Use new <data.json>');const path=resolve(id);await mkdir(dirname(path),{recursive:true});
+    await writeFile(path,JSON.stringify(starter,null,2)+'\n');console.log(path);break;
+  }
+  default: throw Error('Use new, check, reply, list, show, render, or html.');
 }
