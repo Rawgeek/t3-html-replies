@@ -323,8 +323,19 @@ function renderSection(section){
   return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span||1}"${section.slot?` style="${section.slot}"`:''}><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
 }
 
-export async function renderReply(data){
-  const css=await readFile(new URL('./library.css',import.meta.url),'utf8');
+function embedData(data){return `<script type="application/json" id="t3-reply-data">${JSON.stringify(data).replace(/</g,'\\u003c')}</script>`;}
+function renderedVisible(html){
+  const text=String(html);
+  const body=text.slice(text.indexOf('<body>')+6,text.lastIndexOf('</body>'));
+  return body.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[0-9a-f]+);/gi,'x').replace(/\s+/g,'').length;
+}
+function finishReply(html){
+  if(renderedVisible(html)>LIMITS.visibleText)fail(`Reply exceeds ${LIMITS.visibleText} visible characters. Move long material to a linked artifact.`);
+  return html;
+}
+export async function renderReply(data){return finishReply(renderReplyPage(data));}
+function renderReplyPage(data){
+  const css=LIBRARY_CSS;
   if(!data||typeof data!=='object'||Array.isArray(data))fail('Reply data must be an object.');
   if(data.kind==='question')return renderQuestion(data,css);
   assertKeys(data,TOP_KEYS,'Reply');
@@ -418,7 +429,7 @@ export async function renderReply(data){
   const wakeLabel=wakeText.replace(/^on\s+/i,'');
   const wakeChip=wakeOff?'':`<span class="wake-chip" title="Subscribed to ${e(wakeText)}">${icon('bell')}<span>${e(wakeLabel)}</span></span>`;
   const metaHtml=`<div class="reply-meta">${wakeChip}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</div>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}</main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}</main>${embedData(data)}</body></html>`;
 }
 
 const QUESTION_KEYS=['kind','title','context','question','options','actions'];
@@ -444,70 +455,19 @@ function renderQuestion(data,css){
     ?`<button class="btn" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
     :`<a class="btn" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`).join('');
   const optionHtml=options.map((option,index)=>`<button class="ask-option${option.primary||index===0?' primary':''}" type="button" data-t3-send="${e(option.send)}"><span class="ask-copy"><b>${e(option.label)}</b>${option.note?`<small>${e(option.note)}</small>`:''}</span>${icon('arrow-right')}</button>`).join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply question"><header class="reply-head"><h1>${e(title)}</h1>${actionsHtml?`<div class="reply-meta"><div class="actions">${actionsHtml}</div></div>`:''}</header><p class="reply-text">${e(context)}</p><section class="ask" aria-label="Question"><p class="ask-question">${e(question)}</p><div class="ask-options">${optionHtml}</div></section></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply question"><header class="reply-head"><h1>${e(title)}</h1>${actionsHtml?`<div class="reply-meta"><div class="actions">${actionsHtml}</div></div>`:''}</header><p class="reply-text">${e(context)}</p><section class="ask" aria-label="Question"><p class="ask-question">${e(question)}</p><div class="ask-options">${optionHtml}</div></section></main>${embedData(data)}</body></html>`;
 }
 
 export function assertRenderedReply(html){
   const text=String(html);
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
-  if(/<(?:link|script|iframe|object|embed)\b/i.test(text))fail('Not a reply page: it must be self-contained with no linked or embedded content.');
-  const inlineStyles=[...text.matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)].map(match=>(match[1]??match[2]).trim());
-  if([...text.matchAll(/\sstyle\s*=/gi)].length!==inlineStyles.length)fail('Not a reply page: inline styles must be quoted layout variables only. Render reply JSON instead of writing HTML.');
-  const layoutStyle=/^(?:--columns:[1-4]|--value:-?\d+(?:\.\d+)?%|grid-row:\d+(?:\/\d+)?;grid-column:\d+(?:\/\d+)?|grid-template-rows:[a-z0-9(),. %-]+)$/i;
-  if(inlineStyles.some(style=>!layoutStyle.test(style)))fail('Not a reply page: inline styles must be layout variables only. Render reply JSON instead of writing HTML.');
-  const styleMatches=[...text.matchAll(/<style([^>]*)>([\s\S]*?)<\/style>/gi)];
-  if(styleMatches.length!==1||styleMatches[0][1].trim())fail('Not a reply page: it needs exactly one inline style block with no attributes.');
-  if(styleMatches[0][2].trim()!==LIBRARY_CSS.trim())fail('Not a reply page: the stylesheet must be the unmodified library CSS. Render reply JSON instead of writing HTML.');
-  if(/<[^>]+\shidden(?:\s*=|\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
-  if(/<main class="t3lib reply question"/.test(text)){
-    if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a question page: the title is empty.');
-    if(!/<p class="reply-text">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the context is missing.');
-    if(!/<p class="ask-question">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the question is missing.');
-    const choices=[...text.matchAll(/<button class="ask-option[^"]*" type="button" data-t3-send="([^"]+)"><span class="ask-copy"><b>([^<]+)<\/b>/g)];
-    if(choices.length<2||choices.length>3||choices.some(choice=>!choice[1]||!choice[2].trim()))fail('Not a question page: it needs two or three filled answers with send actions.');
-    if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
-    return true;
-  }
-  if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
-  const stateMatch=text.match(/<main class="t3lib reply" data-state="(complete|working|waiting|blocked)">/);
-  if(!stateMatch)fail('Not a reply page: the state is missing or invalid.');
-  const state=stateMatch[1];
-  if(!/<section class="status-board" data-slot="progress"/.test(text))fail('Not a reply page: the progress board is missing. Render reply JSON instead of writing HTML.');
-  if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
-  const progress=text.match(/<div class="status-tile" data-field="progress"[\s\S]*?<\/div>/);
-  if(!progress||!/<dd>[^<]*\d+(?:\.\d+)?%\s*(?:est\.)?<\/dd>/.test(progress[0])||!/aria-valuenow="\d+(?:\.\d+)?"/.test(progress[0]))fail('Not a reply page: the Progress tile needs a percentage and meter.');
-  const progressValue=Number((progress[0].match(/<dd>(\d+(?:\.\d+)?)%(?:\s+est\.)?<\/dd>/)||[])[1]);
-  if(state==='complete'&&progressValue!==100)fail('A complete reply must show 100% progress.');
-  if(state!=='complete'&&progressValue>=100)fail('An unfinished reply cannot show 100% progress. Keep 100% for verified completion.');
-  if(!/<section class="bento"/.test(text))fail('Not a reply page: the bento grid is missing.');
-  const markup=text.replace(/<style>[\s\S]*?<\/style>/i,'');
-  const resultStart=markup.indexOf('<section class="tile-grid reply-results"');
-  const changeStart=resultStart<0?-1:markup.indexOf('data-section-type="changes"',resultStart);
-  if(resultStart<0||changeStart<0||changeStart<=resultStart)fail('Not a reply page: result facts and changes are required.');
-  const resultBlock=markup.slice(resultStart,changeStart);
-  const resultTiles=(resultBlock.match(/<section class="component-tile" data-height="slim">/g)||[]).length;
-  if(resultTiles<3||resultTiles>4||(resultBlock.match(/class="metric-value">[^<]*\S[^<]*</g)||[]).length!==resultTiles)fail('Not a reply page: it needs three or four filled result facts.');
-  const rail=text.match(/<ol class="swimlane">[\s\S]*?<\/ol>/);
-  if(!rail)fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
-  const steps=[...rail[0].matchAll(/<li class="[a-z]+">[\s\S]*?<\/li>/g)];
-  if(steps.length<5||steps.length>6)fail('Not a reply page: the swimlane needs five or six filled steps.');
-  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])||!/<time>(?:[01]\d|2[0-3]):[0-5]\d<\/time>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label and a valid 24-hour clock time.');
-  if(state==='complete'&&/<li class="(?:waiting|pending)">/.test(rail[0]))fail('A complete reply cannot contain waiting or pending swimlane steps.');
-  const changeLists=[...text.matchAll(/<ul class="change-list">([\s\S]*?)<\/ul>/g)];
-  if(!changeLists.length||!changeLists.some(list=>/<li>[\s\S]*?<b>[^<]*\S[^<]*<\/b>/.test(list[1])))fail('Not a reply page: the changes block is empty. Render reply JSON instead of writing HTML.');
-  const changeItems=changeLists.flatMap(([,list])=>[...list.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match=>match[1]));
-  if(changeItems.some(item=>!/<b>[^<]*\S[^<]*<\/b>/.test(item)||!/<small>[^<]*\S[^<]*<\/small>/.test(item)))fail('Every change needs a title and a description. Add the missing text or use another block.');
-  const hasDone=/data-change="done"/.test(markup);
-  const hasTodo=/data-change="todo"/.test(markup);
-  if(state==='complete'&&hasTodo)fail('A complete reply cannot contain a To do block.');
-  if(state!=='complete'&&(!hasDone||!hasTodo))fail('An unfinished reply needs separate Done and To do blocks.');
-  const cards=[...markup.matchAll(/<article class="reply-card">([\s\S]*?)<\/article>/g)].map(match=>match[1]);
-  if(state==='complete'&&cards.some(card=>/data-tone="(?:waiting|active|error)"/.test(card)))fail('A complete reply cannot keep open cards. Mark every card done or keep the reply unfinished.');
-  const types=[...markup.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
-  if(!types.includes('swimlane')||!types.includes('changes'))fail('Not a reply page: it needs a swimlane and a changes block.');
-  if(!types.some(type=>!['swimlane','changes'].includes(type)))fail('Not a reply page: it needs one additional supporting block.');
-  if([...markup.matchAll(/<section class="component-tile reply-section-tile"[\s\S]*?<h2>[^<]*\S[^<]*<\/h2>/g)].length!==types.length)fail('Not a reply page: every section needs a title.');
-  if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
+  const match=text.match(/<script type="application\/json" id="t3-reply-data">([\s\S]*?)<\/script>/);
+  if(!match)fail('Not a reply page: it needs the embedded reply data. Render reply JSON with node ui-library/ui.mjs reply.');
+  let data;
+  try{data=JSON.parse(match[1]);}catch{fail('Not a reply page: its embedded reply data is not valid JSON.');}
+  let canonical;
+  try{canonical=finishReply(renderReplyPage(data));}catch(error){fail('Not a reply page: its embedded reply data does not validate. '+error.message);}
+  if(canonical!==text)fail('Not a reply page: the HTML does not match a fresh render of its embedded data. Render reply JSON instead of editing HTML.');
   return true;
 }
 
