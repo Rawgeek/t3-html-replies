@@ -157,8 +157,15 @@
 .t3lib .reply-section-tile .metric-label { font-size:10.5px; line-height:1.25; }
 .t3lib .reply-section-tile .metric-value { font-size:15.5px; line-height:1.15; }
 .t3lib .reply-section-tile .metric-note { font-size:10.5px; line-height:1.25; }
-.t3lib .reply-section-tile table { height:100%; font-size:10.5px; line-height:1.3; }
+.t3lib .reply-section-tile table { height:100%; table-layout:fixed; font-size:10.5px; line-height:1.3; }
+.t3lib .reply-section-tile table.has-actions { height:auto; table-layout:auto; }
+.t3lib .reply-section-tile .table-wrap { align-self:stretch; }
+.t3lib .reply-section-tile .table-wrap.has-actions { align-self:center; }
 .t3lib .reply-section-tile :is(th,td) { padding:3px 5px; }
+.t3lib .reply-section-tile table.has-actions th:last-child,
+.t3lib .reply-section-tile table.has-actions td.cell-action { width:1%; white-space:nowrap; padding-right:0; }
+.t3lib .reply-section-tile td .btn.compact { min-height:24px; padding:2px 7px; gap:4px; font-size:10.5px; border-radius:6px; }
+.t3lib .reply-section-tile td .btn.compact .icon { width:12px; height:12px; }
 .t3lib .reply-section-tile .bullets { height:100%; grid-auto-rows:1fr; gap:0; font-size:12px; line-height:1.35; }
 .t3lib .reply-section-tile .bullets li { align-items:center; border-bottom:1px solid var(--ui-border); }
 .t3lib .reply-section-tile .bullets li:last-child { border-bottom:0; }
@@ -239,6 +246,14 @@
   .t3lib .status { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (pointer:coarse) { .t3lib .btn, .t3lib select { min-height: 44px; } }
+
+.t3lib .reply-section-tile tr.has-detail { cursor: help; }
+.t3lib .reply-section-tile tr.has-detail:hover td { background: color-mix(in srgb, var(--ui-text) 6%, transparent); }
+@media (min-width:421px) { .t3lib.reply[data-columns="2"] .reply-sections { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width:901px) {
+  .t3lib.reply[data-columns="2"] .reply-section-tile:last-child { grid-column: span 1; }
+  .t3lib.reply[data-columns="2"] .reply-section-tile:last-child:nth-child(odd) { grid-column: span 2; }
+}
 @media (prefers-reduced-motion:reduce) { .t3lib .status-meter span, .t3lib .meter-fill { transition: none; } }
 </style></head><body><main class="t3lib"><p class="muted small">Demo</p><section class="component-tile" data-height="medium"><div class="demo tile-body"><article class="message interactive"><div class="avatar" aria-hidden="true">MC</div><div class="stack"><div class="message-head"><strong>Morgan Chen</strong><time>10:24</time></div><p class="copy-text">The build fix is ready for review. The focused checks pass.</p><div class="actions"><button type="button" class="btn" data-demo-action="copy" data-copy-text="The build fix is ready for review. The focused checks pass."><svg class="icon" aria-hidden="true" focusable="false"
  

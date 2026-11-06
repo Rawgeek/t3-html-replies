@@ -22,5 +22,5 @@ const body=renderShell(records,families);
 const index=document(body,gallery);
 await writeFile(join(root,'index.html'),index);
 await writeFile(join(root,'ELEMENT_INDEX.md'),renderElementIndex(records));
-await writeFile(join(root,'README.md'),"# Reply library\n\nStart with [the guide](AGENT_GUIDE.md) and [the element index](ELEMENT_INDEX.md).\n\n- [Gallery](index.html): 60 visual examples.\n- Index: tree by group, family, demo, and logic.\n- CLI: node ui.mjs list, show, render, or reply.\n\nGenerated files are outputs. Demo data is illustrative. Rebuild with node build.mjs; check with node verify.mjs.\n");
+await writeFile(join(root,'README.md'),"# Reply library\n\nStart with [the guide](AGENT_GUIDE.md) and [the element index](ELEMENT_INDEX.md).\n\n- [Gallery](index.html): 60 visual examples.\n- Index: tree by group, family, demo, and logic.\n- CLI: node ui.mjs list, show, render, or reply.\n- Examples: release-example.json, working-example.json, complete-example.json.\n\nGenerated files are outputs. Demo data is illustrative. Rebuild with node build.mjs; check with node verify.mjs.\n");
 console.log(JSON.stringify({examples:records.length,families:families.length,galleryBytes:Buffer.byteLength(index),snippets:records.length,root}));

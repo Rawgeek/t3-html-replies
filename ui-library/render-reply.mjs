@@ -7,7 +7,7 @@ const LIMITS=Object.freeze({
   title:64,summary:80,results:4,resultLabel:14,resultValue:14,resultNote:24,
   sections:8,sectionTitle:24,
   factsItems:4,listItems:3,listItem:48,
-  tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,
+  tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,rowDetail:260,
   timelineItems:3,timelineLabel:30,timelineNote:32,timelineTime:8,
   barsItems:3,barLabel:18,barNote:22,
   progress:12,next:18,eta:16,wake:20,actions:3,actionLabel:14,actionSend:400,
@@ -18,7 +18,7 @@ const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','timeline','bars']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
-const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','actions'];
+const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','actions','columns'];
 const OPAQUE=/\b[0-9a-f]{8,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 
 const fail=message=>{throw Error(message);};
@@ -56,7 +56,7 @@ const visibleChars=value=>{
   if(typeof value==='string'||typeof value==='number')return String(value).length;
   if(Array.isArray(value))return value.reduce((sum,item)=>sum+visibleChars(item),0);
   if(value&&typeof value==='object')return Object.entries(value)
-    .filter(([key])=>!['href','icon','type','height','state','primary'].includes(key))
+    .filter(([key])=>!['href','icon','type','height','state','primary','send','detail'].includes(key))
     .reduce((sum,[,item])=>sum+visibleChars(item),0);
   return 0;
 };
@@ -116,8 +116,25 @@ function validateSection(section,index){
     const columns=array(section.columns,`${name} columns`,2,LIMITS.tableColumns)
       .map((column,columnIndex)=>field(column,`${name} column ${columnIndex+1}`,LIMITS.tableLabel));
     const rows=array(section.rows,`${name} rows`,2,LIMITS.tableRows).map((row,rowIndex)=>{
-      if(!Array.isArray(row)||row.length!==columns.length)fail(`${name} row ${rowIndex+1} must match the column count.`);
-      return row.map((cell,columnIndex)=>field(cell,`${name} row ${rowIndex+1} cell ${columnIndex+1}`,LIMITS.tableCell));
+      const rowName=`${name} row ${rowIndex+1}`;
+      const objectRow=row&&typeof row==='object'&&!Array.isArray(row);
+      if(objectRow)assertKeys(row,['cells','detail'],rowName);
+      const cells=objectRow?row.cells:row;
+      if(!Array.isArray(cells)||cells.length!==columns.length)fail(`${rowName} must match the column count.`);
+      const detail=objectRow?field(row.detail,`${rowName} detail`,LIMITS.rowDetail,{optional:true}):'';
+      const mapped=cells.map((cell,columnIndex)=>{
+        const cellName=`${name} row ${rowIndex+1} cell ${columnIndex+1}`;
+        if(cell&&typeof cell==='object'&&!Array.isArray(cell)){
+          assertKeys(cell,['label','send','icon','primary'],cellName);
+          const label=field(cell.label,`${cellName} label`,LIMITS.actionLabel);
+          const send=field(cell.send,`${cellName} send`,LIMITS.actionSend);
+          const iconName=field(cell.icon??'arrow-right',`${cellName} icon`,32);
+          if(!/^[a-z0-9-]+$/.test(iconName))fail(`${cellName} icon must use a lowercase Lucide name.`);
+          return {label,send,icon:iconName,primary:Boolean(cell.primary)};
+        }
+        return field(cell,cellName,LIMITS.tableCell);
+      });
+      return {cells:mapped,detail};
     });
     result={type,title,columns,rows};
   }else if(type==='timeline'){
@@ -163,7 +180,17 @@ function renderSection(section){
   }else if(section.type==='list'){
     body=`<ul class="bullets">${section.items.map(item=>`<li><span>${e(item)}</span></li>`).join('')}</ul>`;
   }else if(section.type==='table'){
-    body=`<div class="table-wrap"><table><thead><tr>${section.columns.map(column=>`<th scope="col">${e(column)}</th>`).join('')}</tr></thead><tbody>${section.rows.map(row=>`<tr>${row.map(cell=>`<td${/^(?:[\d.,]+%|[\d.,]+ (?:s|ms|GB|MB))$/.test(cell)?' class="numeric"':''}>${e(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    const hasActions=section.rows.some(row=>row.cells.some(cell=>cell&&typeof cell==='object'));
+    const tableClass=hasActions?' class="has-actions"':'';
+    body=`<div class="table-wrap${hasActions?' has-actions':''}"><table${tableClass}><thead><tr>${section.columns.map(column=>`<th scope="col">${e(column)}</th>`).join('')}</tr></thead><tbody>${section.rows.map(row=>{
+      const title=row.detail||row.cells.find(cell=>cell&&typeof cell==='object')?.send||'';
+      return `<tr${title?` class="has-detail" title="${e(title)}"`:''}>${row.cells.map(cell=>{
+      if(cell&&typeof cell==='object'){
+        return `<td class="cell-action"><button class="btn compact${cell.primary?' primary':''}" type="button" data-t3-send="${e(cell.send)}">${icon(cell.icon)}<span>${e(cell.label)}</span></button></td>`;
+      }
+      return `<td${/^(?:[\d.,]+%|[\d.,]+ (?:s|ms|GB|MB))$/.test(cell)?' class="numeric"':''}>${e(cell)}</td>`;
+    }).join('')}</tr>`;
+    }).join('')}</tbody></table></div>`;
   }else if(section.type==='timeline'){
     body=`<ol class="timeline">${section.items.map(item=>`<li><span class="dot ${item.state}" aria-hidden="true"></span><div>${item.note?`<p>${e(item.label)}</p><p class="muted small">${e(item.note)}</p>`:`<p>${e(item.label)}</p>`}</div>${item.time?`<time>${e(item.time)}</time>`:''}</li>`).join('')}</ol>`;
   }else{
@@ -182,6 +209,8 @@ export async function renderReply(data){
   const done=state==='complete';
   const title=field(data.title,'Title',LIMITS.title);
   const summary=field(data.summary,'Summary',LIMITS.summary,{optional:true});
+  const columns=data.columns===undefined?3:Number(data.columns);
+  if(!Number.isInteger(columns)||![2,3].includes(columns))fail('Columns must be 2 or 3.');
   const results=present(data.results)?facts(data.results,'Results',1):[];
   if(done&&!results.length)fail('Complete replies require result facts.');
   const sections=present(data.sections)?array(data.sections,'Sections',1,LIMITS.sections).map(validateSection):[];
@@ -198,7 +227,7 @@ export async function renderReply(data){
       :`<a class="${className}" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`;
   }).join('');
   const sectionsHtml=sections.length?`<section class="tile-grid reply-sections" aria-label="Supporting blocks">${sections.map(renderSection).join('')}</section>`:'';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {

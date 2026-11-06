@@ -65,6 +65,14 @@ await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',
 await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',columns:['A','B'],rows:[['x'.repeat(19),'B'],['C','D']]}]}),/cell 1 exceeds 18 characters/);
 await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',columns:['A','B','C'],rows:[['1','2','3'],['4','5','6']]}]}),/must contain 2 to 2 items/);
 await assert.rejects(renderReply({...base,sections:[{title:'Table',type:'table',columns:['A','B'],rows:[['A','B'],['C','D'],['E','F'],['G','H']]}]}),/must contain 2 to 3 items/);
+const actionTable=await renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'Reply',icon:'message-square',send:'Reply to this mail.'}],['Alert',{label:'Check',icon:'clock',send:'Check this alert.'}]]}]});
+assert(actionTable.includes('data-t3-send="Reply to this mail."')&&actionTable.includes('class="btn compact"'),'Table cells render send actions');
+const detailTable=await renderReply({...base,columns:2,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[{cells:['Mail',{label:'Reply',send:'Reply to this mail.'}],detail:'Hover detail'},{cells:['Alert','Check']}]}]});
+assert(detailTable.includes('data-columns="2"')&&detailTable.includes('title="Hover detail"'),'Two columns and row details render');
+await assert.rejects(renderReply({...base,columns:4}),/Columns must be 2 or 3/);
+await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['A','B'],rows:[{cells:['A','B'],detail:'x'.repeat(261)},{cells:['C','D']}]}]}),/detail exceeds 260 characters/);
+await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'Reply',send:'x',href:'https://example.com'}],['Alert','Check']]}]}),/unsupported fields: href/);
+await assert.rejects(renderReply({...base,sections:[{title:'Queue',type:'table',columns:['Item','Next'],rows:[['Mail',{label:'x'.repeat(15),send:'x'}],['Alert','Check']]}]}),/label exceeds 14 characters/);
 await assert.rejects(renderReply({...base,sections:[{title:'Steps',type:'timeline',items:[{label:'Built',note:'x'.repeat(33)}, {label:'Review'}]}]}),/note exceeds 32 characters/);
 await assert.rejects(renderReply({...base,sections:[{title:'Bars',type:'bars',items:[{label:'x'.repeat(19),value:1},{label:'After',value:2}]}]}),/label exceeds 18 characters/);
 await assert.rejects(renderReply({...base,sections:Array.from({length:9},(_,index)=>({title:'Item '+index,type:'list',items:['One','Two']}))}),/Sections must contain 1 to 8 items/);
