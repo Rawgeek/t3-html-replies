@@ -48,7 +48,7 @@ Carry authorized work end to end. Continue through implementation, checks, revie
 
 Every reply ships three required elements. The renderer rejects a reply without them.
 
-- The swimlane is a timeline of five to seven steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step carries its own progress number.
+- The swimlane is a timeline of five to seven steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step shows its number only when it differs from overall progress; never repeat the same percentage in the rail and the Progress tile.
 - The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
 - Two to four milestones label the segments of the progress bar.
 - At least two supporting blocks sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.

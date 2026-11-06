@@ -48,7 +48,7 @@ assert(index.includes('data-catalog-grid')&&index.includes('"id":"benchmarks-sma
 const history=[{label:'Scope read',note:'Four blocks chosen',time:'09:10',state:'done'},{label:'Blocks built',note:'Renderer patched',time:'09:24',state:'done'}];
 const swimlane={title:'Stages',type:'swimlane',items:[...history,{label:'Checks running',note:'Focused suite',time:'Now',state:'waiting',progress:'62%'},{label:'Review',note:'After the checks',time:'Next',state:'pending'},{label:'Share post',note:'Then the push',time:'Later',state:'pending'}]};
 const completeSwimlane={title:'Stages',type:'swimlane',items:[...history,{label:'Checks run',note:'All pass',time:'09:30',state:'done'},{label:'Review',note:'Approved',time:'09:45',state:'done'},{label:'Release',note:'Live verified',time:'10:02',state:'done'}]};
-const changes={title:'Changes',type:'changes',done:['Renderer patched','Docs updated'],todo:['Sample reply refreshed']};
+const changes={title:'Changes',type:'changes',done:['Renderer patched','Docs updated'],todo:['Refresh sample']};
 const doneChanges={title:'Changes',type:'changes',done:['Renderer patched','Docs updated','Sample refreshed'],todo:[]};
 const cost={title:'Cost',type:'compare',items:[{label:'Build time',before:'148 s',after:'92 s',delta:'38% less'}]};
 const milestones=['Scope','Build','Verify','Share'];
@@ -66,7 +66,7 @@ await assert.rejects(renderReply({title:'Long',state:'working',summary:'x'.repea
 await assert.rejects(renderReply({...base,details:'Verified flow.'}),/unsupported fields: details/);
 await assert.rejects(renderReply({...base,next:'b611fca'}),/hash or machine ID/);
 await assert.rejects(renderReply({...base,title:'x'.repeat(65)}),/Title exceeds 64 characters/);
-await assert.rejects(renderReply({...base,results:[{label:'x'.repeat(15),value:'x'}]}),/label exceeds 14 characters/);
+await assert.rejects(renderReply({...base,results:[{label:'x'.repeat(13),value:'x'}]}),/label exceeds 12 characters/);
 await assert.rejects(renderReply({...base,results:Array.from({length:5},()=>({label:'A',value:'1'}))}),/Results must contain 1 to 4 items/);
 await assert.rejects(renderReply({...base,sections:[{title:'Long',type:'list',size:'small',items:['One','Two']}]}),/unsupported fields: size/);
 await assert.rejects(renderReply({...base,sections:[{title:'Wide',type:'list',span:2,items:['One','Two']}]}),/unsupported fields: span/);
@@ -95,7 +95,7 @@ await assert.rejects(renderReply({...base,sections:[swimlane,changes]}),/complet
 await assert.rejects(renderReply({...base,next:'1deadbe'}),/hash or machine ID/);
 await assert.rejects(renderReply({...base,sections:[{title:'Bars',type:'bars',items:[{label:'x'.repeat(19),value:1},{label:'After',value:2}]}]}),/label exceeds 18 characters/);
 await assert.rejects(renderReply({...base,sections:Array.from({length:9},(_,index)=>({title:'Item '+index,type:'list',items:['One','Two']}))}),/Sections must contain 1 to 8 items/);
-await assert.rejects(renderReply({...base,results:Array.from({length:4},()=>({label:'L'.repeat(14),value:'V'.repeat(14),note:'N'.repeat(24)})),summary:'x'.repeat(80),...withBlocks(...Array.from({length:5},(_,index)=>({title:'Facts '+index,type:'facts',items:Array.from({length:4},()=>({label:'L'.repeat(14),value:'V'.repeat(14),note:'N'.repeat(24)}))})))}),/visible characters/);
+await assert.rejects(renderReply({...base,results:Array.from({length:4},()=>({label:'L'.repeat(12),value:'V'.repeat(8),note:'N'.repeat(18)})),summary:'x'.repeat(80),...withBlocks(...Array.from({length:5},(_,index)=>({title:'Facts '+index,type:'facts',items:Array.from({length:4},()=>({label:'L'.repeat(12),value:'V'.repeat(8),note:'N'.repeat(18)}))})))}),/visible characters/);
 const actionReply=await renderReply({...base,actions:[{label:'Mark read',icon:'check',send:'Mark these as read.'}]});
 assert(actionReply.includes('data-t3-send="Mark these as read."'),'MCP app send action renders as a button');
 await assert.rejects(renderReply({...base,actions:[{label:'Both',href:'https://example.com',send:'No'}]}),/exactly one of href or send/);
@@ -137,7 +137,7 @@ const rail=railOf(pendingReply);
 assert(rail.includes('<small>62%</small>'),'The rail shows the current step percentage');
 assert.equal((rail.match(/<small>62%<\/small>/g)||[]).length,1,'The rail shows the step percentage exactly once');
 const evenReply=await renderReply({title:'Waiting',state:'waiting',progress:'62%',next:'Finish the review',eta:'Unknown',wake:'Not armed',milestones,sections:[swimlane,changes,cost]});
-assert(railOf(evenReply).includes('<small>62%</small>'),'The rail keeps the step percentage when it equals overall progress');
+assert(!railOf(evenReply).includes('<small>62%</small>'),'The rail omits a percentage that repeats overall progress');
 assert(!/\.reply-card p\s*\{[^}]*display\s*:\s*none/.test(css),'No rule hides card notes');
 const zoned=await renderReply({title:'Waiting',state:'waiting',progress:'78%',next:'Finish the review',eta:'Unknown',wake:'Not armed',zone:'UTC',milestones,sections:[swimlane,changes,cost]});
 assert(zoned.includes('Times UTC'),'An explicit zone keeps generated output deterministic');

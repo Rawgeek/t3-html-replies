@@ -55,12 +55,12 @@
       "title": "Changes",
       "type": "changes",
       "done": [
-        "Swimlane block added",
-        "Progress gates wired",
+      "Swimlane added",
+      "Gates wired",
         "Docs updated"
       ],
       "todo": [
-        "Finish the review",
+      "Finish review",
         "Run full CI"
       ]
     },

@@ -21,6 +21,8 @@ if git diff --cached --name-only | grep -qE '^(ui-library/|scripts/|assets/|hook
     ui-library/README.md \
     ui-library/snippets \
     ui-library/logic \
-    screenshots
+    screenshots/overview.png \
+    screenshots/reply-mobile.png \
+    screenshots/gallery.png
 fi
 

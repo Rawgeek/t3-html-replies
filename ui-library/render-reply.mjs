@@ -5,14 +5,14 @@ import { icon, pill, statusFooter, resultGrid, metric, escapeHTML as e } from '.
 import { percentValue, measure } from './parse.mjs';
 
 const LIMITS=Object.freeze({
-  title:64,summary:80,results:4,resultLabel:14,resultValue:14,resultNote:24,
+  title:64,summary:80,results:4,resultLabel:12,resultValue:8,resultNote:18,
   sections:8,sectionTitle:24,
   factsItems:4,listItems:3,listItem:48,
   tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,rowDetail:260,
   swimlaneItems:7,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
-  changeItems:3,changeItem:44,
+  changeItems:3,changeItem:18,
   compareItems:3,compareLabel:18,compareValue:10,compareDelta:12,
-  cardItems:3,cardLabel:18,cardNote:40,
+  cardItems:3,cardLabel:12,cardNote:18,
   barsItems:3,barLabel:18,barNote:22,
   progress:12,next:18,eta:16,wake:20,actions:3,actionLabel:14,actionSend:400,
   milestones:4,milestoneLabel:8,
@@ -246,7 +246,9 @@ function validateSection(section,index){
     result={type,title,items};
   }
   const visible=visibleChars(result);
-  if(visible>LIMITS.sectionText[type])fail(`${name} has ${visible} visible characters; ${type} blocks allow ${LIMITS.sectionText[type]}. Split it into another block.`);
+  if(visible>LIMITS.sectionText[type])fail(type==='changes'
+    ?`${name} has ${visible} visible characters; changes allow ${LIMITS.sectionText[type]}. Shorten the items or move detail into a supporting block.`
+    :`${name} has ${visible} visible characters; ${type} blocks allow ${LIMITS.sectionText[type]}. Split it into another block.`);
   return {...result,height:type==='swimlane'?'tall':SECTION_HEIGHT};
 }
 
@@ -272,7 +274,7 @@ function renderSection(section,zone=''){
     section.zoneLabel=section.items.some(item=>/^\d{1,2}:\d{2}$/.test(item.time||''))&&zone?`Times ${zone}`:'';
     body=`<ol class="swimlane">${section.items.map(item=>{
       const percent=item.progress?Number(String(item.progress).match(/\d+(?:\.\d+)?/)[0]):null;
-      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span><small>${percent}%</small></span>`:''}</li>`;
+      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span>${item.sameAsOverall?'':`<small>${percent}%</small>`}</span>`:''}</li>`;
     }).join('')}</ol>`;
   }else if(section.type==='cards'){
     const tone={done:['Checked','ok','check'],waiting:['In progress','active','activity'],pending:['Next','waiting','arrow-right'],blocked:['Blocked','error','circle-x']};
@@ -334,7 +336,10 @@ export async function renderReply(data){
   }
   const status=validateStatus(data,done);
   if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
-  percentValue(status.progress,'Progress');
+  const overallPercent=percentValue(status.progress,'Progress');
+  const currentStep=swimlane.items.find(item=>item.state==='waiting');
+  const stepPercent=currentStep&&currentStep.progress?percentValue(currentStep.progress,'Step progress'):null;
+  if(currentStep&&stepPercent!==null&&stepPercent===overallPercent)currentStep.sameAsOverall=true;
   const zoneInput=present(data.zone)?field(data.zone,'Zone',32):undefined;
   const zoneLabel=zoneInput===undefined?localZone:shortZone(zoneInput);
   if(!zoneLabel)fail('Zone must be an IANA name such as Asia/Bangkok.');
@@ -355,7 +360,9 @@ export async function renderReply(data){
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
   const supporting=sections.filter(section=>section!==swimlaneSection);
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection,zone)}<div class="reply-flow" data-count="${supporting.length}">${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]},zone)).join('')}</div></section>`;
+  const swimlaneHtml=renderSection(swimlaneSection,zone);
+  if(overallPercent!==null&&swimlaneHtml.includes(`<small>${overallPercent}%</small>`))fail('The rail repeats the overall percentage. Keep the step number only when it differs from Progress.');
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}<div class="reply-flow" data-count="${supporting.length}">${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]},zone)).join('')}</div></section>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 

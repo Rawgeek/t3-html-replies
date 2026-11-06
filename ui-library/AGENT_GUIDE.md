@@ -17,7 +17,7 @@ Start with [ELEMENT_INDEX.md](ELEMENT_INDEX.md), then open the closest sample.
 
 Every reply carries three things. The renderer rejects a reply that leaves one out.
 
-1. A swimlane. Five to seven steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%.
+1. A swimlane. Five to seven steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%. When that number equals overall progress, the rail keeps the meter and drops the number so the percentage appears once.
 2. A changes block. What is done and what is still to do. A finished reply has no waiting or pending step and an empty to do list, so the rail, the changes, and Next None always agree.
 3. Two to four milestones. They label the segments of the progress bar in the status strip.
 4. At least two supporting blocks beside the swimlane. The renderer rejects a reply that would leave an empty cell in the grid.
@@ -43,8 +43,8 @@ Top-level fields:
 | title | Required, 1 to 64 characters |
 | state | Required: complete, working, waiting, or blocked |
 | summary | Optional, up to 80 characters |
-| results | Optional, 1 to 4 facts. Completed replies need at least one. |
-| sections | Optional, 1 to 8 visible blocks |
+| results | Optional, 1 to 4 facts. Completed replies need at least one. Label 12, value 8, note 18. |
+| sections | Required, 4 to 8 visible blocks: swimlane, changes, and at least two supporting blocks |
 | progress | Up to 12 characters. Completed replies must show 100%. |
 | next | Up to 18 characters |
 | eta | Up to 16 characters |
@@ -53,7 +53,7 @@ Top-level fields:
 | milestones | Required, 2 to 4 labels with 8 characters each. They label the progress segments. |
 | actions | Optional, 1 to 3 buttons. Label up to 14 characters. Exactly one HTTPS link or send message up to 400. |
 
-A result fact has a label of 14 characters, a value of 14, and an optional note of 24.
+A result fact has a label of 12 characters, a value of 8, and an optional note of 18.
 
 The renderer rejects replies above 1200 visible characters.
 
@@ -69,14 +69,14 @@ The type is optional. When it is missing the renderer picks the block from the s
 
 | Type | Fields and limits |
 | --- | --- |
-| facts | title 24; 2 to 4 items with label 14, value 14, note 24 |
+| facts | title 24; 2 to 4 items with label 12, value 8, note 18 |
 | list | title 24; 2 to 3 items, 48 characters each |
 | table | title 24; 2 columns and 2 to 3 rows; heading 14, cell 18. A cell may be a send action. A row may be {cells, detail} for a hover tooltip. |
 | swimlane | title 24; 5 to 7 items; label 30, note 32, time 8; state done, waiting, or pending. Only the waiting item may carry progress, such as 62%. |
 | bars | title 24; 2 to 3 items; label 18, note 22, value up to 12 characters |
-| changes | title 24; done and todo lists with up to 3 items of 44 characters each. Two items minimum together. |
+| changes | title 24; done and todo lists with up to 3 items of 18 characters each. Two items minimum together. Only one changes block is allowed. |
 | compare | title 24; 1 to 3 items; label 18, before 10, after 10, delta 12. Each item draws a before bar and an after bar on one shared scale. |
-| cards | title 24; 2 to 3 items; label 18, note 40; state done, waiting, pending, or blocked. Each card shows a status pill. |
+| cards | title 24; 2 to 3 items; label 12, note 18; state done, waiting, pending, or blocked. Each card shows a status pill. |
 
 When a block cannot hold the next fact, split it into another block. Do not shorten evidence into vague words.
 

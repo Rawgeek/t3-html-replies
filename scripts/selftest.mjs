@@ -5,6 +5,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const server = spawn(process.execPath, [resolve(here, 'mcp-server.mjs')], {
@@ -129,6 +130,9 @@ try {
   if (contents?.mimeType !== 'text/html;profile=mcp-app' || !contents.text?.includes('ui/initialize')) {
     throw Error('MCP app resource is invalid.');
   }
+  const scripts = [...contents.text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
+  if (!scripts.length) throw Error('MCP app has no inline script.');
+  for (const source of scripts) new vm.Script(source, { filename: 'mcp-app.html' });
 
   process.stdout.write('t3-html-replies MCP self-test passed.\n');
 } finally {

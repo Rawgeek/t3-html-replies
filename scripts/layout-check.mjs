@@ -44,14 +44,14 @@ const base = {
         { label: 'Five', state: 'pending' }
       ]
     },
-    { title: 'Changes', type: 'changes', done: ['One change', 'Two changes'], todo: ['Three changes'] },
+    { title: 'Changes', type: 'changes', done: ['WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW'], todo: ['WWWWWWWWWWWWWWWWWW'] },
     {
       title: 'Cards',
       type: 'cards',
       items: [
-        { label: 'ReconciliationName', state: 'done', note: 'Maximum daily throughput in every queue!' },
-        { label: 'Second review gate', state: 'waiting', note: 'Maximum daily throughput in every queue!' },
-        { label: 'Third release gate', state: 'pending', note: 'Maximum daily throughput in every queue!' }
+        { label: 'WWWWWWWWWWWW', state: 'done', note: 'WWWWWWWWWWWWWWWWWW' },
+        { label: 'WWWWWWWWWWWW', state: 'waiting', note: 'WWWWWWWWWWWWWWWWWW' },
+        { label: 'WWWWWWWWWWWW', state: 'pending', note: 'WWWWWWWWWWWWWWWWWW' }
       ]
     },
     {
@@ -72,10 +72,10 @@ const base = {
       title: 'Facts',
       type: 'facts',
       items: [
-        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
-        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
-        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' },
-        { label: 'Reconciliation', value: '99999999999999', note: 'Maximum daily throughput' }
+        { label: 'WWWWWWWWWWWW', value: 'WWWWWWWW', note: 'WWWWWWWWWWWWWWWWWW' },
+        { label: 'WWWWWWWWWWWW', value: 'WWWWWWWW', note: 'WWWWWWWWWWWWWWWWWW' },
+        { label: 'WWWWWWWWWWWW', value: 'WWWWWWWW', note: 'WWWWWWWWWWWWWWWWWW' },
+        { label: 'WWWWWWWWWWWW', value: 'WWWWWWWW', note: 'WWWWWWWWWWWWWWWWWW' }
       ]
     }
   ]
