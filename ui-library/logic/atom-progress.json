@@ -1,0 +1,20 @@
+{
+  "id": "atom-progress",
+  "family": "status-atoms",
+  "familyLabel": "Status atoms",
+  "size": "small",
+  "title": "Progress",
+  "sample": true,
+  "useWhen": "Show one milestone estimate as a compact visual.",
+  "avoidWhen": "The scope is unclear or the percentage has no basis.",
+  "data": {
+    "field": "progress",
+    "label": "Progress",
+    "value": "62% est.",
+    "icon": "activity"
+  },
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/atom-progress.html"
+}

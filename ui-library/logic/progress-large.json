@@ -1,0 +1,18 @@
+{
+  "id": "progress-large",
+  "family": "progress",
+  "familyLabel": "Progress bars",
+  "size": "large",
+  "title": "Progress bars · large",
+  "useWhen": "Show completed, active, and pending gates in one task.",
+  "avoidWhen": "The gates belong to unrelated work or imply equal effort when that is false.",
+  "data": {
+    "level": 2,
+    "value": 75
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/progress-large.html"
+}

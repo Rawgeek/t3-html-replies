@@ -1,0 +1,94 @@
+# Element index
+
+Start with [the reply guide](AGENT_GUIDE.md) for the schema and hard limits.
+The reply renderer accepts facts, list, table, timeline, and bars, and assigns every block the same 184px height. Use these samples for visual reference; do not copy a sample height or long copy into a reply.
+Pick the closest element below. Open its demo or logic, then run `node ui.mjs show <id>` for use and avoid guidance.
+
+- Elements (60)
+  - Reply composition
+    - Task progress
+      - [Task progress · Small · Medium tile](snippets/task-progress-small.html) · [logic](logic/task-progress-small.json) — Give a quick result, next action, and continuation state.
+      - [Task progress · Medium · Medium tile](snippets/task-progress-medium.html) · [logic](logic/task-progress-medium.json) — Explain what is done, what is pending, and what happens next.
+      - [Task progress · Large · Medium tile](snippets/task-progress-large.html) · [logic](logic/task-progress-large.json) — Hand over a task with several verified gates and one clear owner.
+    - Basic summary
+      - [Basic summary · Small · Small tile](snippets/summary-basic.html) · [logic](logic/summary-basic.json) — State one result and its practical effect without a full report.
+    - Reports
+      - [Reports · Small · Tall tile](snippets/reports-small.html) · [logic](logic/reports-small.json) — Explain one bounded result with evidence and the next action.
+      - [Reports · Medium · Tall tile](snippets/reports-medium.html) · [logic](logic/reports-medium.json) — Present findings, alternatives, and unresolved work for a decision.
+      - [Comprehensive report · Large · Tall tile](snippets/reports-large.html) · [logic](logic/reports-large.json) — Hand over a consequential change with method, results, risks, and ownership.
+    - Callouts
+      - [Callouts · Small · Small tile](snippets/callouts-small.html) · [logic](logic/callouts-small.json) — Show a small piece of information that affects the next step.
+      - [Callouts · Medium · Small tile](snippets/callouts-medium.html) · [logic](logic/callouts-medium.json) — Explain a concrete caution that affects a decision.
+      - [Callouts · Large · Small tile](snippets/callouts-large.html) · [logic](logic/callouts-large.json) — Show a blocking failure, its effect, and the recovery action.
+  - Status and progress
+    - Status panels
+      - [Ready · Small · Medium tile](snippets/status-ready.html) · [logic](logic/status-ready.json) — Show that every required gate is verified.
+      - [Running · Medium · Medium tile](snippets/status-running.html) · [logic](logic/status-running.json) — Show an active task with a real next action and a supported estimate.
+      - [Waiting · Medium · Medium tile](snippets/status-waiting.html) · [logic](logic/status-waiting.json) — Show a pending gate and its confirmed continuation.
+      - [Blocked · Large · Medium tile](snippets/status-blocked.html) · [logic](logic/status-blocked.json) — Show a concrete blocker with a named owner and recovery action.
+    - Status atoms
+      - [Progress · Small · Slim tile](snippets/atom-progress.html) · [logic](logic/atom-progress.json) — Show one milestone estimate as a compact visual.
+      - [Next · Small · Slim tile](snippets/atom-next.html) · [logic](logic/atom-next.json) — Keep one immediate action visible in a dense grid.
+      - [ETA · Small · Slim tile](snippets/atom-eta.html) · [logic](logic/atom-eta.json) — Show a supported short time estimate.
+      - [Wake · Small · Slim tile](snippets/atom-wake.html) · [logic](logic/atom-wake.json) — Show whether a continuation is armed.
+    - Progress bars
+      - [Progress bars · Small · Slim tile](snippets/progress-small.html) · [logic](logic/progress-small.json) — Show one measured completion value beside the current action.
+      - [Progress bars · Medium · Small tile](snippets/progress-medium.html) · [logic](logic/progress-medium.json) — Pair a verified milestone estimate with the work still pending.
+      - [Progress bars · Large · Medium tile](snippets/progress-large.html) · [logic](logic/progress-large.json) — Show completed, active, and pending gates in one task.
+    - Status labels
+      - [Status labels · Small · Slim tile](snippets/statuses-small.html) · [logic](logic/statuses-small.json) — Label one state with text as well as color.
+      - [Status labels · Medium · Small tile](snippets/statuses-medium.html) · [logic](logic/statuses-medium.json) — Compare several distinct states in one small work queue.
+      - [Status labels · Large · Tall tile](snippets/statuses-large.html) · [logic](logic/statuses-large.json) — Separate verified, pending, and blocked evidence in a handoff.
+    - Checklists
+      - [Checklists · Small · Medium tile](snippets/checklists-small.html) · [logic](logic/checklists-small.json) — Track a few observable completion gates.
+      - [Checklists · Medium · Medium tile](snippets/checklists-medium.html) · [logic](logic/checklists-medium.json) — Review a bounded acceptance checklist with partial completion.
+      - [Checklists · Large · Tall tile](snippets/checklists-large.html) · [logic](logic/checklists-large.json) — Inspect a detailed release gate list with evidence notes.
+    - Empty, loading, and error states
+      - [Empty state · Small · Small tile](snippets/states-small.html) · [logic](logic/states-small.json) — Explain a valid empty result and an optional next action.
+      - [Loading state · Medium · Small tile](snippets/states-medium.html) · [logic](logic/states-medium.json) — Represent an operation that has started and has no result yet.
+      - [Error state · Large · Small tile](snippets/states-large.html) · [logic](logic/states-large.json) — Explain an actual failure and provide a bounded local retry.
+  - Data, sequence, and layout
+    - Metric groups
+      - [Metric groups · Small · Small tile](snippets/metrics-small.html) · [logic](logic/metrics-small.json) — Show one important measurement and its unit.
+      - [Metric groups · Medium · Medium tile](snippets/metrics-medium.html) · [logic](logic/metrics-medium.json) — Compare a few related measurements with units and context.
+      - [Metric groups · Large · Medium tile](snippets/metrics-large.html) · [logic](logic/metrics-large.json) — Scan several stable operational metrics with concise context.
+    - Benchmarks
+      - [Benchmarks · Small · Medium tile](snippets/benchmarks-small.html) · [logic](logic/benchmarks-small.json) — Compare one measured change with a known baseline.
+      - [Benchmarks · Medium · Tall tile](snippets/benchmarks-medium.html) · [logic](logic/benchmarks-medium.json) — Compare typical and tail latency for one workload.
+      - [Benchmarks · Large · Tall tile](snippets/benchmarks-large.html) · [logic](logic/benchmarks-large.json) — Review several workloads with sample counts and a decision.
+    - Graphs
+      - [Graphs · Small · Small tile](snippets/graphs-small.html) · [logic](logic/graphs-small.json) — Show the direction of one short series beside a single metric.
+      - [Graphs · Medium · Tall tile](snippets/graphs-medium.html) · [logic](logic/graphs-medium.json) — Compare two trends on one shared scale.
+      - [Graphs · Large · Tall tile](snippets/graphs-large.html) · [logic](logic/graphs-large.json) — Inspect several series with range controls and point details.
+    - Tables
+      - [Tables · Small · Medium tile](snippets/tables-small.html) · [logic](logic/tables-small.json) — Show a few named items and one or two facts.
+      - [Tables · Medium · Tall tile](snippets/tables-medium.html) · [logic](logic/tables-medium.json) — Compare a bounded set of items across several fields.
+      - [Tables · Large · Tall tile](snippets/tables-large.html) · [logic](logic/tables-large.json) — Inspect a dense inventory with sorting and local filtering.
+    - Timelines
+      - [Timelines · Small · Medium tile](snippets/timelines-small.html) · [logic](logic/timelines-small.json) — Show a short completed sequence and its current point.
+      - [Timelines · Medium · Tall tile](snippets/timelines-medium.html) · [logic](logic/timelines-medium.json) — Explain several completed and pending steps with ownership.
+      - [Timelines · Large · Tall tile](snippets/timelines-large.html) · [logic](logic/timelines-large.json) — Explain a handoff, blocker, and release sequence across owners.
+    - Column layouts
+      - [2 column arrangement · Small · Tall tile](snippets/layouts-small.html) · [logic](logic/layouts-small.json) — Compare two substantial items or pair a result with evidence.
+      - [3 column arrangement · Medium · Tall tile](snippets/layouts-medium.html) · [logic](logic/layouts-medium.json) — Compare three peers with similar content density at 1024px.
+      - [4 column arrangement · Large · Tall tile](snippets/layouts-large.html) · [logic](logic/layouts-large.json) — Scan four brief peers in a dense 1024px overview.
+  - Communication
+    - Slack messages
+      - [Slack messages · Small · Medium tile](snippets/slack-small.html) · [logic](logic/slack-small.json) — Send a short factual update with one result or request.
+      - [Slack messages · Medium · Tall tile](snippets/slack-medium.html) · [logic](logic/slack-medium.json) — Share a result plus a brief explanation and one next action.
+      - [Slack messages · Large · Tall tile](snippets/slack-large.html) · [logic](logic/slack-large.json) — Prepare an incident or handoff message with evidence and owners.
+    - GitHub PRs
+      - [GitHub PRs · Small · Medium tile](snippets/github-pr-small.html) · [logic](logic/github-pr-small.json) — Describe a small change and the checks that cover it.
+      - [GitHub PRs · Medium · Tall tile](snippets/github-pr-medium.html) · [logic](logic/github-pr-medium.json) — Explain the problem, resulting behavior, and validation for a bounded change.
+      - [GitHub PRs · Large · Tall tile](snippets/github-pr-large.html) · [logic](logic/github-pr-large.json) — Review a consequential change with a concrete example, risks, and rollout evidence.
+    - PR action tables
+      - [PR action tables · Small · Medium tile](snippets/pr-actions-small.html) · [logic](logic/pr-actions-small.json) — Triage two or three PRs with one next action each.
+      - [PR action tables · Medium · Tall tile](snippets/pr-actions-medium.html) · [logic](logic/pr-actions-medium.json) — Compare ownership, review state, and checks across a small queue.
+      - [PR action tables · Large · Tall tile](snippets/pr-actions-large.html) · [logic](logic/pr-actions-large.json) — Review a larger queue and prepare explicit per-PR actions.
+  - Actions
+    - Button groups
+      - [2 action buttons · Small · Small tile](snippets/buttons-small.html) · [logic](logic/buttons-small.json) — Offer one main action and one sensible alternative.
+      - [3 action buttons · Medium · Small tile](snippets/buttons-medium.html) · [logic](logic/buttons-medium.json) — Offer one main action plus two distinct secondary choices.
+      - [4 action buttons · Large · Small tile](snippets/buttons-large.html) · [logic](logic/buttons-large.json) — Expose four familiar, distinct actions for a dense work item.
+
+Every sample is standalone and illustrative. Use the reply CLI for main-session replies.

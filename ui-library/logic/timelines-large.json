@@ -1,0 +1,18 @@
+{
+  "id": "timelines-large",
+  "family": "timelines",
+  "familyLabel": "Timelines",
+  "size": "large",
+  "title": "Timelines · large",
+  "useWhen": "Explain a handoff, blocker, and release sequence across owners.",
+  "avoidWhen": "A true schedule needs shared time scales and durations.",
+  "data": {
+    "level": 2,
+    "count": 7
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/timelines-large.html"
+}

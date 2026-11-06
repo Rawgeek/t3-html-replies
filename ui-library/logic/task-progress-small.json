@@ -1,0 +1,22 @@
+{
+  "id": "task-progress-small",
+  "family": "task-progress",
+  "familyLabel": "Task progress",
+  "size": "small",
+  "title": "Task progress · small",
+  "useWhen": "Give a quick result, next action, and continuation state.",
+  "avoidWhen": "The reader needs evidence or a consequential decision.",
+  "data": {
+    "level": 0,
+    "title": "The fix passes its focused checks.",
+    "progress": 55,
+    "next": "Run the full checks",
+    "eta": "15-25 min estimate",
+    "wake": "Not armed"
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/task-progress-small.html"
+}

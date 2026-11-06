@@ -1,0 +1,29 @@
+{
+  "title": "Master and staging are green",
+  "state": "complete",
+  "summary": "All checks pass. Migration conflict and a CI env leak are fixed.",
+  "results": [
+    {"label": "Master", "value": "2 / 2 green", "note": "Setup plus backend"},
+    {"label": "Staging", "value": "6 / 6 green", "note": "Every suite"},
+    {"label": "Backend", "value": "59,129", "note": "0 failures"},
+    {"label": "PR 22687", "value": "4 / 4 green", "note": "Thread cleared"}
+  ],
+  "sections": [
+    {
+      "title": "What broke",
+      "type": "table",
+      "columns": ["Symptom", "Fix"],
+      "rows": [["Setup red", "Leaf renumbered"], ["Backend red", "Flags filtered"], ["PR 22687 red", "Merge leaf added"]]
+    },
+    {
+      "title": "What changed",
+      "type": "list",
+      "items": ["Dropped merge migration", "Fixtures ignore CI flags", "Peak WMS gained mixin"]
+    },
+    {
+      "title": "Still open",
+      "type": "list",
+      "items": ["Skipped suite has no run", "Playwright sync loop", "PR needs review approval"]
+    }
+  ]
+}

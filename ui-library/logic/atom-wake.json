@@ -1,0 +1,20 @@
+{
+  "id": "atom-wake",
+  "family": "status-atoms",
+  "familyLabel": "Status atoms",
+  "size": "small",
+  "title": "Wake",
+  "sample": true,
+  "useWhen": "Show whether a continuation is armed.",
+  "avoidWhen": "A scheduled wake needs a date or timezone that must stay visible.",
+  "data": {
+    "field": "wake",
+    "label": "Wake",
+    "value": "Off",
+    "icon": "bell-off"
+  },
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/atom-wake.html"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "checklists-small",
+  "family": "checklists",
+  "familyLabel": "Checklists",
+  "size": "small",
+  "title": "Checklists · small",
+  "useWhen": "Track a few observable completion gates.",
+  "avoidWhen": "The items are prose, optional ideas, or cannot be checked.",
+  "data": {
+    "count": 3
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/checklists-small.html"
+}

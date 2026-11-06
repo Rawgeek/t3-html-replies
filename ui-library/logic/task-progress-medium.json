@@ -1,0 +1,22 @@
+{
+  "id": "task-progress-medium",
+  "family": "task-progress",
+  "familyLabel": "Task progress",
+  "size": "medium",
+  "title": "Task progress · medium",
+  "useWhen": "Explain what is done, what is pending, and what happens next.",
+  "avoidWhen": "The task is already complete and needs only a final result.",
+  "data": {
+    "level": 1,
+    "title": "The fix passes its focused checks.",
+    "progress": 70,
+    "next": "Wait for the review",
+    "eta": "Unknown until review",
+    "wake": "Example PR watch"
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/task-progress-medium.html"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "checklists-medium",
+  "family": "checklists",
+  "familyLabel": "Checklists",
+  "size": "medium",
+  "title": "Checklists · medium",
+  "useWhen": "Review a bounded acceptance checklist with partial completion.",
+  "avoidWhen": "The list replaces a clear owner or hides dependencies.",
+  "data": {
+    "count": 5
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/checklists-medium.html"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "task-progress-large",
+  "family": "task-progress",
+  "familyLabel": "Task progress",
+  "size": "large",
+  "title": "Task progress · large",
+  "useWhen": "Hand over a task with several verified gates and one clear owner.",
+  "avoidWhen": "A routine update would become a long status document.",
+  "data": {
+    "level": 2,
+    "title": "The fix passes its focused checks.",
+    "progress": 85,
+    "next": "Verify the released flow",
+    "eta": "10-20 min estimate",
+    "wake": "Not armed"
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/task-progress-large.html"
+}

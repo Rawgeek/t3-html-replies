@@ -1,0 +1,18 @@
+{
+  "id": "reports-small",
+  "family": "reports",
+  "familyLabel": "Reports",
+  "size": "small",
+  "title": "Reports · small",
+  "useWhen": "Explain one bounded result with evidence and the next action.",
+  "avoidWhen": "Only a short confirmation is needed.",
+  "data": {
+    "level": 0,
+    "title": "Build review"
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/reports-small.html"
+}

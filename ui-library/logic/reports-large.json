@@ -1,0 +1,18 @@
+{
+  "id": "reports-large",
+  "family": "reports",
+  "familyLabel": "Reports",
+  "size": "large",
+  "title": "Comprehensive report",
+  "useWhen": "Hand over a consequential change with method, results, risks, and ownership.",
+  "avoidWhen": "The audience needs a fast answer and will not use the supporting material.",
+  "data": {
+    "level": 2,
+    "title": "Comprehensive release report"
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/reports-large.html"
+}

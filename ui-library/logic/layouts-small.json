@@ -1,0 +1,17 @@
+{
+  "id": "layouts-small",
+  "family": "layouts",
+  "familyLabel": "Column layouts",
+  "size": "small",
+  "title": "2 column arrangement",
+  "useWhen": "Compare two substantial items or pair a result with evidence.",
+  "avoidWhen": "One item needs the full width or the columns are unrelated.",
+  "data": {
+    "count": 2
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/layouts-small.html"
+}

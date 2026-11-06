@@ -1,0 +1,18 @@
+{
+  "id": "summary-basic",
+  "family": "summaries",
+  "familyLabel": "Basic summary",
+  "size": "small",
+  "title": "Basic summary",
+  "sample": true,
+  "useWhen": "State one result and its practical effect without a full report.",
+  "avoidWhen": "The result is uncertain, blocked, or needs supporting evidence.",
+  "data": {
+    "title": "The build now uses fewer resources.",
+    "body": "Peak memory fell from 1.8 GB to 1.1 GB on the sample workload. The same tests still run."
+  },
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/summary-basic.html"
+}

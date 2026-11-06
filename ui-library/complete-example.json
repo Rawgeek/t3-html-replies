@@ -1,0 +1,47 @@
+{
+  "title": "Build uses fewer resources",
+  "state": "complete",
+  "summary": "Bounded batches keep every test and cut peak memory 39%.",
+  "results": [
+    {"label": "Peak memory", "value": "1.1 GB", "note": "39% less"},
+    {"label": "Build time", "value": "92 s", "note": "was 148 s"},
+    {"label": "Tests", "value": "1,248", "note": "All pass"},
+    {"label": "Live flow", "value": "Verified", "note": "After release"}
+  ],
+  "sections": [
+    {
+      "title": "Checks",
+      "type": "table",
+      "columns": ["Gate", "Result"],
+      "rows": [["Tests", "1,248 pass"], ["Build", "92 s"], ["Live flow", "Verified"]]
+    },
+    {
+      "title": "Method",
+      "type": "list",
+      "items": ["Same runner", "30 sample runs", "Production input"]
+    },
+    {
+      "title": "Stages",
+      "type": "timeline",
+      "items": [
+        {"label": "Code merged", "note": "Focused checks pass", "time": "09:10", "state": "done"},
+        {"label": "Review", "note": "Sam approved", "time": "09:24", "state": "done"},
+        {"label": "Release", "note": "Live flow verified", "time": "10:02", "state": "done"}
+      ]
+    },
+    {
+      "title": "Impact",
+      "type": "bars",
+      "items": [
+        {"label": "Peak memory", "value": 1.1, "note": "39% less"},
+        {"label": "Build time", "value": 92, "note": "was 148 s"},
+        {"label": "Tests", "value": 1248, "note": "All pass"}
+      ]
+    },
+    {
+      "title": "Scope",
+      "type": "list",
+      "items": ["Batching only", "Same runner", "No test removed"]
+    }
+  ]
+}

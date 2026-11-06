@@ -1,0 +1,21 @@
+{
+  "id": "status-blocked",
+  "family": "status-panels",
+  "familyLabel": "Status panels",
+  "size": "large",
+  "title": "Blocked",
+  "sample": true,
+  "useWhen": "Show a concrete blocker with a named owner and recovery action.",
+  "avoidWhen": "The agent can resolve the issue within its current authority.",
+  "data": {
+    "state": "blocked",
+    "progress": "55% estimate",
+    "next": "Morgan: fix check",
+    "eta": "Unknown until check",
+    "wake": "Not armed"
+  },
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/status-blocked.html"
+}

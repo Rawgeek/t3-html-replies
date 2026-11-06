@@ -1,0 +1,61 @@
+{
+  "id": "tables-medium",
+  "family": "tables",
+  "familyLabel": "Tables",
+  "size": "medium",
+  "title": "Tables · medium",
+  "useWhen": "Compare a bounded set of items across several fields.",
+  "avoidWhen": "Rows need extensive narrative or a large filter workflow.",
+  "data": {
+    "headers": [
+      "Service",
+      "State",
+      "Availability",
+      "p95"
+    ],
+    "rows": [
+      [
+        "Portal",
+        "Healthy",
+        "99.98%",
+        "32 ms"
+      ],
+      [
+        "Rates",
+        "Healthy",
+        "99.95%",
+        "46 ms"
+      ],
+      [
+        "Shipping",
+        "Review",
+        "99.91%",
+        "71 ms"
+      ],
+      [
+        "Search",
+        "Healthy",
+        "99.97%",
+        "38 ms"
+      ],
+      [
+        "Exports",
+        "Waiting",
+        "99.89%",
+        "184 ms"
+      ],
+      [
+        "Billing",
+        "Healthy",
+        "99.99%",
+        "29 ms"
+      ]
+    ],
+    "filter": false
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/tables-medium.html"
+}

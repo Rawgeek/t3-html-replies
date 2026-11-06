@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+  --background: var(--color-background-primary, light-dark(#f8f9fb,#101217));
+  --foreground: var(--color-text-primary, light-dark(#202328,#e9ebee));
+  --card: var(--color-background-secondary, light-dark(#fff,#171a20));
+  --muted: var(--color-background-tertiary, light-dark(#f0f2f5,#222731));
+  --muted-foreground: var(--color-text-secondary, light-dark(#626975,#9aa2ad));
+  --border: var(--color-border-primary, light-dark(#e1e5eb,#303641));
+  --ring: var(--color-ring-primary, light-dark(#3567a3,#9fc5f4));
+  --primary: var(--color-background-inverse, light-dark(#263d58,#d1ddec));
+  --primary-foreground: var(--color-text-inverse, light-dark(#fff,#16202c));
+  --accent-foreground: var(--color-text-info, light-dark(#3567a3,#9fc5f4));
+  --secondary: var(--color-background-tertiary, light-dark(#f0f2f5,#222731));
+  --success-foreground: var(--color-text-success, light-dark(#16734c,#53c697));
+  --warning-foreground: var(--color-text-warning, light-dark(#8e6013,#e5ba72));
+  --destructive-foreground: var(--color-text-danger, light-dark(#a73c42,#ee9299));
+  --radius: var(--border-radius-md, 10px);
+  --font-sans: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  --font-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+html, body {
+  margin: 0;
+  min-height: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: 13px/1.55 var(--font-sans);
+}
+body { padding: 0 0 1px; }
+#reply { width: 100%; }
+.mcp-loading {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.mcp-loading span {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--muted);
+}
+.mcp-loading span:nth-child(2) { width: 78%; }
+.mcp-loading span:nth-child(3) { width: 58%; }
+.mcp-feedback {
+  min-height: 18px;
+  margin-top: 6px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.mcp-feedback:empty { display: none; }
+.mcp-feedback[data-tone="error"] { color: var(--destructive-foreground); }
+.mcp-feedback[data-tone="ok"] { color: var(--success-foreground); }
+</style>
+</head>
+<body>
+<div id="reply" aria-live="polite">
+  <div class="mcp-loading" role="status">
+    <span></span><span></span><span></span>
+    <p>Loading reply</p>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const root = document.getElementById('reply');
+  const parent = window.parent;
+  const pending = new Map();
+  let nextId = 1;
+  let initialized = false;
+  let toolArguments = null;
+  let rendered = false;
+  let lastHeight = 0;
+  let sizeFrame = 0;
+
+  function post(message) {
+    parent.postMessage(message, '*');
+  }
+
+  function notify(method, params) {
+    post({ jsonrpc: '2.0', method, params: params || {} });
+  }
+
+  function request(method, params) {
+    const id = nextId++;
+    return new Promise((resolve, reject) => {
+      pending.set(String(id), { resolve, reject });
+      post({ jsonrpc: '2.0', id, method, params: params || {} });
+    });
+  }
+
+  function applyContext(context) {
+    if (!context || typeof context !== 'object') return;
+    const variables = context.styles && context.styles.variables;
+    if (variables && typeof variables === 'object') {
+      for (const [key, value] of Object.entries(variables)) {
+        if (typeof value === 'string' && key.startsWith('--')) {
+          document.documentElement.style.setProperty(key, value);
+        }
+      }
+    }
+    if (context.theme === 'light' || context.theme === 'dark') {
+      document.documentElement.style.colorScheme = context.theme;
+    }
+  }
+
+  function clean(html) {
+    const parsed = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    parsed.querySelectorAll('script,noscript,iframe,object,embed,link,meta,base').forEach((node) => node.remove());
+    for (const node of parsed.body.querySelectorAll('*')) {
+      for (const attribute of Array.from(node.attributes)) {
+        const name = attribute.name.toLowerCase();
+        const value = attribute.value.trim().toLowerCase();
+        if (name.startsWith('on') || name === 'srcdoc' || name === 'formaction') {
+          node.removeAttribute(attribute.name);
+        } else if ((name === 'href' || name === 'src' || name === 'xlink:href') && value.startsWith('javascript:')) {
+          node.removeAttribute(attribute.name);
+        }
+      }
+    }
+    return parsed;
+  }
+
+  function feedbackFor(actions) {
+    const existing = actions.parentElement && actions.parentElement.querySelector('.mcp-feedback');
+    if (existing) return existing;
+    const output = document.createElement('output');
+    output.className = 'mcp-feedback';
+    output.setAttribute('aria-live', 'polite');
+    actions.insertAdjacentElement('afterend', output);
+    return output;
+  }
+
+  function messageFor(error) {
+    const text = error && typeof error.message === 'string' ? error.message : '';
+    if (/declin|refus/i.test(text)) return 'Send was declined.';
+    return text && text.length < 120 ? 'Could not send. ' + text : 'Could not send. Try again.';
+  }
+
+  function bindActions() {
+    const buttons = root.querySelectorAll('button[data-t3-send]');
+    for (const button of buttons) {
+      if (button.dataset.t3Bound === 'true') continue;
+      button.dataset.t3Bound = 'true';
+      button.type = 'button';
+      button.addEventListener('click', async () => {
+        const text = button.dataset.t3Send || '';
+        if (!text || button.disabled) return;
+        const actions = button.closest('.actions');
+        const feedback = actions ? feedbackFor(actions) : null;
+        const label = button.querySelector('span');
+        const original = label ? label.textContent : button.textContent;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        if (feedback) {
+          feedback.dataset.tone = '';
+          feedback.textContent = 'Waiting for T3 confirmation.';
+        }
+        try {
+          await request('ui/message', {
+            role: 'user',
+            content: [{ type: 'text', text }]
+          });
+          if (label) label.textContent = 'Sent';
+          else button.textContent = 'Sent';
+          if (feedback) {
+            feedback.dataset.tone = 'ok';
+            feedback.textContent = 'Sent to chat.';
+          }
+          for (const other of buttons) other.disabled = true;
+        } catch (error) {
+          button.disabled = false;
+          if (label) label.textContent = original;
+          else button.textContent = original;
+          if (feedback) {
+            feedback.dataset.tone = 'error';
+            feedback.textContent = messageFor(error);
+          }
+        } finally {
+          button.removeAttribute('aria-busy');
+          scheduleSize();
+        }
+      });
+    }
+
+    for (const link of root.querySelectorAll('a[href]')) {
+      if (link.dataset.t3Bound === 'true') continue;
+      link.dataset.t3Bound = 'true';
+      link.addEventListener('click', async (event) => {
+        const href = link.getAttribute('href') || '';
+        if (!/^https:\/\//i.test(href)) return;
+        event.preventDefault();
+        try {
+          await request('ui/open-link', { url: href });
+        } catch {
+          const feedback = document.querySelector('.mcp-feedback');
+          if (feedback) {
+            feedback.dataset.tone = 'error';
+            feedback.textContent = 'Could not open the link. Try again.';
+          }
+        }
+      });
+    }
+  }
+
+  function render(html) {
+    if (rendered || typeof html !== 'string' || !html.trim()) return;
+    rendered = true;
+    const parsed = clean(html);
+    const oldStyle = document.getElementById('reply-style');
+    if (oldStyle) oldStyle.remove();
+    const style = document.createElement('style');
+    style.id = 'reply-style';
+    style.textContent = Array.from(parsed.querySelectorAll('style')).map((node) => node.textContent).join('\n');
+    document.head.appendChild(style);
+    root.replaceChildren(...Array.from(parsed.body.childNodes).map((node) => document.importNode(node, true)));
+    bindActions();
+    scheduleSize();
+  }
+
+  function scheduleSize() {
+    if (sizeFrame) return;
+    sizeFrame = requestAnimationFrame(() => {
+      sizeFrame = 0;
+      const height = Math.max(80, Math.ceil(root.getBoundingClientRect().height + 2));
+      if (height !== lastHeight) {
+        lastHeight = height;
+        notify('ui/notifications/size-changed', { height });
+      }
+    });
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.source !== parent) return;
+    const message = event.data;
+    if (!message || message.jsonrpc !== '2.0') return;
+
+    if (message.id !== undefined && !message.method) {
+      const waiter = pending.get(String(message.id));
+      if (!waiter) return;
+      pending.delete(String(message.id));
+      if (message.error) waiter.reject(message.error);
+      else waiter.resolve(message.result);
+      return;
+    }
+
+    if (message.method === 'ui/notifications/tool-input') {
+      toolArguments = message.params && message.params.arguments;
+      if (toolArguments && typeof toolArguments.html === 'string') render(toolArguments.html);
+      return;
+    }
+    if (message.method === 'ui/notifications/tool-result') {
+      const params = message.params || {};
+      const structured = params.structuredContent || {};
+      const html = typeof structured.html === 'string' ? structured.html : undefined;
+      if (html) render(html);
+      return;
+    }
+    if (message.method === 'ui/notifications/host-context-changed') {
+      applyContext(message.params);
+      scheduleSize();
+      return;
+    }
+    if (message.method === 'ui/notifications/request-teardown') {
+      notify('ui/notifications/request-teardown', {});
+    }
+  });
+
+  new ResizeObserver(scheduleSize).observe(root);
+
+  request('ui/initialize', {
+    protocolVersion: '2026-01-26',
+    appInfo: { name: 'T3 HTML Replies', version: '1.0.0' },
+    appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] }
+  }).then((value) => {
+    initialized = true;
+    applyContext(value && value.hostContext);
+    notify('ui/notifications/initialized', {});
+    scheduleSize();
+  }).catch(() => {
+    root.replaceChildren();
+    const message = document.createElement('p');
+    message.className = 'mcp-loading';
+    message.textContent = 'T3 could not start the reply app.';
+    root.append(message);
+    scheduleSize();
+  });
+})();
+</script>
+</body>
+</html>

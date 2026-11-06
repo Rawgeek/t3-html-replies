@@ -1,0 +1,19 @@
+{
+  "id": "github-pr-medium",
+  "family": "github-pr",
+  "familyLabel": "GitHub PRs",
+  "size": "medium",
+  "title": "GitHub PRs · medium",
+  "useWhen": "Explain the problem, resulting behavior, and validation for a bounded change.",
+  "avoidWhen": "The change needs a migration, rollout plan, or risk analysis.",
+  "data": {
+    "level": 1,
+    "title": "Reduce the test runner memory peak",
+    "text": "The test job exceeded its memory limit when all bundles loaded together. The runner now loads bounded batches and preserves the same test coverage.\n\n## Validation\n- The focused suite passes.\n- The sample memory peak fell from 1.8 GB to 1.1 GB.\n\n## Next\nWait for full CI and review."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/github-pr-medium.html"
+}

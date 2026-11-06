@@ -1,0 +1,20 @@
+{
+  "id": "atom-eta",
+  "family": "status-atoms",
+  "familyLabel": "Status atoms",
+  "size": "small",
+  "title": "ETA",
+  "sample": true,
+  "useWhen": "Show a supported short time estimate.",
+  "avoidWhen": "The timing is unknown or depends on an uncertain gate.",
+  "data": {
+    "field": "eta",
+    "label": "ETA",
+    "value": "15m",
+    "icon": "clock"
+  },
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/atom-eta.html"
+}

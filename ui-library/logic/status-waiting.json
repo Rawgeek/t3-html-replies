@@ -1,0 +1,21 @@
+{
+  "id": "status-waiting",
+  "family": "status-panels",
+  "familyLabel": "Status panels",
+  "size": "medium",
+  "title": "Waiting",
+  "sample": true,
+  "useWhen": "Show a pending gate and its confirmed continuation.",
+  "avoidWhen": "The wake is only planned or independent work can still continue.",
+  "data": {
+    "state": "waiting",
+    "progress": "78% estimate",
+    "next": "Finish the review",
+    "eta": "Unknown until review",
+    "wake": "Example PR watch"
+  },
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/status-waiting.html"
+}

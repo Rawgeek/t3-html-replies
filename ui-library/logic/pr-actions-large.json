@@ -1,0 +1,18 @@
+{
+  "id": "pr-actions-large",
+  "family": "pr-actions",
+  "familyLabel": "PR action tables",
+  "size": "large",
+  "title": "PR action tables · large",
+  "useWhen": "Review a larger queue and prepare explicit per-PR actions.",
+  "avoidWhen": "The state is stale or the user has not authorized the proposed action.",
+  "data": {
+    "count": 8,
+    "level": 2
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/pr-actions-large.html"
+}

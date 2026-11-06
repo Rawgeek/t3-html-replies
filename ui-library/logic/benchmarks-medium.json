@@ -1,0 +1,54 @@
+{
+  "id": "benchmarks-medium",
+  "family": "benchmarks",
+  "familyLabel": "Benchmarks",
+  "size": "medium",
+  "title": "Benchmarks · medium",
+  "useWhen": "Compare typical and tail latency for one workload.",
+  "avoidWhen": "The distributions or test environments are not comparable.",
+  "data": {
+    "title": "Request latency",
+    "unit": "ms",
+    "n": 5000,
+    "rows": [
+      [
+        "p50 · baseline",
+        42,
+        0
+      ],
+      [
+        "p50 · current",
+        28,
+        1
+      ],
+      [
+        "p95 · baseline",
+        118,
+        0
+      ],
+      [
+        "p95 · current",
+        64,
+        1
+      ],
+      [
+        "p99 · baseline",
+        221,
+        0
+      ],
+      [
+        "p99 · current",
+        110,
+        1
+      ]
+    ],
+    "baseline": 118,
+    "current": 64,
+    "method": "Same input, warm cache, identical runner. Each sample excludes setup time."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/benchmarks-medium.html"
+}

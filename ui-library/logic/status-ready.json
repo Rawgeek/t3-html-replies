@@ -1,0 +1,21 @@
+{
+  "id": "status-ready",
+  "family": "status-panels",
+  "familyLabel": "Status panels",
+  "size": "small",
+  "title": "Ready",
+  "sample": true,
+  "useWhen": "Show that every required gate is verified.",
+  "avoidWhen": "Only local checks pass or a release gate is still pending.",
+  "data": {
+    "state": "complete",
+    "progress": "100%",
+    "next": "None",
+    "eta": "Complete",
+    "wake": "Not needed"
+  },
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/status-ready.html"
+}

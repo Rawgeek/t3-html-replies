@@ -1,0 +1,17 @@
+{
+  "id": "statuses-small",
+  "family": "statuses",
+  "familyLabel": "Status labels",
+  "size": "small",
+  "title": "Status labels · small",
+  "useWhen": "Label one state with text as well as color.",
+  "avoidWhen": "The label adds no information beyond the sentence.",
+  "data": {
+    "level": 0
+  },
+  "sample": true,
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/statuses-small.html"
+}

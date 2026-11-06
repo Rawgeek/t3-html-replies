@@ -1,0 +1,18 @@
+{
+  "id": "progress-medium",
+  "family": "progress",
+  "familyLabel": "Progress bars",
+  "size": "medium",
+  "title": "Progress bars · medium",
+  "useWhen": "Pair a verified milestone estimate with the work still pending.",
+  "avoidWhen": "The task has no stable scope or the milestone weights are unclear.",
+  "data": {
+    "level": 1,
+    "value": 70
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/progress-medium.html"
+}

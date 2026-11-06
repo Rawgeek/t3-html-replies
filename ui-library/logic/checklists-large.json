@@ -1,0 +1,17 @@
+{
+  "id": "checklists-large",
+  "family": "checklists",
+  "familyLabel": "Checklists",
+  "size": "large",
+  "title": "Checklists · large",
+  "useWhen": "Inspect a detailed release gate list with evidence notes.",
+  "avoidWhen": "The list is too long to keep current or implies unverified proof.",
+  "data": {
+    "count": 8
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/checklists-large.html"
+}

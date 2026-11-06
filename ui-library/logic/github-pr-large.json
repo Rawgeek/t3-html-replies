@@ -1,0 +1,19 @@
+{
+  "id": "github-pr-large",
+  "family": "github-pr",
+  "familyLabel": "GitHub PRs",
+  "size": "large",
+  "title": "GitHub PRs · large",
+  "useWhen": "Review a consequential change with a concrete example, risks, and rollout evidence.",
+  "avoidWhen": "The extra sections repeat the diff or add no useful review context.",
+  "data": {
+    "level": 2,
+    "title": "Reduce the test runner memory peak",
+    "text": "## Problem and result\nThe job loaded every bundle at once and exceeded its memory limit. Bounded batches keep the same tests within the limit.\n\n## Example\nThe sample peak falls from 1.8 GB to 1.1 GB. Runtime falls from 148 s to 92 s.\n\n## Validation\n- Identical spec inventory before and after.\n- Focused checks pass.\n- Full CI and review remain pending.\n\n## Risk and rollout\nThe runner could omit a batch if discovery changes. Compare the discovered and executed spec counts before release. Revert the runner change if parity fails."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/github-pr-large.html"
+}

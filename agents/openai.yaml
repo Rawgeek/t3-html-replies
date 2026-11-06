@@ -1,0 +1,4 @@
+interface:
+  display_name: "T3 HTML Replies"
+  short_description: "Render compact T3 HTML replies with native actions"
+  default_prompt: "Use $t3-html-replies to prepare my next T3 reply as concise HTML with clear status and native chat actions."

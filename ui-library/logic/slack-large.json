@@ -1,0 +1,18 @@
+{
+  "id": "slack-large",
+  "family": "slack",
+  "familyLabel": "Slack messages",
+  "size": "large",
+  "title": "Slack messages · large",
+  "useWhen": "Prepare an incident or handoff message with evidence and owners.",
+  "avoidWhen": "The channel needs a quick update rather than a full handoff.",
+  "data": {
+    "level": 2,
+    "text": "*Build resource update*\n\nThe fix passes the focused checks. It is not released yet.\n\n*Evidence*\n• Peak memory: 1.8 GB to 1.1 GB.\n• Runtime: 148 s to 92 s.\n• Input and runner stayed the same.\n\n*Next*\nMorgan owns review. Riley will verify the released flow after the checks pass. ETA depends on review."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/slack-large.html"
+}

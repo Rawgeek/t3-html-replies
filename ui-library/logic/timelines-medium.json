@@ -1,0 +1,18 @@
+{
+  "id": "timelines-medium",
+  "family": "timelines",
+  "familyLabel": "Timelines",
+  "size": "medium",
+  "title": "Timelines · medium",
+  "useWhen": "Explain several completed and pending steps with ownership.",
+  "avoidWhen": "The steps are independent and belong in a grid or table.",
+  "data": {
+    "level": 1,
+    "count": 5
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/timelines-medium.html"
+}

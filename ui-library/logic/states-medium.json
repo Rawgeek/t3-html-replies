@@ -1,0 +1,17 @@
+{
+  "id": "states-medium",
+  "family": "states",
+  "familyLabel": "Empty, loading, and error states",
+  "size": "medium",
+  "title": "Loading state",
+  "useWhen": "Represent an operation that has started and has no result yet.",
+  "avoidWhen": "The operation is finished, stalled, or has a known failure.",
+  "data": {
+    "kind": "loading"
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/states-medium.html"
+}

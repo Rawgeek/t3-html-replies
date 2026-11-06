@@ -1,0 +1,17 @@
+{
+  "id": "metrics-small",
+  "family": "metrics",
+  "familyLabel": "Metric groups",
+  "size": "small",
+  "title": "Metric groups · small",
+  "useWhen": "Show one important measurement and its unit.",
+  "avoidWhen": "A standalone number hides the baseline or uncertainty.",
+  "data": {
+    "count": 1
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/metrics-small.html"
+}

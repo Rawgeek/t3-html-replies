@@ -1,0 +1,18 @@
+{
+  "id": "reports-medium",
+  "family": "reports",
+  "familyLabel": "Reports",
+  "size": "medium",
+  "title": "Reports · medium",
+  "useWhen": "Present findings, alternatives, and unresolved work for a decision.",
+  "avoidWhen": "There is no decision and the evidence fits in a brief update.",
+  "data": {
+    "level": 1,
+    "title": "Performance investigation"
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/reports-medium.html"
+}

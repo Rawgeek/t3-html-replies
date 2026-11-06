@@ -1,0 +1,57 @@
+{
+  "id": "graphs-medium",
+  "family": "graphs",
+  "familyLabel": "Graphs",
+  "size": "medium",
+  "title": "Graphs · medium",
+  "useWhen": "Compare two trends on one shared scale.",
+  "avoidWhen": "The series have incompatible units or sampling intervals.",
+  "data": {
+    "title": "Latency before and after",
+    "unit": "ms",
+    "spark": false,
+    "detailed": false,
+    "height": 190,
+    "series": [
+      {
+        "name": "Baseline",
+        "values": [
+          66,
+          65,
+          63,
+          67,
+          62,
+          61,
+          59,
+          60,
+          58,
+          60,
+          57,
+          56
+        ]
+      },
+      {
+        "name": "Current",
+        "values": [
+          48,
+          45,
+          46,
+          42,
+          39,
+          40,
+          36,
+          35,
+          34,
+          30,
+          31,
+          28
+        ]
+      }
+    ]
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/graphs-medium.html"
+}

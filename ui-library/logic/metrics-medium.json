@@ -1,0 +1,17 @@
+{
+  "id": "metrics-medium",
+  "family": "metrics",
+  "familyLabel": "Metric groups",
+  "size": "medium",
+  "title": "Metric groups · medium",
+  "useWhen": "Compare a few related measurements with units and context.",
+  "avoidWhen": "The measurements use incompatible definitions.",
+  "data": {
+    "count": 3
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/metrics-medium.html"
+}

@@ -1,0 +1,64 @@
+{
+  "id": "benchmarks-large",
+  "family": "benchmarks",
+  "familyLabel": "Benchmarks",
+  "size": "large",
+  "title": "Benchmarks · large",
+  "useWhen": "Review several workloads with sample counts and a decision.",
+  "avoidWhen": "Only one number matters or the method is still undefined.",
+  "data": {
+    "title": "Benchmark review",
+    "unit": "ms",
+    "n": 5000,
+    "rows": [
+      [
+        "Read · baseline",
+        66,
+        0
+      ],
+      [
+        "Read · current",
+        41,
+        1
+      ],
+      [
+        "Write · baseline",
+        84,
+        0
+      ],
+      [
+        "Write · current",
+        67,
+        1
+      ],
+      [
+        "Search · baseline",
+        188,
+        0
+      ],
+      [
+        "Search · current",
+        102,
+        1
+      ],
+      [
+        "Export · baseline",
+        312,
+        0
+      ],
+      [
+        "Export · current",
+        248,
+        1
+      ]
+    ],
+    "baseline": 188,
+    "current": 102,
+    "method": "Same input, warm cache, identical runner. Each sample excludes setup time."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/benchmarks-large.html"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "pr-actions-small",
+  "family": "pr-actions",
+  "familyLabel": "PR action tables",
+  "size": "small",
+  "title": "PR action tables · small",
+  "useWhen": "Triage two or three PRs with one next action each.",
+  "avoidWhen": "The work belongs to one PR and can be described directly.",
+  "data": {
+    "count": 3,
+    "level": 0
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/pr-actions-small.html"
+}

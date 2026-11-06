@@ -1,0 +1,19 @@
+{
+  "id": "callouts-large",
+  "family": "callouts",
+  "familyLabel": "Callouts",
+  "size": "large",
+  "title": "Callouts · large",
+  "useWhen": "Show a blocking failure, its effect, and the recovery action.",
+  "avoidWhen": "The problem is minor or can be resolved without interrupting the reader.",
+  "data": {
+    "tone": "error",
+    "title": "The release check failed",
+    "body": "The affected flow is not verified. Fix the failed check before claiming completion."
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/callouts-large.html"
+}

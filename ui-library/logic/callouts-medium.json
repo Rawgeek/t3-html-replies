@@ -1,0 +1,19 @@
+{
+  "id": "callouts-medium",
+  "family": "callouts",
+  "familyLabel": "Callouts",
+  "size": "medium",
+  "title": "Callouts · medium",
+  "useWhen": "Explain a concrete caution that affects a decision.",
+  "avoidWhen": "The risk is hypothetical or has no practical action.",
+  "data": {
+    "tone": "waiting",
+    "title": "Sample counts differ",
+    "body": "Compare the same input before interpreting the runtime difference."
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/callouts-medium.html"
+}

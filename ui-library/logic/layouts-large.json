@@ -1,0 +1,17 @@
+{
+  "id": "layouts-large",
+  "family": "layouts",
+  "familyLabel": "Column layouts",
+  "size": "large",
+  "title": "4 column arrangement",
+  "useWhen": "Scan four brief peers in a dense 1024px overview.",
+  "avoidWhen": "The cells contain paragraphs or need more than a few metrics.",
+  "data": {
+    "count": 4
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/layouts-large.html"
+}

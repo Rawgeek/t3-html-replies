@@ -1,0 +1,21 @@
+{
+  "id": "status-running",
+  "family": "status-panels",
+  "familyLabel": "Status panels",
+  "size": "medium",
+  "title": "Running",
+  "sample": true,
+  "useWhen": "Show an active task with a real next action and a supported estimate.",
+  "avoidWhen": "No work is running or the percentage has no milestone basis.",
+  "data": {
+    "state": "working",
+    "progress": "62% estimate",
+    "next": "Run the full checks",
+    "eta": "15-25 min estimate",
+    "wake": "Not armed"
+  },
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/status-running.html"
+}

@@ -1,0 +1,39 @@
+{
+  "id": "tables-small",
+  "family": "tables",
+  "familyLabel": "Tables",
+  "size": "small",
+  "title": "Tables · small",
+  "useWhen": "Show a few named items and one or two facts.",
+  "avoidWhen": "A sentence is clearer or more than three columns are needed.",
+  "data": {
+    "headers": [
+      "Service",
+      "State",
+      "Availability"
+    ],
+    "rows": [
+      [
+        "Portal",
+        "Healthy",
+        "99.98%"
+      ],
+      [
+        "Rates",
+        "Healthy",
+        "99.95%"
+      ],
+      [
+        "Shipping",
+        "Review",
+        "99.91%"
+      ]
+    ],
+    "filter": false
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/tables-small.html"
+}

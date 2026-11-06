@@ -1,0 +1,18 @@
+{
+  "id": "progress-small",
+  "family": "progress",
+  "familyLabel": "Progress bars",
+  "size": "small",
+  "title": "Progress bars · small",
+  "useWhen": "Show one measured completion value beside the current action.",
+  "avoidWhen": "The percentage is invented or elapsed time is the only evidence.",
+  "data": {
+    "level": 0,
+    "value": 45
+  },
+  "sample": true,
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/progress-small.html"
+}

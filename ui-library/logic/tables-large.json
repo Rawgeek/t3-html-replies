@@ -1,0 +1,107 @@
+{
+  "id": "tables-large",
+  "family": "tables",
+  "familyLabel": "Tables",
+  "size": "large",
+  "title": "Tables · large",
+  "useWhen": "Inspect a dense inventory with sorting and local filtering.",
+  "avoidWhen": "Phone readers only need the main finding, not the full dataset.",
+  "data": {
+    "headers": [
+      "Service",
+      "State",
+      "Availability",
+      "p95",
+      "Owner",
+      "Action"
+    ],
+    "rows": [
+      [
+        "Portal",
+        "Healthy",
+        "99.98%",
+        "32 ms",
+        "Morgan",
+        "Checked"
+      ],
+      [
+        "Rates",
+        "Healthy",
+        "99.95%",
+        "46 ms",
+        "Riley",
+        "Checked"
+      ],
+      [
+        "Shipping",
+        "Review",
+        "99.91%",
+        "71 ms",
+        "Sam",
+        "Review"
+      ],
+      [
+        "Search",
+        "Healthy",
+        "99.97%",
+        "38 ms",
+        "Alex",
+        "Checked"
+      ],
+      [
+        "Exports",
+        "Waiting",
+        "99.89%",
+        "184 ms",
+        "Taylor",
+        "Queue"
+      ],
+      [
+        "Billing",
+        "Healthy",
+        "99.99%",
+        "29 ms",
+        "Jamie",
+        "Checked"
+      ],
+      [
+        "Labels",
+        "Healthy",
+        "99.96%",
+        "54 ms",
+        "Casey",
+        "Checked"
+      ],
+      [
+        "Support",
+        "Review",
+        "99.93%",
+        "61 ms",
+        "Jordan",
+        "Review"
+      ],
+      [
+        "Inventory",
+        "Healthy",
+        "99.98%",
+        "42 ms",
+        "Robin",
+        "Checked"
+      ],
+      [
+        "Returns",
+        "Waiting",
+        "99.92%",
+        "78 ms",
+        "Drew",
+        "Queue"
+      ]
+    ],
+    "filter": true
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/tables-large.html"
+}

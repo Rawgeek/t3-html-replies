@@ -1,0 +1,18 @@
+{
+  "id": "slack-medium",
+  "family": "slack",
+  "familyLabel": "Slack messages",
+  "size": "medium",
+  "title": "Slack messages · medium",
+  "useWhen": "Share a result plus a brief explanation and one next action.",
+  "avoidWhen": "A one-line confirmation would do.",
+  "data": {
+    "level": 1,
+    "text": "The build fix is ready for review.\n\nPeak memory is 1.1 GB on the sample workload, down from 1.8 GB. The same tests still run.\n\nNext: Morgan will review the change."
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/slack-medium.html"
+}

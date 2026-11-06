@@ -1,0 +1,24 @@
+{
+  "title": "Checks pass",
+  "state": "waiting",
+  "summary": "Sample reply. Review and full CI remain.",
+  "progress": "78% estimate",
+  "next": "Finish the review",
+  "eta": "Unknown",
+  "wake": "PR watch 10m",
+  "sections": [
+    {
+      "title": "Open gates",
+      "type": "list",
+      "items": ["Review verdict", "Full CI"]
+    },
+    {
+      "title": "Evidence",
+      "type": "timeline",
+      "items": [
+        {"label": "Focused checks", "note": "Passed", "time": "09:18", "state": "done"},
+        {"label": "Review", "note": "Pending", "time": "Now", "state": "waiting"}
+      ]
+    }
+  ]
+}

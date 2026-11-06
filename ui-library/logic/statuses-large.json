@@ -1,0 +1,17 @@
+{
+  "id": "statuses-large",
+  "family": "statuses",
+  "familyLabel": "Status labels",
+  "size": "large",
+  "title": "Status labels · large",
+  "useWhen": "Separate verified, pending, and blocked evidence in a handoff.",
+  "avoidWhen": "The labels substitute for proof or imply that a check actually ran.",
+  "data": {
+    "level": 2
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/statuses-large.html"
+}

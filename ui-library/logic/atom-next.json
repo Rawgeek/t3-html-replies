@@ -1,0 +1,20 @@
+{
+  "id": "atom-next",
+  "family": "status-atoms",
+  "familyLabel": "Status atoms",
+  "size": "small",
+  "title": "Next",
+  "sample": true,
+  "useWhen": "Keep one immediate action visible in a dense grid.",
+  "avoidWhen": "The action needs an owner or explanation that will not fit.",
+  "data": {
+    "field": "next",
+    "label": "Next",
+    "value": "Review",
+    "icon": "arrow-right"
+  },
+  "height": "slim",
+  "heightUseWhen": "One compact metric, status, or action row.",
+  "heightAvoidWhen": "A heading, list, graph, or several controls need room.",
+  "sourceFile": "snippets/atom-next.html"
+}

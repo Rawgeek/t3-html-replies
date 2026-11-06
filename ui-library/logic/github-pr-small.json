@@ -1,0 +1,19 @@
+{
+  "id": "github-pr-small",
+  "family": "github-pr",
+  "familyLabel": "GitHub PRs",
+  "size": "small",
+  "title": "GitHub PRs · small",
+  "useWhen": "Describe a small change and the checks that cover it.",
+  "avoidWhen": "The behavior change or rollout needs context.",
+  "data": {
+    "level": 0,
+    "title": "Reduce the test runner memory peak",
+    "text": "The runner processes bounded batches so the test job stays below its memory limit.\n\nValidation: the focused suite passes."
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/github-pr-small.html"
+}

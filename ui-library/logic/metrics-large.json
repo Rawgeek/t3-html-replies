@@ -1,0 +1,17 @@
+{
+  "id": "metrics-large",
+  "family": "metrics",
+  "familyLabel": "Metric groups",
+  "size": "large",
+  "title": "Metric groups · large",
+  "useWhen": "Scan several stable operational metrics with concise context.",
+  "avoidWhen": "The metric collection adds noise or needs trend analysis.",
+  "data": {
+    "count": 4
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/metrics-large.html"
+}

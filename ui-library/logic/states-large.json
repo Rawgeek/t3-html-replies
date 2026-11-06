@@ -1,0 +1,17 @@
+{
+  "id": "states-large",
+  "family": "states",
+  "familyLabel": "Empty, loading, and error states",
+  "size": "large",
+  "title": "Error state",
+  "useWhen": "Explain an actual failure and provide a bounded local retry.",
+  "avoidWhen": "The issue is a valid empty state or retries cannot help.",
+  "data": {
+    "kind": "error"
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/states-large.html"
+}

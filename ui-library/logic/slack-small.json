@@ -1,0 +1,18 @@
+{
+  "id": "slack-small",
+  "family": "slack",
+  "familyLabel": "Slack messages",
+  "size": "small",
+  "title": "Slack messages · small",
+  "useWhen": "Send a short factual update with one result or request.",
+  "avoidWhen": "The message needs caveats, evidence, or several actions.",
+  "data": {
+    "level": 0,
+    "text": "The build fix is ready for review. The focused checks pass."
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/slack-small.html"
+}

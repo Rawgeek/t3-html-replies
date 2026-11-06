@@ -1,0 +1,34 @@
+{
+  "id": "benchmarks-small",
+  "family": "benchmarks",
+  "familyLabel": "Benchmarks",
+  "size": "small",
+  "title": "Benchmarks · small",
+  "useWhen": "Compare one measured change with a known baseline.",
+  "avoidWhen": "Several workloads or uncertain measurements need explanation.",
+  "data": {
+    "title": "Build duration",
+    "unit": "s",
+    "n": 30,
+    "rows": [
+      [
+        "Baseline",
+        148,
+        0
+      ],
+      [
+        "Current",
+        92,
+        1
+      ]
+    ],
+    "baseline": 148,
+    "current": 92,
+    "method": "Same input, warm cache, identical runner. Each sample excludes setup time."
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/benchmarks-small.html"
+}

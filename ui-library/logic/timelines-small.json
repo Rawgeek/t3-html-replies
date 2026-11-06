@@ -1,0 +1,18 @@
+{
+  "id": "timelines-small",
+  "family": "timelines",
+  "familyLabel": "Timelines",
+  "size": "small",
+  "title": "Timelines · small",
+  "useWhen": "Show a short completed sequence and its current point.",
+  "avoidWhen": "Order or time does not help explain the result.",
+  "data": {
+    "level": 0,
+    "count": 3
+  },
+  "sample": true,
+  "height": "medium",
+  "heightUseWhen": "A small chart, short table, or related measurements.",
+  "heightAvoidWhen": "A full report or many rows would need continuous scrolling.",
+  "sourceFile": "snippets/timelines-small.html"
+}

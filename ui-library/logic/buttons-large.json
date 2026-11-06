@@ -1,0 +1,17 @@
+{
+  "id": "buttons-large",
+  "family": "buttons",
+  "familyLabel": "Button groups",
+  "size": "large",
+  "title": "4 action buttons",
+  "useWhen": "Expose four familiar, distinct actions for a dense work item.",
+  "avoidWhen": "A menu or a simpler two-action choice would reduce effort.",
+  "data": {
+    "count": 4
+  },
+  "sample": true,
+  "height": "small",
+  "heightUseWhen": "A brief result, a small checklist, or a few actions.",
+  "heightAvoidWhen": "The content needs several sections or a detailed chart.",
+  "sourceFile": "snippets/buttons-large.html"
+}

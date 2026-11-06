@@ -1,0 +1,26 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { catalog, families } from './catalog.mjs';
+import { renderExample } from './components.mjs';
+import { loadAssets } from './assets.mjs';
+import { exampleDocument } from './document.mjs';
+import { renderShell } from './shell.mjs';
+import { renderReply } from './render-reply.mjs';
+import { renderElementIndex } from './element-index.mjs';
+const root=dirname(fileURLToPath(import.meta.url));
+for(const name of ['reply','complete'])await writeFile(join(root,`${name}-template.html`),await renderReply(JSON.parse(await readFile(join(root,`${name}-example.json`),'utf8'))));
+const {css,runtime}=await loadAssets();
+const gallery=await readFile(join(root,'gallery.js'),'utf8');
+const records=catalog.map(item=>({...item,html:renderExample(item),sourceFile:`snippets/${item.id}.html`}));
+await mkdir(join(root,'snippets'),{recursive:true});
+await mkdir(join(root,'logic'),{recursive:true});
+const document=(body,script)=>`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body>${body}<script>${runtime}\n${script}</script></body></html>`;
+for(const item of records)await writeFile(join(root,item.sourceFile),exampleDocument(item,{css,runtime}));
+for(const item of records){const {html,...logic}=item;await writeFile(join(root,'logic',item.id+'.json'),JSON.stringify({...logic,sourceFile:item.sourceFile},null,2)+'\n');}
+const body=renderShell(records,families);
+const index=document(body,gallery);
+await writeFile(join(root,'index.html'),index);
+await writeFile(join(root,'ELEMENT_INDEX.md'),renderElementIndex(records));
+await writeFile(join(root,'README.md'),"# Reply library\n\nStart with [the guide](AGENT_GUIDE.md) and [the element index](ELEMENT_INDEX.md).\n\n- [Gallery](index.html): 60 visual examples.\n- Index: tree by group, family, demo, and logic.\n- CLI: node ui.mjs list, show, render, or reply.\n\nGenerated files are outputs. Demo data is illustrative. Rebuild with node build.mjs; check with node verify.mjs.\n");
+console.log(JSON.stringify({examples:records.length,families:families.length,galleryBytes:Buffer.byteLength(index),snippets:records.length,root}));

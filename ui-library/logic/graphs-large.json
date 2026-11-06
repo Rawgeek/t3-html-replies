@@ -1,0 +1,74 @@
+{
+  "id": "graphs-large",
+  "family": "graphs",
+  "familyLabel": "Graphs",
+  "size": "large",
+  "title": "Graphs · large",
+  "useWhen": "Inspect several series with range controls and point details.",
+  "avoidWhen": "A static value or a simple comparison answers the question.",
+  "data": {
+    "title": "Latency by workload",
+    "unit": "ms",
+    "spark": false,
+    "detailed": true,
+    "height": 250,
+    "series": [
+      {
+        "name": "Baseline",
+        "values": [
+          66,
+          65,
+          63,
+          67,
+          62,
+          61,
+          59,
+          60,
+          58,
+          60,
+          57,
+          56
+        ]
+      },
+      {
+        "name": "Current",
+        "values": [
+          48,
+          45,
+          46,
+          42,
+          39,
+          40,
+          36,
+          35,
+          34,
+          30,
+          31,
+          28
+        ]
+      },
+      {
+        "name": "Write",
+        "values": [
+          62,
+          62,
+          66,
+          56,
+          56,
+          60,
+          50,
+          52,
+          54,
+          44,
+          48,
+          48
+        ]
+      }
+    ]
+  },
+  "sample": true,
+  "height": "tall",
+  "heightUseWhen": "A detailed graph, status panel, table, or bounded report.",
+  "heightAvoidWhen": "A smaller preset fits the information without overflow.",
+  "sourceFile": "snippets/graphs-large.html"
+}
