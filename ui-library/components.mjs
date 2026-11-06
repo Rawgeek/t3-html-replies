@@ -71,16 +71,20 @@ export function progressBoard({progress='Unknown',eta='Unknown',state='working',
   const value=percentValue(progress,'Progress');
   const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
   const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
+  const estimate=/est(?:imate)?\.?\s*$/i.test(String(progress).trim());
   const shortEta=/unknown/i.test(eta)?'Unknown':/complete/i.test(eta)?'Done':String(eta).replace(/ estimate/i,'');
   const track=`<div class="status-meter" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" ${value===null?'aria-valuetext="Unknown"':`aria-valuenow="${value}"`}><span style="--value:${value||0}%"></span></div>`;
   const normalize=value=>String(value).trim().toLowerCase();
-  const stageMatches=(stage,label)=>{
-    const text=normalize(stage),gate=normalize(label);
-    return text===gate||text===gate+'s'||text+'s'===gate||text.startsWith(gate+' ')||text.endsWith(' '+gate)||text.includes(' '+gate+' ');
+  const tokenMatches=(text,gate)=>text!==gate&&(text===gate+'s'||text+'s'===gate||text.startsWith(gate+' ')||text.endsWith(' '+gate)||text.includes(' '+gate+' '));
+  const stageFor=label=>{
+    const gate=normalize(label);
+    const exact=stages.find(item=>normalize(item.label)===gate);
+    if(exact)return exact;
+    const matches=stages.filter(item=>tokenMatches(normalize(item.label),gate));
+    return matches.length===1?matches[0]:null;
   };
   const gateState=label=>{
-    if(done)return 'done';
-    const stage=stages.find(item=>stageMatches(item.label,label));
+    const stage=stageFor(label);
     if(!stage)return 'pending';
     return stage.state==='done'?'done':stage.state==='waiting'?'active':'pending';
   };
@@ -88,7 +92,7 @@ export function progressBoard({progress='Unknown',eta='Unknown',state='working',
     const step=gateState(label);
     return `<span class="${step}">${e(label)}</span>`;
   }).join('')}</div>`:'';
-  return `<section class="status-board" data-slot="progress" data-state="${e(state)}"><dl class="status-tiles" aria-label="Progress"><div class="status-tile" data-field="progress" data-tone="${tone}"><dt>${icon(done?'check':blocked?'circle-x':'activity')}<span>Progress</span><em class="status-eta">${e(shortEta)}</em></dt><dd>${value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':'')}</dd>${track}${gates}</div></dl></section>`;
+  return `<section class="status-board" data-slot="progress" data-state="${e(state)}"><dl class="status-tiles" aria-label="Progress"><div class="status-tile" data-field="progress" data-tone="${tone}"><dt>${icon(done?'check':blocked?'circle-x':'activity')}<span>Progress</span><em class="status-eta">${e(shortEta)}</em></dt><dd>${value===null?'Unknown':value+'%'+(estimate?' est.':'')}</dd>${track}${gates}</div></dl></section>`;
 }
 export function metric(value,label,note='') {
   return `<div class="metric"><p class="metric-label">${e(label)}</p><p class="metric-value">${e(value)}</p>${note?`<p class="metric-note">${e(note)}</p>`:''}</div>`;

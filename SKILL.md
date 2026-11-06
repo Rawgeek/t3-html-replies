@@ -41,7 +41,7 @@ Read `AGENT_GUIDE.md` from the same UI directory for the exact schema and limits
 
 ## Stages and changes
 
-- Stages: five or six steps. Each needs a real 24-hour `HH:MM` time. Done steps come first, then one current waiting step, then pending steps. The current step alone carries progress. Do not repeat the overall percentage in the rail.
+- Stages: five or six steps. Each needs a real 24-hour `HH:MM` time. Done steps come first, then pending steps. An unfinished reply keeps exactly one waiting current step; a complete reply has none. Only the current step carries progress. Do not repeat the overall percentage in the rail.
 - Done and To do: separate tall blocks below Progress. Each item requires a short title (18) and description (22). An unfinished reply needs both lists; a complete reply has only Done and no pending work anywhere.
 - Milestones: two to four labels. Only an exact or token match with the current stage advances them. Unmatched labels stay pending rather than appearing passed from a percentage threshold.
 

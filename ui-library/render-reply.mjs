@@ -179,7 +179,7 @@ function validateSection(section,index){
     };
     const done=lists(section.done,'done');
     const todo=lists(section.todo,'todo');
-    if(done.length+todo.length<2)fail(`${name} needs at least two changes across done and todo.`);
+    if(done.length+todo.length<1)fail(`${name} needs at least one change item.`);
     result={type,title,done,todo};
   }else if(type==='cards'){
     assertKeys(section,['title','type','items'],name);
@@ -446,6 +446,13 @@ function renderQuestion(data,css){
 export function assertRenderedReply(html){
   const text=String(html);
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
+  const inlineHidden=/<[^>]+\sstyle="[^"]*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?(?:\s*!important)?(?:\s*[;"]|$)|font-size\s*:\s*0(?:px)?(?:\s*!important)?(?:\s*[;"]|$)|height\s*:\s*0(?:px)?(?:\s*!important)?(?:\s*[;"]|$))/i;
+  if(inlineHidden.test(text))fail('Not a reply page: inline CSS hides required content. Remove the hiding style.');
+  const styleBlock=[...text.matchAll(/<style>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
+  const requiredSelector=/(?:\bmain\b|\.bento\b|\.reply-body\b|\.reply-text\b|\.reply-head\b|\.reply-meta\b|\.reply-section-tile\b|\.reply-results\b|\.reply-cards\b|\.reply-card\b|\.tile-body\b|\.status-board\b|\.status-tile\b|\.status-gates\b|\.swimlane\b|\.change-list\b|\.change-col\b|\.changes\b|\.metric\b|\.ask\b|\.ask-question\b|\.ask-option\b|\bh1\b)/i;
+  const hiddenRule=/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?\s*(?:!important)?\s*(?:;|$)|font-size\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i;
+  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selector,body])=>requiredSelector.test(selector)&&!selector.includes('::')&&hiddenRule.test(';'+body));
+  if(hidesRequired)fail('Not a reply page: CSS hides required reply content.');
   if(/<main class="t3lib reply question"/.test(text)){
     if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a question page: the title is empty.');
     if(!/<p class="reply-text">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the context is missing.');
@@ -460,13 +467,13 @@ export function assertRenderedReply(html){
   if(!stateMatch)fail('Not a reply page: the state is missing or invalid.');
   const state=stateMatch[1];
   if(/<[^>]+\shidden(?:\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
-  const styleBlock=[...text.matchAll(/<style>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
-  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selector,body])=>/(?:\bmain\b|\.bento\b|\.reply-section-tile\b|\.status-board\b|\.reply-results\b|\.swimlane\b)/i.test(selector)&&!selector.includes('::')&&/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i.test(';'+body));
-  if(hidesRequired)fail('Not a reply page: CSS hides required reply content.');
   if(!/<section class="status-board" data-slot="progress"/.test(text))fail('Not a reply page: the progress board is missing. Render reply JSON instead of writing HTML.');
   if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
   const progress=text.match(/<div class="status-tile" data-field="progress"[\s\S]*?<\/div>/);
   if(!progress||!/<dd>[^<]*\d+(?:\.\d+)?%\s*(?:est\.)?<\/dd>/.test(progress[0])||!/aria-valuenow="\d+(?:\.\d+)?"/.test(progress[0]))fail('Not a reply page: the Progress tile needs a percentage and meter.');
+  const progressValue=Number((progress[0].match(/<dd>(\d+(?:\.\d+)?)%(?:\s+est\.)?<\/dd>/)||[])[1]);
+  if(state==='complete'&&progressValue!==100)fail('A complete reply must show 100% progress.');
+  if(state!=='complete'&&progressValue>=100)fail('An unfinished reply cannot show 100% progress. Keep 100% for verified completion.');
   if(!/<section class="bento"/.test(text))fail('Not a reply page: the bento grid is missing.');
   const markup=text.replace(/<style>[\s\S]*?<\/style>/i,'');
   const resultStart=markup.indexOf('<section class="tile-grid reply-results"');
@@ -483,10 +490,14 @@ export function assertRenderedReply(html){
   if(state==='complete'&&/<li class="(?:waiting|pending)">/.test(rail[0]))fail('A complete reply cannot contain waiting or pending swimlane steps.');
   const changeLists=[...text.matchAll(/<ul class="change-list">([\s\S]*?)<\/ul>/g)];
   if(!changeLists.length||!changeLists.some(list=>/<li>[\s\S]*?<b>[^<]*\S[^<]*<\/b>/.test(list[1])))fail('Not a reply page: the changes block is empty. Render reply JSON instead of writing HTML.');
+  const changeItems=changeLists.flatMap(([,list])=>[...list.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match=>match[1]));
+  if(changeItems.some(item=>!/<b>[^<]*\S[^<]*<\/b>/.test(item)||!/<small>[^<]*\S[^<]*<\/small>/.test(item)))fail('Every change needs a title and a description. Add the missing text or use another block.');
   const hasDone=/data-change="done"/.test(markup);
   const hasTodo=/data-change="todo"/.test(markup);
   if(state==='complete'&&hasTodo)fail('A complete reply cannot contain a To do block.');
   if(state!=='complete'&&(!hasDone||!hasTodo))fail('An unfinished reply needs separate Done and To do blocks.');
+  const cards=[...markup.matchAll(/<article class="reply-card">([\s\S]*?)<\/article>/g)].map(match=>match[1]);
+  if(state==='complete'&&cards.some(card=>/data-tone="(?:waiting|active|error)"/.test(card)))fail('A complete reply cannot keep open cards. Mark every card done or keep the reply unfinished.');
   const types=[...markup.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
   if(!types.includes('swimlane')||!types.includes('changes'))fail('Not a reply page: it needs a swimlane and a changes block.');
   if(!types.some(type=>!['swimlane','changes'].includes(type)))fail('Not a reply page: it needs one additional supporting block.');

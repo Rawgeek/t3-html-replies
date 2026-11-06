@@ -267,11 +267,13 @@ const inspect = async (url, width) => {
       });
       const resultClip = resultMetrics.filter((tile) => tile.scrollHeight > tile.clientHeight + 1 || tile.scrollWidth > tile.clientWidth + 1).length;
       const progress = document.querySelector('.bento > .status-board[data-slot="progress"]');
+      const progressTile = progress && progress.querySelector('.status-tile[data-field="progress"]');
+      const progressGap = progress && progressTile ? Math.round((progress.getBoundingClientRect().bottom - progressTile.getBoundingClientRect().bottom) * 100) / 100 : 0;
       const stage = document.querySelector('.bento > [data-section-type="swimlane"]');
       const orderOk = !progress || !stage || progress.getBoundingClientRect().top <= stage.getBoundingClientRect().top;
       const page = document.documentElement;
       const overflowX = page.scrollWidth > page.clientWidth + 1;
-      return JSON.stringify({ columns, clipped: clippedTiles.length, resultClip, resultMetrics, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, hidden, spilled, spilledNodes, holes, sectionHeights, sectionMeta, orderOk, overflowX });
+      return JSON.stringify({ columns, clipped: clippedTiles.length, resultClip, resultMetrics, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, hidden, spilled, spilledNodes, holes, sectionHeights, sectionMeta, progressGap, orderOk, overflowX });
     })()`
   });
   ws.close();
@@ -299,6 +301,7 @@ try {
       if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes (' + report.spilledNodes.slice(0, 3).join(' | ') + ')');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
       if (!report.orderOk) failures.push(name + '@' + width + ': Progress does not lead the layout');
+      if (width > 900 && report.progressGap > 1) failures.push(name + '@' + width + ': the Progress tile leaves ' + report.progressGap + 'px of its row unpainted');
       if (width > 900) {
         const minimum = { slim: 88, small: 184, tall: 376 };
         const short = report.sectionMeta.filter((tile) => tile.pixels + 1 < minimum[tile.height]);

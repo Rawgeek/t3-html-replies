@@ -61,7 +61,7 @@ The type may be inferred from the object shape. Prefer an explicit type.
 
 ## Timeline
 
-Use five or six stages. Every stage carries a real clock time. Done steps must come first, followed by one current waiting step, then pending steps. The renderer derives a completed step's duration from the previous clock time; it does not print duration for pending work.
+Use five or six stages. Every stage carries a real clock time. Done steps come first, then pending steps. An unfinished reply keeps exactly one waiting current step; a complete reply has none. The renderer derives a completed step's duration from the previous clock time; it does not print duration for pending work.
 
 The current step may show its own progress. When it equals overall progress, the renderer keeps the meter and omits the repeated number. Milestone labels follow an exact or token match with the current stage. An unmatched label stays pending; percentage alone never marks a gate done.
 
