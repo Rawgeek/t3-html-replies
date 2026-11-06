@@ -61,9 +61,9 @@ The renderer rejects replies above 1200 visible characters.
 
 The page is always a four column grid at 1024px: the swimlane fills one column and three flow columns hold the supporting blocks. The renderer decides each block span and the flow never leaves a cell empty. Every section is a fixed 184px tile, and the renderer rejects a size or span field.
 
-The flow fills every cell: two blocks stack full width, three use spans of 2, 1, and 3, and four use three single cells plus one full row. Up to seven blocks each get a span that fills the row. Leave the arrangement to the renderer.
+The flow fills every cell: two blocks stack full width, three use spans of 2, 1, and 3, and four use three single cells plus one full row. Up to seven blocks each get a span that fills the row. Below 900px the flow drops to two columns and pairs the last odd block across both. Below 620px it uses one column. Leave the arrangement to the renderer.
 
-Every block stays fully visible. Notes wrap inside cards; no block hides content to fit.
+Every block stays fully visible. Notes wrap inside cards; no block hides content to fit. Content keeps its natural height and centers inside the fixed tile, so padding stays even instead of stretching rows apart.
 
 The type is optional. When it is missing the renderer picks the block from the shape: done and todo lists become changes, columns and rows become a table, before and after become compare, label and value become facts, five or more timed steps become a swimlane, fewer state items become cards, and plain strings become a list.
 

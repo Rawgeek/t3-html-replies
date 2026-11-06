@@ -8,7 +8,7 @@ The renderer turns short JSON into one self-contained HTML page. Replies use a d
 
 ## What it does
 
-- Four-column grid at 1024px: one rail and three flow columns. Blocks stack on tablets and phones.
+- Four-column grid at 1024px: one rail and three flow columns. Two flow columns on tablets, one on phones.
 - Results and status use 88px tiles. Reply sections share 184px; the swimlane is a tall side rail at least 376px high.
 - 8 sections max, 3 items per block, 1,200 visible characters.
 - Every reply carries a swimlane of five to seven steps, a done and to do changes block, and two to four progress milestones.
