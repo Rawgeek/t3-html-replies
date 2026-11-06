@@ -12,7 +12,7 @@ Apply this skill to every message shown to the user in a T3 main session, includ
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
 - Use a dense 1024px grid with 3 or 4 columns and 8px gaps. Stack on phones.
-- Results and status use the Slim height. Reply sections share 184px. The swimlane alone is a full-width Tall band. The renderer assigns every height, so rows always align.
+- Results and status use the Slim height. Reply sections share 184px. The swimlane is a tall side column. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
 - Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.
 - Give every interactive control a real transport. A button either sends through the T3 HTML reply app or is a link. Never draw a control that only looks interactive.
@@ -39,8 +39,11 @@ Every reply ships three required elements. The renderer rejects a reply without 
 - The swimlane is a timeline of five or six steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step carries its own progress number.
 - The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
 - Two to four milestones label the segments of the progress bar.
+- At least two supporting blocks sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
 
 This gives every reply a visible past, present, and future. Do not replace the swimlane with prose.
+
+The grid never leaves a hole. Supporting blocks fill two columns beside the swimlane, and an odd count makes the last block span both. Never pad a reply with filler to fill space.
 
 ## Validation
 

@@ -20,8 +20,11 @@ Every reply carries three things. The renderer rejects a reply that leaves one o
 1. A swimlane. Five or six steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%.
 2. A changes block. What is done and what is still to do. A finished reply ships with no waiting step and may leave the to do list empty.
 3. Two to four milestones. They label the segments of the progress bar in the status strip.
+4. At least two supporting blocks beside the swimlane. The renderer rejects a reply that would leave an empty cell in the grid.
 
 The swimlane shows history, the current step, and future steps. The changes block shows the delivered and remaining work.
+
+The swimlane sits in a tall left column. Supporting blocks fill two columns beside it, and an odd count makes the last block span both. The grid never leaves a hole, so do not pad a reply with filler blocks.
 
 ## Reply JSON
 

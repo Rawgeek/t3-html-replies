@@ -315,7 +315,10 @@ export async function renderReply(data){
       ?`<button class="${className}" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
       :`<a class="${className}" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`;
   }).join('');
-  const sectionsHtml=sections.length?`<section class="tile-grid reply-sections" data-layout="${sections.some(section=>section.type==='swimlane')?'side':'flow'}" aria-label="Supporting blocks">${sections.map(renderSection).join('')}</section>`:'';
+  const swimlaneSection=sections.find(section=>section.type==='swimlane');
+  const supporting=sections.filter(section=>section!==swimlaneSection);
+  if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection)}<div class="reply-flow">${supporting.map(renderSection).join('')}</div></section>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
