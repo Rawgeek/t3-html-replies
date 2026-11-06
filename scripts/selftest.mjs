@@ -54,21 +54,20 @@ try {
 
   const called = await rpc('tools/call', {
     name: 'render_reply',
-    arguments: { html: '<!doctype html><html><body>Self test</body></html>' }
+    arguments: { html: '<!doctype html><html><body><main class="t3lib reply">Self test</main></body></html>' }
   });
   if (called.structuredContent?.html?.includes('Self test') !== true) {
     throw Error('render_reply did not return its HTML payload.');
   }
 
-  const appPath = resolve(here, '../assets/mcp-app.html');
-  const fromPath = await rpc('tools/call', {
-    name: 'render_reply',
-    arguments: { htmlPath: appPath }
-  });
-  if (!fromPath.structuredContent?.html?.includes('data-t3-send')) {
-    throw Error('htmlPath rendering failed.');
-  }
-
+  const { writeFile, mkdtemp } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dir = await mkdtemp(join(tmpdir(), 't3-reply-'));
+  const replyPath = join(dir, 'reply.html');
+  await writeFile(replyPath, '<!doctype html><html><body><main class="t3lib reply">Path check</main></body></html>');
+  const fromPath = await rpc('tools/call', { name: 'render_reply', arguments: { htmlPath: replyPath } });
+  if (!fromPath.structuredContent?.html?.includes('Path check')) throw Error('htmlPath rendering failed.');
   const resource = await rpc('resources/read', {
     uri: 'ui://t3-html-replies/reply.html'
   });
