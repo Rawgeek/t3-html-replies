@@ -43,7 +43,7 @@ Every reply ships three required elements. The renderer rejects a reply without 
 
 This gives every reply a visible past, present, and future. Do not replace the swimlane with prose.
 
-The grid never leaves a hole. Supporting blocks fill two columns beside the swimlane, and an odd count makes the last block span both. Never pad a reply with filler to fill space.
+The grid never leaves a hole. Supporting blocks fill the three flow columns beside the swimlane and the renderer picks their spans. Never pad a reply with filler to fill space.
 
 ## Validation
 

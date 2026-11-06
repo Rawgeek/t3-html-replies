@@ -5,7 +5,7 @@ Start with [ELEMENT_INDEX.md](ELEMENT_INDEX.md), then open the closest sample.
 ## Reply contract
 
 - Every T3 main-session message is one self-contained HTML page. Never append Markdown or plain text.
-- Use a dense grid: 3 columns at 1024px, 2 below 620px, 1 on phones. Use 8px gaps.
+- Use a fixed four column grid at 1024px: one swimlane column and three flow columns. Stack on phones. Use 8px gaps.
 - Results and status use the Slim height (88px). Every reply section uses one shared Small height (184px). The swimlane is the one exception: it is a full-width Tall band (376px) so five or six steps stay readable.
 - The renderer assigns every height; the JSON has no per-section size.
 - Never use expandable text, disclosures, accordions, dropdowns, or hidden content.
@@ -24,7 +24,7 @@ Every reply carries three things. The renderer rejects a reply that leaves one o
 
 The swimlane shows history, the current step, and future steps. The changes block shows the delivered and remaining work.
 
-The swimlane sits in a tall left column. Supporting blocks fill two columns beside it, and an odd count makes the last block span both. The grid never leaves a hole, so do not pad a reply with filler blocks.
+The swimlane sits in a tall left column. Supporting blocks fill the three flow columns beside it, and the renderer picks their spans so the flow never leaves a cell empty. Do not pad a reply with filler blocks.
 
 ## Reply JSON
 
@@ -51,7 +51,6 @@ Top-level fields:
 | wake | Up to 20 characters |
 | milestones | Required, 2 to 4 labels with 8 characters each. They label the progress segments. |
 | actions | Optional, 1 to 3 buttons. Label up to 14 characters. Exactly one HTTPS link or send message up to 400. |
-| columns | Optional 2 or 3. Defaults to 3. Use 2 when the blocks feel dense. |
 
 A result fact has a label of 14 characters, a value of 14, and an optional note of 24.
 

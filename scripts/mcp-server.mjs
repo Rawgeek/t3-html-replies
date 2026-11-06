@@ -25,8 +25,14 @@ function readString(args, key, max) {
 }
 
 function assertReplyShape(html) {
+  if (html.includes('<!--')) {
+    throw Error('The HTML contains comments. Render the reply with node ui.mjs reply instead.');
+  }
   if (!/<main class="t3lib reply"/.test(html)) {
     throw Error('The HTML is not a rendered reply. Use node ui.mjs reply to render it first.');
+  }
+  if (!/<section class="status-board"/.test(html)) {
+    throw Error('The HTML is missing the status board. Render the reply with node ui.mjs reply.');
   }
   if (/<details|<summary/i.test(html)) {
     throw Error('Expandable content is not allowed. Remove details and summary elements.');

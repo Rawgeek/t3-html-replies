@@ -22,6 +22,7 @@ const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
+const localZone=(()=>{try{const parts=new Intl.DateTimeFormat('en',{timeZoneName:'short'}).formatToParts(new Date());return parts.find(part=>part.type==='timeZoneName')?.value||'';}catch{return '';}})();
 const flowSpans={2:[3,3],3:[2,1,3],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
 const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
@@ -73,7 +74,7 @@ const visibleChars=value=>{
   if(typeof value==='string'||typeof value==='number')return String(value).length;
   if(Array.isArray(value))return value.reduce((sum,item)=>sum+visibleChars(item),0);
   if(value&&typeof value==='object')return Object.entries(value)
-    .filter(([key])=>!['href','icon','type','height','state','primary','send','detail'].includes(key))
+    .filter(([key])=>!['href','icon','type','height','state','primary','send','detail','beforeValue','afterValue'].includes(key))
     .reduce((sum,[,item])=>sum+visibleChars(item),0);
   return 0;
 };
@@ -90,8 +91,8 @@ function validateStatus(data,done){
 }
 
 const percentValue=(text,name)=>{
-  const match=String(text).match(/(-?\d+(?:\.\d+)?)\s*%/);
-  if(!match)return null;
+  const match=String(text).match(/^(\d+(?:\.\d+)?)\s*%/);
+  if(!match){if(/^unknown$/i.test(String(text).trim()))return null;fail(name+' must start with a number and a percent sign, such as 62% or 62% estimate.');}
   const value=Number(match[1]);
   if(!Number.isFinite(value)||value<0||value>100)fail(`${name} must be a percentage from 0 to 100, not ${value}.`);
   return value;
@@ -104,6 +105,7 @@ const measure=(text,name)=>{
   const match=String(text).replace(/,/g,'').match(/^(-?\d+(?:\.\d+)?)\s*([a-z%]+)?$/i);
   if(!match)fail(`${name} must be a number with an optional unit, like 92 s or 1.2k.`);
   const value=Number(match[1]),unit=(match[2]||'').toLowerCase();
+  if(value<0)fail(name+' must not be negative.');
   if(!unit)return {value,unit:'',family:''};
   const entry=UNITS[unit];
   if(!entry)fail(`${name} uses an unknown unit "${match[2]}". Use ms, s, min, h, KB, MB, GB, k, %, or no unit.`);
@@ -130,7 +132,7 @@ function validateActions(value){
     if(!/^[a-z0-9-]+$/.test(iconName))fail(`${name} icon must use a lowercase Lucide name.`);
     return {
       label,
-      ...(hasHref?{href:action.href}:{send}),
+      ...(hasHref?{href:new URL(action.href).href}:{send}),
       icon:iconName,
       primary:Boolean(action.primary)
     };
@@ -212,6 +214,7 @@ function validateSection(section,index){
       const before=field(item.before,`${itemName} before`,LIMITS.compareValue);
       const after=field(item.after,`${itemName} after`,LIMITS.compareValue);
       const b=measure(before,`${itemName} before`),a=measure(after,`${itemName} after`);
+      if((b.family==='')!==(a.family===''))fail(`${itemName} must use a unit on both sides or on neither.`);
       if(b.family&&a.family&&b.family!==a.family)fail(`${itemName} compares ${b.unit} with ${a.unit}. Use the same unit on both sides.`);
       return {
         label:field(item.label,`${itemName} label`,LIMITS.compareLabel),
@@ -282,6 +285,7 @@ function renderSection(section){
     }).join('')}</tr>`;
     }).join('')}</tbody></table></div>`;
   }else if(section.type==='swimlane'){
+    section.zoneLabel=section.items.some(item=>/^\d{1,2}:\d{2}$/.test(item.time||''))&&localZone?`Times ${localZone}`:'';
     body=`<ol class="swimlane">${section.items.map(item=>{
       const percent=item.progress?Number(String(item.progress).match(/\d+(?:\.\d+)?/)[0]):null;
       return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span><small>${e(item.progress)}</small></span>`:''}</li>`;
@@ -307,7 +311,7 @@ function renderSection(section){
     const max=Math.max(...section.items.map(item=>item.value),1);
     body=`<div class="reply-bars">${section.items.map(item=>`<div class="reply-bar"><div class="reply-bar-head"><span>${e(item.label)}</span><strong>${e(item.display)}</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:${item.value/max*100}%"></span></div>${item.note?`<p class="metric-note">${e(item.note)}</p>`:''}</div>`).join('')}</div>`;
   }
-  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
+  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}${section.zoneLabel?` <span class="section-zone">${e(section.zoneLabel)}</span>`:''}</h2><div class="reply-body">${body}</div></div></section>`;
 }
 
 export async function renderReply(data){
@@ -339,8 +343,9 @@ export async function renderReply(data){
   if(active&&!active.progress)fail('The current swimlane step needs its own progress, for example 62%.');
   if(done&&!changes[0].done.length)fail('A complete reply needs at least one done change.');
   if(!done&&!changes[0].todo.length)fail('A pending reply needs at least one to do change.');
-  if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Show follow-ups as done work or keep the reply unfinished.');
+  if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Remove the remaining items or keep the reply unfinished.');
   const status=validateStatus(data,done);
+  if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
   const milestones=data.milestones===undefined?[]:array(data.milestones,'Milestones',2,LIMITS.milestones).map((item,index)=>field(item,`Milestones ${index+1}`,LIMITS.milestoneLabel));
   if(!milestones.length)fail('Every reply needs 2 to 4 milestones so the progress bar can show its gates.');
   const actions=validateActions(data.actions);
