@@ -78,8 +78,9 @@ export function progressBoard({progress='Unknown',eta='Unknown',state='working',
   const tokenMatches=(text,gate)=>text!==gate&&(text===gate+'s'||text+'s'===gate||text.startsWith(gate+' ')||text.endsWith(' '+gate)||text.includes(' '+gate+' '));
   const stageFor=label=>{
     const gate=normalize(label);
-    const exact=stages.find(item=>normalize(item.label)===gate);
-    if(exact)return exact;
+    const exact=stages.filter(item=>normalize(item.label)===gate);
+    if(exact.length>1)return null;
+    if(exact.length===1)return exact[0];
     const matches=stages.filter(item=>tokenMatches(normalize(item.label),gate));
     return matches.length===1?matches[0]:null;
   };

@@ -64,7 +64,7 @@ Server: `scripts/mcp-server.mjs`. App: `assets/mcp-app.html`. Run `scripts/selft
 
 - No text outside the page.
 - The page came from `ui.mjs reply` or `render_reply`.
-- Stages have five or six clocked steps and one current step.
+- Stages have five or six clocked steps; unfinished replies keep one current step.
 - Done and To do are separate; completion has no remaining work.
 - Progress has ETA, milestones, and no duplicate percentage.
 - Results, title, summary, and actions fit without clipping or horizontal overflow.

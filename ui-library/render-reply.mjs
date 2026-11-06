@@ -235,6 +235,8 @@ function validateSection(section,index){
         progress
       };
     });
+    const stageLabels=items.map(item=>item.label.trim().toLowerCase());
+    if(new Set(stageLabels).size!==stageLabels.length)fail(`${name} needs distinct stage labels so each milestone matches one step.`);
     const order=items.map(item=>item.state).join('');
     if(!/^(?:done)*(?:waiting)?(?:pending)*$/.test(order))fail(`${name} "${title}" must list done steps first, then the current step, then pending steps.`);
     result={type,title,items};
@@ -446,13 +448,15 @@ function renderQuestion(data,css){
 export function assertRenderedReply(html){
   const text=String(html);
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
-  const inlineHidden=/<[^>]+\sstyle="[^"]*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?(?:\s*!important)?(?:\s*[;"]|$)|font-size\s*:\s*0(?:px)?(?:\s*!important)?(?:\s*[;"]|$)|height\s*:\s*0(?:px)?(?:\s*!important)?(?:\s*[;"]|$))/i;
-  if(inlineHidden.test(text))fail('Not a reply page: inline CSS hides required content. Remove the hiding style.');
-  const styleBlock=[...text.matchAll(/<style>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
-  const requiredSelector=/(?:\bmain\b|\.bento\b|\.reply-body\b|\.reply-text\b|\.reply-head\b|\.reply-meta\b|\.reply-section-tile\b|\.reply-results\b|\.reply-cards\b|\.reply-card\b|\.tile-body\b|\.status-board\b|\.status-tile\b|\.status-gates\b|\.swimlane\b|\.change-list\b|\.change-col\b|\.changes\b|\.metric\b|\.ask\b|\.ask-question\b|\.ask-option\b|\bh1\b)/i;
+  const inlineStyles=[...text.matchAll(/\sstyle=(?:"([^"]*)"|'([^']*)')/gi)].map(match=>match[1]??match[2]);
+  const hidesInline=/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*(?:0+(?:\.0*)?|\.0+)\s*(?:!important)?\s*(?:;|$)|font-size\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i;
+  if(inlineStyles.some(style=>hidesInline.test(style)))fail('Not a reply page: inline CSS hides required content. Remove the hiding style.');
+  const styleBlock=[...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
+  const requiredSelector=/(?:\bmain\b|\.bento\b|\.reply-body\b|\.reply-text\b|\.reply-head\b|\.reply-meta\b|\.reply-section-tile\b|\.reply-results\b|\.reply-cards\b|\.reply-card\b|\.tile-body\b|\.status-board\b|\.status-tile\b|\.status-gates\b|\.swimlane\b|\.change-list\b|\.change-copy\b|\.change-head\b|\.change-col\b|\.changes\b|\.metric\b|\.ask\b|\.ask-question\b|\.ask-option\b|\bh1\b)/i;
   const hiddenRule=/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?\s*(?:!important)?\s*(?:;|$)|font-size\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i;
-  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selector,body])=>requiredSelector.test(selector)&&!selector.includes('::')&&hiddenRule.test(';'+body));
+  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selectors,body])=>hiddenRule.test(';'+body)&&selectors.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!selector.includes('::')).some(selector=>requiredSelector.test(selector)));
   if(hidesRequired)fail('Not a reply page: CSS hides required reply content.');
+  if(/<[^>]+\shidden(?:\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
   if(/<main class="t3lib reply question"/.test(text)){
     if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a question page: the title is empty.');
     if(!/<p class="reply-text">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the context is missing.');
@@ -466,7 +470,6 @@ export function assertRenderedReply(html){
   const stateMatch=text.match(/<main class="t3lib reply" data-state="(complete|working|waiting|blocked)">/);
   if(!stateMatch)fail('Not a reply page: the state is missing or invalid.');
   const state=stateMatch[1];
-  if(/<[^>]+\shidden(?:\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
   if(!/<section class="status-board" data-slot="progress"/.test(text))fail('Not a reply page: the progress board is missing. Render reply JSON instead of writing HTML.');
   if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
   const progress=text.match(/<div class="status-tile" data-field="progress"[\s\S]*?<\/div>/);

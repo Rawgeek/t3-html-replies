@@ -107,12 +107,12 @@ const maximum = {
       title: 'Stages',
       type: 'swimlane',
       items: [
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '09:00', state: 'done' },
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '09:30', state: 'done' },
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '10:00', state: 'waiting', progress: '55%' },
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '10:30', state: 'pending' },
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '11:00', state: 'pending' },
-        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '11:30', state: 'pending' }
+        { label: 'W'.repeat(17) + '1', note: 'N'.repeat(20), time: '09:00', state: 'done' },
+        { label: 'W'.repeat(17) + '2', note: 'N'.repeat(20), time: '09:30', state: 'done' },
+        { label: 'W'.repeat(17) + '3', note: 'N'.repeat(20), time: '10:00', state: 'waiting', progress: '55%' },
+        { label: 'W'.repeat(17) + '4', note: 'N'.repeat(20), time: '10:30', state: 'pending' },
+        { label: 'W'.repeat(17) + '5', note: 'N'.repeat(20), time: '11:00', state: 'pending' },
+        { label: 'W'.repeat(17) + '6', note: 'N'.repeat(20), time: '11:30', state: 'pending' }
       ]
     },
     {
@@ -168,7 +168,7 @@ maxStages.sections[0] = {
   title: W(24),
   type: 'swimlane',
   items: Array.from({ length: 6 }, (_, index) => ({
-    label: W(18), note: W(20), time: '09:' + String(index * 10).padStart(2, '0'),
+    label: W(17) + String(index + 1), note: W(20), time: '09:' + String(index * 10).padStart(2, '0'),
     state: index < 3 ? 'done' : index === 3 ? 'waiting' : 'pending', ...(index === 3 ? { progress: '55%' } : {})
   }))
 };
@@ -179,9 +179,19 @@ boundary.maxResults = maxResults;
 const maxChanges = structuredClone(compactBase);
 maxChanges.sections[1] = { type: 'changes', title: W(24), done: Array.from({ length: 3 }, () => ({ title: W(18), description: W(22) })), todo: Array.from({ length: 3 }, () => ({ title: W(18), description: W(22) })) };
 boundary.maxChanges = maxChanges;
+const question = {
+  kind: 'question',
+  title: W(64),
+  context: W(160),
+  question: W(120),
+  options: [
+    { label: W(28), note: W(60), send: 'First answer' },
+    { label: W(28), note: W(60), send: 'Second answer' }
+  ]
+};
 
 const pages = {};
-for (const [name, data] of Object.entries({ base, dense, maximum, actions, ...boundary })) {
+for (const [name, data] of Object.entries({ base, dense, maximum, actions, question, ...boundary })) {
   const file = join(dir, name + '.html');
   try {
     await writeFile(file, await renderReply(data));
@@ -226,6 +236,7 @@ const inspect = async (url, width) => {
     expression: `(() => {
       const bento = document.querySelector('.bento');
       const box = (element) => element.getBoundingClientRect();
+      if (!bento) return JSON.stringify({ question: true, columns: 0, copies: [...document.querySelectorAll('.ask-copy')].map((copy) => ({ scrollWidth: copy.scrollWidth, clientWidth: copy.clientWidth, scrollHeight: copy.scrollHeight, clientHeight: copy.clientHeight })), overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1 });
       const tiles = [...document.querySelectorAll('.bento .reply-section-tile')];
       const clippedTiles = tiles.filter((tile) => {
         const body = tile.querySelector('.tile-body');
@@ -292,6 +303,12 @@ try {
   for (const [name, url] of Object.entries(pages)) {
     for (const width of [1024, 728, 390]) {
       const report = await inspect(url, width);
+      if (report.question) {
+        if (report.overflowX) failures.push(name + '@' + width + ': the question page scrolls horizontally');
+        const clippedCopy = report.copies.filter((copy) => copy.scrollWidth > copy.clientWidth + 2 || copy.scrollHeight > copy.clientHeight + 2);
+        if (clippedCopy.length) failures.push(name + '@' + width + ': ' + clippedCopy.length + ' question answers clip ' + JSON.stringify(clippedCopy));
+        continue;
+      }
       const expected = width > 900 ? 4 : 1;
       if (report.columns !== expected) failures.push(name + '@' + width + ': ' + report.columns + ' columns, expected ' + expected);
       if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles (' + report.clippedTypes.join(',') + ')');

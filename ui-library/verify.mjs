@@ -27,6 +27,8 @@ assert.equal(gateState(gateBoard,'Ship'),'pending','A pending stage keeps its ga
 assert.equal(gateState(gateBoard,'Nope'),'pending','An unmatched gate stays pending');
 const doneBoard=progressBoard({progress:'100%',eta:'Complete',state:'complete',milestones:['Missing'],stages:[{label:'Shipped',state:'done'}]});
 assert.equal(gateState(doneBoard,'Missing'),'pending','Percentage alone never completes a gate');
+const duplicateBoard=progressBoard({progress:'62%',eta:'~5m',state:'working',milestones:['Build'],stages:[{label:'Build',state:'done'},{label:'Build',state:'waiting'}]});
+assert.equal(gateState(duplicateBoard,'Build'),'pending','Duplicate exact stage names keep the gate pending');
 const estimateBoard=progressBoard({progress:'55% est.',eta:'~5m',state:'working',milestones:['Build'],stages:[{label:'Build',state:'waiting'}]});
 assert(estimateBoard.includes('55% est.'),'The estimate qualifier survives rendering');
 const opaque='deadbeef';
@@ -146,6 +148,12 @@ assert.throws(()=>assertRenderedReply(reply.replace(/(<article class="reply-card
 assert.throws(()=>assertRenderedReply(reply.replace(/(<ul class="change-list">[\s\S]*?)<small>[^<]*<\/small>/,'$1')),/title and a description/,'The guard rejects a change without a description');
 assert.throws(()=>assertRenderedReply(pendingGuard.replace('<dd>62%</dd>','<dd style="opacity:0">62%</dd>')),/inline CSS hides/,'The guard rejects inline hiding');
 assert.throws(()=>assertRenderedReply(pendingGuard.replace('</style>','.t3lib .reply-body{display:none!important}</style>')),/CSS hides/,'The guard rejects a hidden reply body');
+assert.throws(()=>assertRenderedReply(pendingGuard.replace('<dd>62%</dd>',"<dd style='opacity:0'>62%</dd>")),/inline CSS hides/,'The guard rejects single-quoted inline hiding');
+assert.throws(()=>assertRenderedReply(pendingGuard.replace('<dd>62%</dd>','<dd style="opacity:.0">62%</dd>')),/inline CSS hides/,'The guard rejects fractional inline hiding');
+assert.throws(()=>assertRenderedReply(pendingGuard.replace('</style>','.change-copy small{display:none!important}</style>')),/CSS hides/,'The guard rejects hidden descriptions');
+assert.throws(()=>assertRenderedReply(pendingGuard.replace('</style>','.reply-body,.reply-body::before{display:none!important}</style>')),/CSS hides/,'The guard checks every selector in a list');
+assert.throws(()=>assertRenderedReply(pendingGuard.replace('<style>',"<style media='all'>").replace('</style>','.reply-body{display:none}</style>')),/CSS hides/,'The guard scans style tags with attributes');
+await assert.rejects(renderReply({...base,sections:[{...completeSwimlane,items:completeSwimlane.items.map((item,index)=>index===1?{...item,label:'Scope read'}:item)},doneChanges,cost]}),/distinct stage labels/,'Duplicate stage labels are rejected');
 const singleDone=await renderReply({...base,sections:[completeSwimlane,{...doneChanges,done:doneChanges.done.slice(0,1)},cost]});
 assert.equal(assertRenderedReply(singleDone),true,'A complete reply passes with one done change');
 const questionReply=await renderReply({kind:'question',title:'Deploy after one more review?',context:'Fixes are pushed and 306 tests pass. Deployment is paused by the review limit.',question:'Run one final Sol review, then deploy if it approves?',options:[{label:'Review, then deploy',note:'One Sol pass gates the release',send:'Run one final review, then deploy.'},{label:'Deploy now',send:'Deploy now without another review.'}]});
@@ -153,6 +161,7 @@ assert(questionReply.includes('class="t3lib reply question"')&&(questionReply.ma
 assert(questionReply.includes('data-t3-send="Deploy now without another review."'),'Question answers send their own message');
 assert.equal(assertRenderedReply(questionReply),true,'A question page passes the guard');
 assert.throws(()=>assertRenderedReply(questionReply.replace('</style>','.ask{display:none}</style>')),/CSS hides/,'The guard rejects a hidden question');
+assert.throws(()=>assertRenderedReply(questionReply.replace('<section class="ask"','<section class="ask" hidden')),/Hidden content/,'The guard checks hidden ancestors on question pages');
 await assert.rejects(renderReply({kind:'question',title:'T',context:'C',question:'Q',options:[{label:'Only',send:'x'}]}),/must contain 2 to 3 items/);
 await assert.rejects(renderReply({kind:'question',title:'T',context:'C',question:'Q',options:[{label:'A',send:'x'},{label:'B',note:'No send'}]}),/needs the message/);
 assert.throws(()=>assertRenderedReply('<!doctype html><html><body><main class="t3lib reply question"><h1>T</h1><p class="reply-text">C</p></main></body></html>'),/question is missing/i,'A question shell fails the guard');
