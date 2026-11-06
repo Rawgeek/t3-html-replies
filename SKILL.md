@@ -9,13 +9,15 @@ Apply this skill to every message shown to the user in a T3 main session, includ
 
 ## Hard gate
 
-Every user-facing message must come out of the renderer. Markdown, plain text, and hand-written HTML are all invalid, including a one-line status, an apology, or an error note.
+Every user-facing message must come out of the renderer. Markdown, plain text, and hand-written HTML are all invalid, including a one-line status, an apology, or an error note. A fragment such as <p>Status: green.</p> is not a reply.
 
 1. Build the reply data, then run node ui-library/ui.mjs check and node ui-library/ui.mjs reply. Send only that rendered file through the MCP app or T3's HTML renderer.
+   Run node ui-library/ui.mjs guard FILE on any HTML you did not render yourself. It rejects fragments and shells.
 2. If validation fails, shorten the field or add a block and render again.
 3. If rendering still fails, send a rendered error card naming the validator message. Never fall back to chat text.
 
 An answer that was not rendered is a failed turn, even when its content is correct.
+The most common failure is an HTML fragment. It looks right in chat but fails guard, because it has no page, status board, or blocks.
 
 ## Contract
 

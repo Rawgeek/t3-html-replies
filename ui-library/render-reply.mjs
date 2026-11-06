@@ -359,6 +359,18 @@ export async function renderReply(data){
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
+export function assertRenderedReply(html){
+  const text=String(html);
+  if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
+  if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
+  if(!/<section class="status-board"/.test(text))fail('Not a reply page: the status board is missing. Render reply JSON instead of writing HTML.');
+  if(!/data-section-type="swimlane"/.test(text))fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
+  if(!/data-section-type="changes"/.test(text))fail('Not a reply page: the changes block is missing. Render reply JSON instead of writing HTML.');
+  if((text.match(/data-section-type="/g)||[]).length<4)fail('Not a reply page: it needs a swimlane, a changes block, and two supporting blocks.');
+  if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
+  return true;
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   const [input,output]=process.argv.slice(2);
   if(!input||!output)throw Error('Usage: node render-reply.mjs input.json output.html');

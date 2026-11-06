@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import { catalog, families } from './catalog.mjs';
 import { renderExample, statusFooter, icon } from './components.mjs';
 import { heights } from './heights.mjs';
-import { renderReply } from './render-reply.mjs';
+import { renderReply, assertRenderedReply } from './render-reply.mjs';
 const root=dirname(fileURLToPath(import.meta.url));
 assert.equal(catalog.length,60);assert.equal(families.length,20);assert.equal(new Set(catalog.map(x=>x.id)).size,catalog.length);
 assert.deepEqual(Object.keys(heights),['slim','small','medium','tall']);
@@ -115,6 +115,9 @@ assert(reply.includes('class="compare-bar before"')&&reply.includes('class="comp
 assert(reply.includes('reply-card')&&reply.includes('>Checked<'),'Cards render a readable status pill');
 assert((reply.match(/class="status-gates"/g)||[]).length===1,'Progress tile carries milestone gates');
 assert(reply.includes('data-layout="side"')&&reply.includes('class="reply-flow"'),'The swimlane sits beside one packed block area');
+assert.equal(assertRenderedReply(reply),true,'A rendered reply passes the guard');
+assert.throws(()=>assertRenderedReply('<p>Status: green.</p>'),/fragment/i,'A hand-written fragment fails the guard');
+assert.throws(()=>assertRenderedReply('<!doctype html><html><body><main class="t3lib reply"><section class="status-board">x</section></main></body></html>'),/swimlane/i,'A shell without blocks fails the guard');
 assert(css.includes('.reply-flow > [data-span="3"]')&&css.includes('repeat(3,minmax(0,1fr))'),'A final lone block spans the three flow columns');
 assert(!/\.t3lib \.reply-section-tile:last-child/.test(css),'Layout depends on spans, not block position');
 assert(css.includes('[data-span="2"] .metric-grid')&&css.includes('[data-span="3"] .metric-grid'),'Wide facts use their own column rule');

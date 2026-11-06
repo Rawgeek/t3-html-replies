@@ -97,10 +97,11 @@ Fast path, three commands from this ui-library directory:
     node ui.mjs new /task/output/reply.json
     node ui.mjs check /task/output/reply.json
     node ui.mjs reply /task/output/reply.json /task/output/reply.html
+    node ui.mjs guard /task/output/reply.html
 
 1. Run new to write a valid starter, then fill the fields. No guide reading needed for a routine reply.
 2. Run check after each edit. It prints one line: valid, or the exact field that failed.
-3. Render, then preview at 728px and 390px only when the reply is new or changed layout.
+3. Render, then run guard. It rejects fragments and shells. Preview at 728px and 390px only when the reply is new or changed layout.
 4. Send the absolute dataPath to the t3-html-replies render_reply MCP tool when it is available. Otherwise use T3's HTML render tool. Keep the HTML source out of model context.
 
 Read [ELEMENT_INDEX.md](ELEMENT_INDEX.md) only when the starter blocks do not fit the content.

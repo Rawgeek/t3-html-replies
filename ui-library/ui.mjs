@@ -4,7 +4,7 @@ import { catalog, families } from './catalog.mjs';
 import { renderExample } from './components.mjs';
 import { loadAssets } from './assets.mjs';
 import { exampleDocument } from './document.mjs';
-import { renderReply } from './render-reply.mjs';
+import { renderReply, assertRenderedReply } from './render-reply.mjs';
 
 const [command='list',id,output]=process.argv.slice(2);
 async function save(html) {
@@ -44,11 +44,13 @@ switch(command) {
     if(!id||!output)throw Error('Use reply <data.json> <output.html>');await save(await renderReply(JSON.parse(await readFile(id,'utf8'))));break;
   case 'check':
     if(!id)throw Error('Use check <data.json>');await renderReply(JSON.parse(await readFile(id,'utf8')));console.log('Valid reply.');break;
+  case 'guard':
+    if(!id)throw Error('Use guard <reply.html>');assertRenderedReply(await readFile(id,'utf8'));console.log('Valid reply page.');break;
   case 'new': {
     if(!id)throw Error('Use new <data.json>');const path=resolve(id);await mkdir(dirname(path),{recursive:true});
     await writeFile(path,JSON.stringify(starter,null,2)+'\n');console.log(path);break;
   }
-  default: throw Error('Use new, check, reply, list, show, render, or html.');
+  default: throw Error('Use new, check, reply, guard, list, show, render, or html.');
 }
 } catch (error) {
   console.error(error.message);
