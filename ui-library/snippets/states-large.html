@@ -329,6 +329,11 @@
   .t3lib .reply-sections[data-layout="side"] { grid-template-columns:1fr; }
   .t3lib .reply-flow { grid-template-columns:1fr; }
   .t3lib .reply-flow > .reply-section-tile[data-span] { grid-column:auto; }
+  .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { min-height:0; }
+  .t3lib .swimlane { align-content:start; }
+  .t3lib.reply > .status-board { order:3; }
+  .t3lib.reply > .reply-sections { order:4; }
+  .t3lib.reply > .actions { order:5; }
 }
 
 </style></head><body><main class="t3lib"><p class="muted small">Demo</p><section class="component-tile" data-height="small"><div class="demo tile-body"><div class="stack interactive"><h3>The sample check could not finish</h3><p class="muted small">The result is unavailable. Try one local retry to inspect the recovery state.</p><div class="actions"><button type="button" class="btn primary" data-demo-action="retry" ><svg class="icon" aria-hidden="true" focusable="false"

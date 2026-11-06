@@ -329,6 +329,11 @@
   .t3lib .reply-sections[data-layout="side"] { grid-template-columns:1fr; }
   .t3lib .reply-flow { grid-template-columns:1fr; }
   .t3lib .reply-flow > .reply-section-tile[data-span] { grid-column:auto; }
+  .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { min-height:0; }
+  .t3lib .swimlane { align-content:start; }
+  .t3lib.reply > .status-board { order:3; }
+  .t3lib.reply > .reply-sections { order:4; }
+  .t3lib.reply > .actions { order:5; }
 }
 
 </style></head><body><main class="t3lib reply" data-state="complete"><header class="reply-head"><h1>Build uses fewer resources</h1><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
