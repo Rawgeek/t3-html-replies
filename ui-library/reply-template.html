@@ -219,6 +219,7 @@
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile { grid-row:auto; grid-row-end:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { height:auto; min-height:376px; }
 .t3lib .reply-flow .reply-section-tile { height:184px; }
+.t3lib .reply-flow > .reply-results { grid-column:1/-1; }
 .t3lib .swimlane { display:grid; grid-auto-rows:auto; height:100%; align-content:space-between; gap:6px; }
 .t3lib .swimlane li { display:grid; grid-template-columns:9px minmax(0,1fr) 46px; grid-template-rows:auto; gap:2px 10px; align-content:center; align-items:center; position:relative; min-width:0; padding-block:4px; border-bottom:1px solid var(--ui-border); }
 .t3lib .swimlane li:last-child { border-bottom:0; }
@@ -342,56 +343,7 @@
   .t3lib .reply-flow > .reply-section-tile:last-child:nth-child(odd) { grid-column:auto; }
 }
 
-</style></head><body><main class="t3lib reply" data-state="waiting"><header class="reply-head"><h1>Checks pass, review open</h1><span class="pill" data-tone="waiting"><svg class="icon" aria-hidden="true" focusable="false"
- 
- 
- 
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
->
-  <circle cx="12" cy="12" r="10" />
-  <path d="M12 6v6l4 2" />
-</svg><span>Waiting</span></span></header><p class="reply-text">Focused suite is green. Review and full CI remain.</p><section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks"><section class="component-tile reply-section-tile" data-height="tall" data-section-type="swimlane" data-span="1"><div class="demo tile-body"><h2>Stages <span class="section-zone">Times GMT+7</span></h2><div class="reply-body"><ol class="swimlane"><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Scope read</b><small>Four blocks chosen</small></span><time>09:10</time></li><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Renderer patched</b><small>Focused suite green</small></span><time>09:24</time></li><li class="waiting"><span class="dot waiting" aria-hidden="true"></span><span class="swimlane-copy"><b>Review</b><small>Waiting on the reader</small></span><time>Now</time><span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78"><i style="--value:78%"></i></span></span></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Full CI</b><small>After the review</small></span><time>Next</time></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Share post</b><small>Then the announcement</small></span><time>Later</time></li></ol></div></div></section><div class="reply-flow" data-count="3"><section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-span="2"><div class="demo tile-body"><h2>Changes</h2><div class="reply-body"><div class="changes"><div class="change-col done"><p class="change-head">Done</p><ul class="change-list"><li><span class="dot done" aria-hidden="true"></span><span>Swimlane added</span></li><li><span class="dot done" aria-hidden="true"></span><span>Gates wired</span></li><li><span class="dot done" aria-hidden="true"></span><span>Docs updated</span></li></ul></div><div class="change-col pending"><p class="change-head">To do</p><ul class="change-list"><li><span class="dot pending" aria-hidden="true"></span><span>Finish review</span></li><li><span class="dot pending" aria-hidden="true"></span><span>Run full CI</span></li></ul></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="compare" data-span="1"><div class="demo tile-body"><h2>Build cost</h2><div class="reply-body"><div class="compare"><div class="compare-row"><div class="compare-line"><span class="compare-label">Build time</span><span class="compare-delta">38% less</span></div><div class="compare-bar before"><span class="compare-value">148 s</span><span class="compare-track"><i style="--value:100%"></i></span></div><div class="compare-bar after"><span class="compare-value">92 s</span><span class="compare-track"><i style="--value:62.2%"></i></span></div></div><div class="compare-row"><div class="compare-line"><span class="compare-label">Peak memory</span><span class="compare-delta">39% less</span></div><div class="compare-bar before"><span class="compare-value">1.8 GB</span><span class="compare-track"><i style="--value:100%"></i></span></div><div class="compare-bar after"><span class="compare-value">1.1 GB</span><span class="compare-track"><i style="--value:61.1%"></i></span></div></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="cards" data-span="3"><div class="demo tile-body"><h2>Work</h2><div class="reply-body"><div class="reply-cards"><article class="reply-card"><h3>Renderer</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
- 
- 
- 
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
->
-  <path d="M20 6 9 17l-5-5" />
-</svg><span>Checked</span></span><p>Blocks and limits</p></article><article class="reply-card"><h3>Docs</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
- 
- 
- 
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
->
-  <path d="M20 6 9 17l-5-5" />
-</svg><span>Checked</span></span><p>Guide and index</p></article><article class="reply-card"><h3>Review</h3><span class="pill" data-tone="active"><svg class="icon" aria-hidden="true" focusable="false"
- 
- 
- 
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
->
-  <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
-</svg><span>Working</span></span><p>Reader pending</p></article></div></div></div></section></div></section><section class="status-board" data-state="waiting"><dl class="status-tiles" aria-label="Task status"><div class="status-tile" data-field="progress" data-tone="waiting"><dt><svg class="icon" aria-hidden="true" focusable="false"
+</style></head><body><main class="t3lib reply" data-state="waiting"><section class="status-board" data-state="waiting"><dl class="status-tiles" aria-label="Task status"><div class="status-tile" data-field="progress" data-tone="waiting"><dt><svg class="icon" aria-hidden="true" focusable="false"
  
  
  
@@ -442,4 +394,53 @@
 >
   <path d="M10.268 21a2 2 0 0 0 3.464 0" />
   <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
-</svg><span>Wake</span></dt><dd>PR watch 10m</dd></div></dl></section></main></body></html>
+</svg><span>Wake</span></dt><dd>PR watch 10m</dd></div></dl></section><header class="reply-head"><h1>Checks pass, review open</h1><span class="pill" data-tone="waiting"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 6v6l4 2" />
+</svg><span>Waiting</span></span></header><p class="reply-text">Focused suite is green. Review and full CI remain.</p><section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks"><section class="component-tile reply-section-tile" data-height="tall" data-section-type="swimlane" data-span="1"><div class="demo tile-body"><h2>Stages <span class="section-zone">Times GMT+7</span></h2><div class="reply-body"><ol class="swimlane"><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Scope read</b><small>Four blocks chosen</small></span><time>09:10</time></li><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Renderer patched</b><small>Focused suite green</small></span><time>09:24</time></li><li class="waiting"><span class="dot waiting" aria-hidden="true"></span><span class="swimlane-copy"><b>Review</b><small>Waiting on the reader</small></span><time>Now</time><span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78"><i style="--value:78%"></i></span></span></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Full CI</b><small>After the review</small></span><time>Next</time></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Share post</b><small>Then the announcement</small></span><time>Later</time></li></ol></div></div></section><div class="reply-flow" data-count="3"><section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-span="2"><div class="demo tile-body"><h2>Changes</h2><div class="reply-body"><div class="changes"><div class="change-col done"><p class="change-head">Done</p><ul class="change-list"><li><span class="dot done" aria-hidden="true"></span><span>Swimlane added</span></li><li><span class="dot done" aria-hidden="true"></span><span>Gates wired</span></li><li><span class="dot done" aria-hidden="true"></span><span>Docs updated</span></li></ul></div><div class="change-col pending"><p class="change-head">To do</p><ul class="change-list"><li><span class="dot pending" aria-hidden="true"></span><span>Finish review</span></li><li><span class="dot pending" aria-hidden="true"></span><span>Run full CI</span></li></ul></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="compare" data-span="1"><div class="demo tile-body"><h2>Build cost</h2><div class="reply-body"><div class="compare"><div class="compare-row"><div class="compare-line"><span class="compare-label">Build time</span><span class="compare-delta">38% less</span></div><div class="compare-bar before"><span class="compare-value">148 s</span><span class="compare-track"><i style="--value:100%"></i></span></div><div class="compare-bar after"><span class="compare-value">92 s</span><span class="compare-track"><i style="--value:62.2%"></i></span></div></div><div class="compare-row"><div class="compare-line"><span class="compare-label">Peak memory</span><span class="compare-delta">39% less</span></div><div class="compare-bar before"><span class="compare-value">1.8 GB</span><span class="compare-track"><i style="--value:100%"></i></span></div><div class="compare-bar after"><span class="compare-value">1.1 GB</span><span class="compare-track"><i style="--value:61.1%"></i></span></div></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="cards" data-span="3"><div class="demo tile-body"><h2>Work</h2><div class="reply-body"><div class="reply-cards"><article class="reply-card"><h3>Renderer</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 6 9 17l-5-5" />
+</svg><span>Checked</span></span><p>Blocks and limits</p></article><article class="reply-card"><h3>Docs</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 6 9 17l-5-5" />
+</svg><span>Checked</span></span><p>Guide and index</p></article><article class="reply-card"><h3>Review</h3><span class="pill" data-tone="active"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+</svg><span>Working</span></span><p>Reader pending</p></article></div></div></div></section></div></section></main></body></html>

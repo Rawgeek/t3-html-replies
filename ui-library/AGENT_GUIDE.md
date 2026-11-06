@@ -26,6 +26,8 @@ The swimlane shows history, the current step, and future steps. The changes bloc
 
 The swimlane sits in a tall left column. Supporting blocks fill the three flow columns beside it, and the renderer picks their spans so the flow never leaves a cell empty. Do not pad a reply with filler blocks.
 
+Status comes first, then the title and summary. Result facts open the flow beside the rail, above the supporting blocks.
+
 ## Reply JSON
 
 Use the reply command from this directory:

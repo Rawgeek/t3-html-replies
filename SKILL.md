@@ -24,6 +24,7 @@ The most common failure is an HTML fragment. It looks right in chat but fails gu
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
 - Use a fixed four column grid at 1024px: one swimlane column and three flow columns with 8px gaps. Tablets use two flow columns and phones use one. The renderer chooses each block span and the block type when the type is omitted.
+- Put status first, then the title. Result facts open the flow beside the rail, above the supporting blocks.
 - Results and status use the Slim height. Reply sections share 184px. The swimlane is a tall side column. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
 - Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.

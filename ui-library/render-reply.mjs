@@ -362,8 +362,9 @@ export async function renderReply(data){
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
   const swimlaneHtml=renderSection(swimlaneSection,zone);
   if(overallPercent!==null&&swimlaneHtml.includes(`<small>${overallPercent}%</small>`))fail('The rail repeats the overall percentage. Keep the step number only when it differs from Progress.');
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}<div class="reply-flow" data-count="${supporting.length}">${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]},zone)).join('')}</div></section>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
+  const resultsHtml=results.length?resultGrid(results):'';
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}<div class="reply-flow" data-count="${supporting.length}">${resultsHtml}${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]},zone)).join('')}</div></section>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}">${statusFooter({...status,state,milestones})}<header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
 export function assertRenderedReply(html){
