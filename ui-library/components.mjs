@@ -36,7 +36,8 @@ export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake=
   const compact=(text)=>shorts[text]||String(text);
   const shortEta=/unknown/i.test(eta)?'Unknown':/complete/i.test(eta)?'Done':/ready/i.test(eta)?'Ready':String(eta).replace(/ min(?:utes?)?/g,'m').replace(/ estimate/g,'');
   const off=/not armed|not needed|^off$|^none$/i.test(wake),uncertain=/unknown|unverified/i.test(wake),wakeOn=!off&&!uncertain;
-  const shortWake=off?(/not needed/i.test(wake)?'None':'Off'):uncertain?'Unknown':/review|pr watch/i.test(wake)?'Review':compact(wake);
+  const wakeClock=(String(wake).match(/\b\d{1,2}:\d{2}(?:\s*[A-Z]{2,5})?\b/)||String(wake).match(/\b\d+\s?m\b/)||[])[0]||'';
+  const shortWake=off?(/not needed/i.test(wake)?'None':'Off'):uncertain?'Unknown':wakeClock?`Review ${wakeClock}`:compact(wake);
   const tile=(label,name,text,tileTone='',extra='',field='')=>`<div class="status-tile" data-field="${field}" data-tone="${tileTone}"><dt>${icon(name)}<span>${label}</span></dt><dd>${e(text)}</dd>${extra}</div>`;
   const track=`<div class="status-meter" role="progressbar" aria-label="Progress${/estimate/i.test(progress)?', estimate':''}" aria-valuemin="0" aria-valuemax="100" ${value===null?'aria-valuetext="Unknown"':`aria-valuenow="${value}"`}><span style="--value:${value||0}%"></span></div>`;
   const gates=milestones.length?`<div class="status-gates" aria-hidden="true">${milestones.map((label,index)=>{

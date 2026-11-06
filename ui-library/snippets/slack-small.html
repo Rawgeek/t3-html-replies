@@ -180,6 +180,7 @@
 .t3lib .reply-bar-track { height:4px; border-radius:4px; overflow:hidden; background:var(--ui-secondary); }
 .t3lib .reply-bar-track span { display:block; height:100%; width:var(--value); border-radius:inherit; background:var(--ui-series-1); }
 .t3lib .changes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; height:100%; align-items:stretch; }
+.t3lib .changes[data-single] { grid-template-columns:1fr; }
 .t3lib .change-col { display:grid; grid-template-rows:auto minmax(0,1fr); gap:4px; min-width:0; }
 .t3lib .change-head { font-size:9.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ui-muted); }
 .t3lib .change-list { display:grid; grid-auto-rows:1fr; gap:0; font-size:11.5px; line-height:1.3; }
@@ -208,8 +209,9 @@
 .t3lib .reply-sections[data-layout="side"] { grid-template-columns:minmax(0,1fr) minmax(0,3fr); align-items:stretch; grid-auto-rows:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile { grid-row:auto; grid-row-end:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { height:auto; min-height:376px; }
-.t3lib .reply-flow { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-content:start; }
+.t3lib .reply-flow { display:grid; grid-template-columns:repeat(var(--flow-columns,2),minmax(0,1fr)); gap:8px; align-content:start; }
 .t3lib .reply-flow .reply-section-tile:last-child:nth-child(odd) { grid-column:1 / -1; }
+.t3lib .reply-flow[data-count="2"] { grid-template-columns:1fr; }
 .t3lib .reply-flow .reply-section-tile { height:184px; }
 .t3lib .swimlane { display:grid; grid-auto-rows:auto; height:100%; align-content:space-between; gap:6px; }
 .t3lib .swimlane li { display:grid; grid-template-columns:9px minmax(0,1fr) 46px; grid-template-rows:auto; gap:2px 10px; align-content:center; align-items:center; position:relative; min-width:0; padding-block:4px; border-bottom:1px solid var(--ui-border); }
@@ -303,7 +305,7 @@
 @container (max-width: 500px) { .t3lib .arrangement[style*="--n:4"], .t3lib .arrangement[style*="--n:3"] { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @container (max-width: 280px) { .t3lib .arrangement { grid-template-columns: 1fr; } .t3lib .grid-3, .t3lib .grid-4 { --n: 2; } }
 @container (max-width: 240px) { .t3lib .row { grid-auto-flow: row; grid-template-columns: repeat(2, max-content); justify-content: start; } }
-@container (max-width: 360px) { .t3lib .status-tiles { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@container (max-width: 620px) { .t3lib .status-tiles { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 760px) { .t3lib .catalog { grid-template-columns: repeat(var(--mobile-columns,2),minmax(0,1fr)); } }
 @media (max-width: 540px) {
   .t3lib .catalog { grid-template-columns: 1fr; }
@@ -313,13 +315,8 @@
 
 .t3lib .reply-section-tile tr.has-detail { cursor: help; }
 .t3lib .reply-section-tile tr.has-detail:hover td { background: color-mix(in srgb, var(--ui-text) 6%, transparent); }
-@media (min-width:421px) { .t3lib.reply[data-columns="2"] .reply-sections { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media (min-width:901px) {
-  .t3lib.reply[data-columns="2"] .reply-section-tile:last-child { grid-column: span 1; }
-  .t3lib.reply[data-columns="2"] .reply-section-tile:last-child:nth-child(odd) { grid-column: span 2; }
-}
 @media (prefers-reduced-motion:reduce) { .t3lib .status-meter span, .t3lib .meter-fill { transition: none; } }
-@media (max-width:620px) { .t3lib .status-gates { font-size:0; gap:4px; } .t3lib .status-gates span::before { height:4px; } }
+@media (max-width:620px) { .t3lib .status-gates { font-size:8px; gap:3px; } }
 </style></head><body><main class="t3lib"><p class="muted small">Demo</p><section class="component-tile" data-height="medium"><div class="demo tile-body"><article class="message interactive"><div class="avatar" aria-hidden="true">MC</div><div class="stack"><div class="message-head"><strong>Morgan Chen</strong><time>10:24</time></div><p class="copy-text">The build fix is ready for review. The focused checks pass.</p><div class="actions"><button type="button" class="btn" data-demo-action="copy" data-copy-text="The build fix is ready for review. The focused checks pass."><svg class="icon" aria-hidden="true" focusable="false"
  
  

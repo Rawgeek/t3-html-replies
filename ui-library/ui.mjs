@@ -28,6 +28,7 @@ const starter={
     {title:'Work',type:'cards',items:[{label:'Area',state:'done',note:'Short note'},{label:'Area',state:'pending',note:'Short note'}]}
   ]
 };
+try {
 switch(command) {
   case 'list':
     console.log(id?catalog.filter(x=>x.family===id).map(x=>`${x.id} ${x.height}`).join('\n'):families.map(x=>x.id).join(' '));break;
@@ -48,4 +49,8 @@ switch(command) {
     await writeFile(path,JSON.stringify(starter,null,2)+'\n');console.log(path);break;
   }
   default: throw Error('Use new, check, reply, list, show, render, or html.');
+}
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
 }

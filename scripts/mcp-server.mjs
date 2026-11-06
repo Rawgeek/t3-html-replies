@@ -4,7 +4,6 @@ import { readFile, realpath } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
-import { homedir } from 'node:os';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP_PATH = resolve(HERE, '../assets/mcp-app.html');
@@ -25,9 +24,22 @@ function readString(args, key, max) {
   return value;
 }
 
+function assertReplyShape(html) {
+  if (!/<main class="t3lib reply"/.test(html)) {
+    throw Error('The HTML is not a rendered reply. Use node ui.mjs reply to render it first.');
+  }
+  if (/<details|<summary/i.test(html)) {
+    throw Error('Expandable content is not allowed. Remove details and summary elements.');
+  }
+  return html;
+}
+
 async function resolveHtml(args) {
   const inline = readString(args, 'html', MAX_HTML_BYTES);
-  if (inline !== undefined) return inline;
+  if (inline !== undefined) {
+    if (Buffer.byteLength(inline) > MAX_HTML_BYTES) throw Error('The reply HTML exceeds 1 MB.');
+    return assertReplyShape(inline);
+  }
 
   const htmlPath = readString(args, 'htmlPath', 4096);
   if (htmlPath === undefined) throw Error('Pass html or htmlPath.');
@@ -36,16 +48,12 @@ async function resolveHtml(args) {
   }
 
   const real = await realpath(resolve(htmlPath));
-  const home = resolve(homedir());
-  if (real !== home && !real.startsWith(home + '/')) {
-    throw Error('htmlPath must stay inside your home directory.');
-  }
 
   const html = await readFile(real, 'utf8');
   if (Buffer.byteLength(html) > MAX_HTML_BYTES) {
     throw Error('The reply HTML exceeds 1 MB.');
   }
-  return html;
+  return assertReplyShape(html);
 }
 
 const tool = {

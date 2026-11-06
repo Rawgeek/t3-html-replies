@@ -18,7 +18,7 @@ Start with [ELEMENT_INDEX.md](ELEMENT_INDEX.md), then open the closest sample.
 Every reply carries three things. The renderer rejects a reply that leaves one out.
 
 1. A swimlane. Five to seven steps: at least two done, the current step, and at least two pending. The current step is the only waiting item and must carry its own progress, such as 62%.
-2. A changes block. What is done and what is still to do. A finished reply ships with no waiting step and may leave the to do list empty.
+2. A changes block. What is done and what is still to do. A finished reply has no waiting or pending step and an empty to do list, so the rail, the changes, and Next None always agree.
 3. Two to four milestones. They label the segments of the progress bar in the status strip.
 4. At least two supporting blocks beside the swimlane. The renderer rejects a reply that would leave an empty cell in the grid.
 
@@ -55,13 +55,13 @@ Top-level fields:
 
 A result fact has a label of 14 characters, a value of 14, and an optional note of 24.
 
-The renderer rejects replies above 1600 visible characters.
+The renderer rejects replies above 1200 visible characters.
 
 ## Section blocks
 
-Every section is a fixed 184px tile, except the swimlane at 376px. Use 2 to 4 items. The swimlane starts full width and every other block starts at one grid column. The renderer rejects a size field on a section.
+Every section is a fixed 184px tile. The swimlane sits in a 376px tall side column and the other blocks fill the flow area beside it. The renderer rejects a size field on a section.
 
-The grid fills the last row automatically. A lone final block spans the full width; two leftover blocks share 2 plus 1. Never set a span.
+The flow fills every cell: with exactly two blocks they stack, and with an odd count the last block spans the row. Never leave an empty cell.
 
 | Type | Fields and limits |
 | --- | --- |

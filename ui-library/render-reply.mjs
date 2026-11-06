@@ -16,7 +16,7 @@ const LIMITS=Object.freeze({
   progress:12,next:18,eta:16,wake:20,actions:3,actionLabel:14,actionSend:400,
   milestones:4,milestoneLabel:8,
   sectionText:{facts:240,list:175,table:240,swimlane:320,bars:170,changes:200,compare:170,cards:220},
-  visibleText:1600
+  visibleText:1200
 });
 const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
@@ -70,12 +70,32 @@ function validateStatus(data,done){
   const next=field(data.next??(done?'None':'Unknown'),'Next',LIMITS.next);
   const eta=field(data.eta??(done?'Complete':'Unknown'),'ETA',LIMITS.eta);
   const wake=field(data.wake??(done?'Not needed':'Not armed'),'Wake',LIMITS.wake);
-  const percent=progress.match(/(\d+(?:\.\d+)?)\s*%/);
-  const value=percent?Number(percent[1]):null;
+  const value=percentValue(progress,'Progress');
   if(done&&value!==100)fail('Complete replies require 100%.');
   if(!done&&value===100)fail('Pending work cannot be shown at 100%.');
   return {progress,next,eta,wake};
 }
+
+const percentValue=(text,name)=>{
+  const match=String(text).match(/(-?\d+(?:\.\d+)?)\s*%/);
+  if(!match)return null;
+  const value=Number(match[1]);
+  if(!Number.isFinite(value)||value<0||value>100)fail(`${name} must be a percentage from 0 to 100, not ${value}.`);
+  return value;
+};
+
+const UNITS={ms:['time',1],s:['time',1000],min:['time',60000],h:['time',3600000],
+  b:['size',1],kb:['size',1024],mb:['size',1048576],gb:['size',1073741824],
+  k:['count',1000],'%':['percent',1]};
+const measure=(text,name)=>{
+  const match=String(text).replace(/,/g,'').match(/^(-?\d+(?:\.\d+)?)\s*([a-z%]+)?$/i);
+  if(!match)fail(`${name} must be a number with an optional unit, like 92 s or 1.2k.`);
+  const value=Number(match[1]),unit=(match[2]||'').toLowerCase();
+  if(!unit)return {value,unit:'',family:''};
+  const entry=UNITS[unit];
+  if(!entry)fail(`${name} uses an unknown unit "${match[2]}". Use ms, s, min, h, KB, MB, GB, k, %, or no unit.`);
+  return {value:value*entry[1],unit,family:entry[0]};
+};
 
 function validateActions(value){
   if(value===undefined)return [];
@@ -86,8 +106,12 @@ function validateActions(value){
     const label=field(action.label,`${name} label`,LIMITS.actionLabel);
     const hasHref=present(action.href),hasSend=present(action.send);
     if(hasHref===hasSend)fail(`${name} requires exactly one of href or send.`);
-    if(hasHref&&(typeof action.href!=='string'||!/^https:\/\//.test(action.href)||action.href.length>500))
-      fail(`${name}.href must be an HTTPS link up to 500 characters.`);
+    if(hasHref){
+      if(typeof action.href!=='string'||action.href.length>500)fail(`${name}.href must be an HTTPS link up to 500 characters.`);
+      let url;
+      try{url=new URL(action.href);}catch{url=null;}
+      if(!url||url.protocol!=='https:'||!url.hostname)fail(`${name}.href must be a full HTTPS link with a hostname.`);
+    }
     const send=hasSend?field(action.send,`${name} send`,LIMITS.actionSend):'';
     const iconName=field(action.icon??'arrow-right',`${name} icon`,32);
     if(!/^[a-z0-9-]+$/.test(iconName))fail(`${name} icon must use a lowercase Lucide name.`);
@@ -172,10 +196,16 @@ function validateSection(section,index){
     const items=array(section.items,`${name} items`,1,LIMITS.compareItems).map((item,itemIndex)=>{
       const itemName=`${name} item ${itemIndex+1}`;
       assertKeys(item,['label','before','after','delta'],itemName);
+      const before=field(item.before,`${itemName} before`,LIMITS.compareValue);
+      const after=field(item.after,`${itemName} after`,LIMITS.compareValue);
+      const b=measure(before,`${itemName} before`),a=measure(after,`${itemName} after`);
+      if(b.family&&a.family&&b.family!==a.family)fail(`${itemName} compares ${b.unit} with ${a.unit}. Use the same unit on both sides.`);
       return {
         label:field(item.label,`${itemName} label`,LIMITS.compareLabel),
-        before:field(item.before,`${itemName} before`,LIMITS.compareValue),
-        after:field(item.after,`${itemName} after`,LIMITS.compareValue),
+        before,
+        after,
+        beforeValue:b.value,
+        afterValue:a.value,
         delta:field(item.delta,`${itemName} delta`,LIMITS.compareDelta,{optional:true})
       };
     });
@@ -189,7 +219,7 @@ function validateSection(section,index){
       if(!['done','waiting','pending'].includes(state))fail(`${itemName} state must be done, waiting, or pending.`);
       const progress=field(item.progress,`${itemName} progress`,LIMITS.swimlaneProgress,{optional:true});
       if(progress&&state!=='waiting')fail(`${itemName} progress belongs on the current step, the only waiting item.`);
-      if(progress&&!/\d+\s*%/.test(progress))fail(`${itemName} progress must include a percentage, for example 62%.`);
+      if(progress&&percentValue(progress,`${itemName} progress`)===null)fail(`${itemName} progress must include a percentage, for example 62%.`);
       return {
         label:field(item.label,`${itemName} label`,LIMITS.swimlaneLabel),
         note:field(item.note,`${itemName} note`,LIMITS.swimlaneNote,{optional:true}),
@@ -250,20 +280,16 @@ function renderSection(section){
       return `<article class="reply-card"><h3>${e(item.label)}</h3>${pill(text,toneName,iconName)}${item.note?`<p>${e(item.note)}</p>`:''}</article>`;
     }).join('')}</div>`;
   }else if(section.type==='compare'){
-    const number=text=>{
-      const match=String(text).replace(/,/g,'').match(/-?\d+(?:\.\d+)?/);
-      return match?Number(match[0]):null;
-    };
     body=`<div class="compare">${section.items.map(item=>{
-      const before=number(item.before),after=number(item.after);
-      const max=Math.max(before??0,after??0)||1;
-      const scale=value=>Math.round((value===null?100:value/max*100)*10)/10;
+      const before=item.beforeValue,after=item.afterValue;
+      const max=Math.max(before,after)||1;
+      const scale=value=>Math.round(value/max*1000)/10;
       const bar=(kind,value,width)=>`<div class="compare-bar ${kind}"><span class="compare-value">${e(value)}</span><span class="compare-track"><i style="--value:${width}%"></i></span></div>`;
       return `<div class="compare-row"><div class="compare-line"><span class="compare-label">${e(item.label)}</span>${item.delta?`<span class="compare-delta">${e(item.delta)}</span>`:''}</div>${bar('before',item.before,scale(before))}${bar('after',item.after,scale(after))}</div>`;
     }).join('')}</div>`;
   }else if(section.type==='changes'){
     const column=(label,items,state)=>items.length?`<div class="change-col ${state}"><p class="change-head">${e(label)}</p><ul class="change-list">${items.map(item=>`<li><span class="dot ${state}" aria-hidden="true"></span><span>${e(item)}</span></li>`).join('')}</ul></div>`:'';
-    body=`<div class="changes">${column('Done',section.done,'done')}${column('To do',section.todo,'pending')}</div>`;
+    body=`<div class="changes"${section.done.length&&section.todo.length?'':' data-single'}>${column('Done',section.done,'done')}${column('To do',section.todo,'pending')}</div>`;
   }else{
     const max=Math.max(...section.items.map(item=>item.value),1);
     body=`<div class="reply-bars">${section.items.map(item=>`<div class="reply-bar"><div class="reply-bar-head"><span>${e(item.label)}</span><strong>${e(item.display)}</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:${item.value/max*100}%"></span></div>${item.note?`<p class="metric-note">${e(item.note)}</p>`:''}</div>`).join('')}</div>`;
@@ -280,7 +306,7 @@ export async function renderReply(data){
   const done=state==='complete';
   const title=field(data.title,'Title',LIMITS.title);
   const summary=field(data.summary,'Summary',LIMITS.summary,{optional:true});
-  const columns=data.columns===undefined?3:Number(data.columns);
+  const columns=data.columns===undefined?2:Number(data.columns);
   if(!Number.isInteger(columns)||![2,3].includes(columns))fail('Columns must be 2 or 3.');
   const results=present(data.results)?facts(data.results,'Results',1):[];
   if(done&&!results.length)fail('Complete replies require result facts.');
@@ -294,13 +320,15 @@ export async function renderReply(data){
   const currentSteps=swimlane.items.filter(item=>item.state==='waiting').length;
   const nextSteps=swimlane.items.filter(item=>item.state==='pending').length;
   if(doneSteps<2)fail('The swimlane needs at least two done steps so the history is visible.');
-  if(nextSteps<2)fail('The swimlane needs at least two pending steps so the next steps are visible.');
+  if(!done&&nextSteps<2)fail('The swimlane needs at least two pending steps so the next steps are visible.');
   if(done&&currentSteps)fail('A complete reply cannot keep a waiting step in its swimlane.');
   if(!done&&currentSteps!==1)fail('A pending reply needs exactly one waiting step for the current step.');
+  if(done&&nextSteps)fail('A complete reply cannot keep pending steps. Move follow-ups into the changes block or keep the reply unfinished.');
   const active=swimlane.items.find(item=>item.state==='waiting');
   if(active&&!active.progress)fail('The current swimlane step needs its own progress, for example 62%.');
   if(done&&!changes[0].done.length)fail('A complete reply needs at least one done change.');
   if(!done&&!changes[0].todo.length)fail('A pending reply needs at least one to do change.');
+  if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Show follow-ups as done work or keep the reply unfinished.');
   const status=validateStatus(data,done);
   const milestones=data.milestones===undefined?[]:array(data.milestones,'Milestones',2,LIMITS.milestones).map((item,index)=>field(item,`Milestones ${index+1}`,LIMITS.milestoneLabel));
   if(!milestones.length)fail('Every reply needs 2 to 4 milestones so the progress bar can show its gates.');
@@ -318,8 +346,8 @@ export async function renderReply(data){
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
   const supporting=sections.filter(section=>section!==swimlaneSection);
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection)}<div class="reply-flow">${supporting.map(renderSection).join('')}</div></section>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${renderSection(swimlaneSection)}<div class="reply-flow" data-count="${supporting.length}">${supporting.map(renderSection).join('')}</div></section>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}" style="--flow-columns:${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {

@@ -64,16 +64,10 @@
           "state": "done"
         },
         {
-          "label": "Watch next red",
-          "note": "After the first run",
-          "time": "Later",
-          "state": "pending"
-        },
-        {
-          "label": "Retire old path",
-          "note": "Next week",
-          "time": "Later",
-          "state": "pending"
+          "label": "Cleanup",
+          "note": "Old path removed",
+          "time": "10:20",
+          "state": "done"
         }
       ]
     },
@@ -85,10 +79,7 @@
         "Same runner kept",
         "Live flow verified"
       ],
-      "todo": [
-        "Retire the old path",
-        "Watch the next run"
-      ]
+      "todo": []
     },
     {
       "title": "Cost",

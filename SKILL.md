@@ -11,7 +11,7 @@ Apply this skill to every message shown to the user in a T3 main session, includ
 
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
-- Use a dense 1024px grid with 3 or 4 columns and 8px gaps. Stack on phones.
+- Use a dense 1024px grid with two or three flow columns and 8px gaps. Stack on phones.
 - Results and status use the Slim height. Reply sections share 184px. The swimlane is a tall side column. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
 - Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.

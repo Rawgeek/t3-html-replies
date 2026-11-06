@@ -47,14 +47,20 @@ let scripts=0;for(const match of index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/s
 assert(index.includes('data-catalog-grid')&&index.includes('"id":"benchmarks-small"'));assert(!/\{\{[A-Z_]+\}\}/.test(index));
 const history=[{label:'Scope read',note:'Four blocks chosen',time:'09:10',state:'done'},{label:'Blocks built',note:'Renderer patched',time:'09:24',state:'done'}];
 const swimlane={title:'Stages',type:'swimlane',items:[...history,{label:'Checks running',note:'Focused suite',time:'Now',state:'waiting',progress:'62%'},{label:'Review',note:'After the checks',time:'Next',state:'pending'},{label:'Share post',note:'Then the push',time:'Later',state:'pending'}]};
-const completeSwimlane={title:'Stages',type:'swimlane',items:[...history,{label:'Checks run',note:'All pass',time:'09:30',state:'done'},{label:'Review',note:'Approved',time:'09:45',state:'done'},{label:'Share post',note:'Queued',time:'Later',state:'pending'},{label:'Verify post',note:'After upload',time:'Last',state:'pending'}]};
+const completeSwimlane={title:'Stages',type:'swimlane',items:[...history,{label:'Checks run',note:'All pass',time:'09:30',state:'done'},{label:'Review',note:'Approved',time:'09:45',state:'done'},{label:'Release',note:'Live verified',time:'10:02',state:'done'}]};
 const changes={title:'Changes',type:'changes',done:['Renderer patched','Docs updated'],todo:['Sample reply refreshed']};
+const doneChanges={title:'Changes',type:'changes',done:['Renderer patched','Docs updated','Sample refreshed'],todo:[]};
 const cost={title:'Cost',type:'compare',items:[{label:'Build time',before:'148 s',after:'92 s',delta:'38% less'}]};
 const milestones=['Scope','Build','Verify','Share'];
-const base={title:'Released',state:'complete',results:[{label:'Errors',value:0},{label:'Change',value:'<script>'}],milestones,sections:[completeSwimlane,changes,cost]};
-const withBlocks=(...extra)=>({sections:[completeSwimlane,changes,cost,...extra]});
+const base={title:'Released',state:'complete',results:[{label:'Errors',value:0},{label:'Change',value:'<script>'}],milestones,sections:[completeSwimlane,doneChanges,cost]};
+const withBlocks=(...extra)=>({sections:[completeSwimlane,doneChanges,cost,...extra]});
 await assert.rejects(renderReply({title:'Pending',state:'waiting',progress:'100%',milestones,sections:[swimlane,changes,cost]}),/Pending work cannot be shown at 100%/);
-await assert.rejects(renderReply({...base,sections:[completeSwimlane,changes]}),/at least two supporting blocks/);
+await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges]}),/at least two supporting blocks/);
+await assert.rejects(renderReply({...base,progress:'999%'}),/percentage from 0 to 100/);
+const unitCompare=await renderReply({...base,sections:[completeSwimlane,doneChanges,{title:'Cost',type:'compare',items:[{label:'Mixed',before:'1 s',after:'500 ms'}]}]});
+assert(unitCompare.includes('--value:100%')&&unitCompare.includes('--value:50%'),'Compare normalizes convertible units');
+await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges,{title:'Cost',type:'compare',items:[{label:'Mixed',before:'1 s',after:'2 KB'}]}]}),/Use the same unit/);
+await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges,{title:'Cost',type:'compare',items:[{label:'Text',before:'fast',after:'slow'}]}]}),/must be a number/);
 await assert.rejects(renderReply({title:'Complete',state:'complete'}),/Complete replies require result facts/);
 await assert.rejects(renderReply({title:'Long',state:'working',summary:'x'.repeat(81)}),/Summary exceeds 80 characters/);
 await assert.rejects(renderReply({...base,details:'Verified flow.'}),/unsupported fields: details/);
@@ -96,7 +102,7 @@ await assert.rejects(renderReply({...base,actions:[{label:'Both',href:'https://e
 await assert.rejects(renderReply({...base,actions:[{label:'Neither'}]}),/exactly one of href or send/);
 const reply=await renderReply({...base,sections:[
   completeSwimlane,
-  changes,
+  doneChanges,
   {title:'Facts',type:'facts',items:[{label:'Limit',value:'5 fields',note:'All applied'},{label:'Blocks',value:'1 height'}]},
   {title:'List',type:'list',items:['One','Two']},
   {title:'Table',type:'table',columns:['Gate','State'],rows:[['Tests','Pass'],['Review','Pass']]},
@@ -111,6 +117,11 @@ assert((reply.match(/class="status-gates"/g)||[]).length===1,'Progress tile carr
 assert(reply.includes('data-layout="side"')&&reply.includes('class="reply-flow"'),'The swimlane sits beside one packed block area');
 assert(css.includes('.reply-flow .reply-section-tile:last-child:nth-child(odd)'),'An odd supporting block fills the row so no space is left');
 assert(css.includes('min-height:376px'),'The swimlane matches two rows of supporting blocks');
+assert(reply.includes('data-count="7"'),'The flow records how many blocks it packs');
+const replyTemplate=await readFile(join(root,'reply-template.html'),'utf8');
+assert.equal(replyTemplate,await renderReply(JSON.parse(await readFile(join(root,'reply-example.json'),'utf8'))),'reply-template.html is regenerated from the current renderer and example');
+const completeTemplate=await readFile(join(root,'complete-template.html'),'utf8');
+assert.equal(completeTemplate,await renderReply(JSON.parse(await readFile(join(root,'complete-example.json'),'utf8'))),'complete-template.html is regenerated from the current renderer and example');
 const sectionHeights=[...reply.matchAll(/class="component-tile reply-section-tile" data-height="([a-z]+)"/g)].map(match=>match[1]);
 assert.equal(sectionHeights.length,8,'Structured blocks render');
 assert.deepEqual(sectionHeights,['tall',...Array(7).fill('small')],'The swimlane is taller and every other block shares one height');
