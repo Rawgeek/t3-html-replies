@@ -3,10 +3,8 @@
   "state": "waiting",
   "summary": "Focused suite is green. Review and full CI remain.",
   "progress": "78% estimate",
-  "next": "Finish the review",
-  "eta": "Unknown",
-  "wake": "PR watch 10m",
-  "zone": "Asia/Bangkok",
+  "eta": "25m left",
+  "wake": "Review finish",
   "milestones": [
     "Scope",
     "Build",
@@ -33,20 +31,20 @@
         {
           "label": "Review",
           "note": "Waiting on the reader",
-          "time": "Now",
+          "time": "09:40",
           "state": "waiting",
           "progress": "78%"
         },
         {
           "label": "Full CI",
           "note": "After the review",
-          "time": "Next",
+          "time": "10:05",
           "state": "pending"
         },
         {
           "label": "Share post",
           "note": "Then the announcement",
-          "time": "Later",
+          "time": "10:20",
           "state": "pending"
         }
       ]
@@ -55,13 +53,28 @@
       "title": "Changes",
       "type": "changes",
       "done": [
-      "Swimlane added",
-      "Gates wired",
-        "Docs updated"
+        {
+          "title": "Swimlane timed",
+          "description": "Every step carries a clock time"
+        },
+        {
+          "title": "Gates wired",
+          "description": "Four milestones map to the bar"
+        },
+        {
+          "title": "Docs updated",
+          "description": "Guide and index refreshed"
+        }
       ],
       "todo": [
-      "Finish review",
-        "Run full CI"
+        {
+          "title": "Finish review",
+          "description": "Reader verdict is pending"
+        },
+        {
+          "title": "Run full CI",
+          "description": "Starts after the review"
+        }
       ]
     },
     {

@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
-import { icon, pill, statusFooter, resultGrid, metric, escapeHTML as e } from './components.mjs';
+import { icon, pill, progressBoard, resultGrid, metric, escapeHTML as e } from './components.mjs';
 import { percentValue, measure } from './parse.mjs';
 
 const LIMITS=Object.freeze({
@@ -10,24 +10,20 @@ const LIMITS=Object.freeze({
   factsItems:4,listItems:3,listItem:48,
   tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,rowDetail:260,
   swimlaneItems:7,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
-  changeItems:3,changeItem:18,
+  changeItems:3,changeTitle:28,changeDescription:52,
   compareItems:3,compareLabel:18,compareValue:10,compareDelta:12,
   cardItems:3,cardLabel:12,cardNote:18,
   barsItems:3,barLabel:18,barNote:22,
   progress:12,next:18,eta:16,wake:20,actions:3,actionLabel:14,actionSend:400,
   milestones:4,milestoneLabel:8,
-  sectionText:{facts:240,list:175,table:240,swimlane:320,bars:170,changes:200,compare:170,cards:220},
+  sectionText:{facts:240,list:175,table:240,swimlane:340,bars:170,changes:280,compare:170,cards:220},
   visibleText:1200
 });
 const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
-const shortZone=timeZone=>{try{const parts=new Intl.DateTimeFormat('en',{timeZone,timeZoneName:'short'}).formatToParts(new Date());return parts.find(part=>part.type==='timeZoneName')?.value||'';}catch{return '';}};
-const localZone=shortZone(undefined);
-const flowSpans={2:[3,3],3:[2,1,3],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
-const pairSpans={1:[2],2:[2,2],3:[1,1,2],4:[1,1,1,1],5:[1,1,1,1,2],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,2]};
-const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions','zone'];
+const TOP_KEYS=['title','state','summary','results','sections','progress','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 
 const fail=message=>{throw Error(message);};
@@ -84,13 +80,12 @@ const visibleChars=value=>{
 
 function validateStatus(data,done){
   const progress=field(data.progress??(done?'100%':'Unknown'),'Progress',LIMITS.progress);
-  const next=field(data.next??(done?'None':'Unknown'),'Next',LIMITS.next);
   const eta=field(data.eta??(done?'Complete':'Unknown'),'ETA',LIMITS.eta);
   const wake=field(data.wake??(done?'Not needed':'Not armed'),'Wake',LIMITS.wake);
   const value=percentValue(progress,'Progress');
   if(done&&value!==100)fail('Complete replies require 100%.');
   if(!done&&value===100)fail('Pending work cannot be shown at 100%.');
-  return {progress,next,eta,wake};
+  return {progress,eta,wake};
 }
 
 
@@ -131,7 +126,9 @@ function validateSection(section,index){
   let result;
   if(type==='facts'){
     assertKeys(section,['title','type','items'],name);
-    result={type,title,items:facts(section.items,`${name} items`,2)};
+    const factItems=facts(section.items,`${name} items`,2);
+    if(factItems.length%2)fail(`${name} needs 2 or 4 facts so the grid fills. Add one or remove one.`);
+    result={type,title,items:factItems};
   }else if(type==='list'){
     assertKeys(section,['title','type','items'],name);
     const items=array(section.items,`${name} items`,2,LIMITS.listItems)
@@ -169,7 +166,17 @@ function validateSection(section,index){
       if(value===undefined)return [];
       if(!Array.isArray(value))fail(`${name} ${label} must be an array.`);
       if(value.length>LIMITS.changeItems)fail(`${name} ${label} allows at most ${LIMITS.changeItems} items.`);
-      return value.map((item,itemIndex)=>field(item,`${name} ${label} ${itemIndex+1}`,LIMITS.changeItem));
+      return value.map((item,itemIndex)=>{
+        const itemName=`${name} ${label} ${itemIndex+1}`;
+        if(item&&typeof item==='object'&&!Array.isArray(item)){
+          assertKeys(item,['title','description'],itemName);
+          return {
+            title:field(item.title,`${itemName} title`,LIMITS.changeTitle),
+            description:field(item.description,`${itemName} description`,LIMITS.changeDescription,{optional:true})
+          };
+        }
+        return {title:field(item,`${itemName} title`,LIMITS.changeTitle),description:''};
+      });
     };
     const done=lists(section.done,'done');
     const todo=lists(section.todo,'todo');
@@ -222,7 +229,7 @@ function validateSection(section,index){
       return {
         label:field(item.label,`${itemName} label`,LIMITS.swimlaneLabel),
         note:field(item.note,`${itemName} note`,LIMITS.swimlaneNote,{optional:true}),
-        time:field(item.time,`${itemName} time`,LIMITS.swimlaneTime,{optional:true}),
+        time:field(item.time,`${itemName} time`,LIMITS.swimlaneTime),
         state,
         progress
       };
@@ -253,7 +260,7 @@ function validateSection(section,index){
   return {...result,height:type==='swimlane'?'tall':SECTION_HEIGHT};
 }
 
-function renderSection(section,zone=''){
+function renderSection(section){
   let body='';
   if(section.type==='facts'){
     body=`<div class="metric-grid">${section.items.map(item=>metric(item.value,item.label,item.note)).join('')}</div>`;
@@ -272,10 +279,17 @@ function renderSection(section,zone=''){
     }).join('')}</tr>`;
     }).join('')}</tbody></table></div>`;
   }else if(section.type==='swimlane'){
-    section.zoneLabel=section.items.some(item=>/^\d{1,2}:\d{2}$/.test(item.time||''))&&zone?`Times ${zone}`:'';
+    const clock=value=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(value||'').trim());return m?Number(m[1])*60+Number(m[2]):null;};
+    const span=mins=>mins>=60?`${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`:`${mins}m`;
+    section.items.forEach((item,index)=>{
+      if(index===0)return;
+      const prev=clock(section.items[index-1].time),cur=clock(item.time);
+      if(prev!==null&&cur!==null&&cur>prev&&cur-prev<24*60)item.took=span(cur-prev);
+    });
     body=`<ol class="swimlane">${section.items.map(item=>{
       const percent=item.progress?Number(String(item.progress).match(/\d+(?:\.\d+)?/)[0]):null;
-      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span>${item.sameAsOverall?'':`<small>${percent}%</small>`}</span>`:''}</li>`;
+      const took=item.took?`<small class="stage-took">${e(item.took)}</small>`:'';
+      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span><time>${e(item.time)}</time>${took}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span>${item.sameAsOverall?'':`<small>${percent}%</small>`}</span>`:''}</li>`;
     }).join('')}</ol>`;
   }else if(section.type==='cards'){
     const tone={done:['Checked','ok','check'],waiting:['In progress','active','activity'],pending:['Next','waiting','arrow-right'],blocked:['Blocked','error','circle-x']};
@@ -292,13 +306,13 @@ function renderSection(section,zone=''){
       return `<div class="compare-row"><div class="compare-line"><span class="compare-label">${e(item.label)}</span>${item.delta?`<span class="compare-delta">${e(item.delta)}</span>`:''}</div>${bar('before',item.before,scale(before))}${bar('after',item.after,scale(after))}</div>`;
     }).join('')}</div>`;
   }else if(section.type==='changes'){
-    const column=(label,items,state)=>items.length?`<div class="change-col ${state}"><p class="change-head">${e(label)}</p><ul class="change-list">${items.map(item=>`<li><span class="dot ${state}" aria-hidden="true"></span><span>${e(item)}</span></li>`).join('')}</ul></div>`:'';
+    const column=(label,items,state)=>items.length?`<div class="change-col ${state}"><p class="change-head">${e(label)}</p><ul class="change-list">${items.map(item=>`<li><span class="dot ${state}" aria-hidden="true"></span><span class="change-copy"><b>${e(item.title)}</b>${item.description?`<small>${e(item.description)}</small>`:''}</span></li>`).join('')}</ul></div>`:'';
     body=`<div class="changes"${section.done.length&&section.todo.length?'':' data-single'}>${column('Done',section.done,'done')}${column('To do',section.todo,'pending')}</div>`;
   }else{
     const max=Math.max(...section.items.map(item=>item.value),1);
     body=`<div class="reply-bars">${section.items.map(item=>`<div class="reply-bar"><div class="reply-bar-head"><span>${e(item.label)}</span><strong>${e(item.display)}</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:${item.value/max*100}%"></span></div>${item.note?`<p class="metric-note">${e(item.note)}</p>`:''}</div>`).join('')}</div>`;
   }
-  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}${section.zoneLabel?` <span class="section-zone">${e(section.zoneLabel)}</span>`:''}</h2><div class="reply-body">${body}</div></div></section>`;
+  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
 }
 
 export async function renderReply(data){
@@ -336,22 +350,15 @@ export async function renderReply(data){
     if(open)fail(`A complete reply cannot keep the ${open.state} card "${open.label}" in ${open.section}. Mark every card done or keep the reply unfinished.`);
   }
   const status=validateStatus(data,done);
-  if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
   const overallPercent=percentValue(status.progress,'Progress');
   const currentStep=swimlane.items.find(item=>item.state==='waiting');
   const stepPercent=currentStep&&currentStep.progress?percentValue(currentStep.progress,'Step progress'):null;
   if(currentStep&&stepPercent!==null&&stepPercent===overallPercent)currentStep.sameAsOverall=true;
-  const zoneInput=present(data.zone)?field(data.zone,'Zone',32):undefined;
-  const zoneLabel=zoneInput===undefined?localZone:shortZone(zoneInput);
-  if(!zoneLabel)fail('Zone must be an IANA name such as Asia/Bangkok.');
-  const zone=zoneLabel;
   const milestones=data.milestones===undefined?[]:array(data.milestones,'Milestones',2,LIMITS.milestones).map((item,index)=>field(item,`Milestones ${index+1}`,LIMITS.milestoneLabel));
   if(!milestones.length)fail('Every reply needs 2 to 4 milestones so the progress bar can show its gates.');
   const actions=validateActions(data.actions);
   const visible=visibleChars({title,summary,results,sections,status,milestones,actions:actions.map(({label})=>({label}))});
   if(visible>LIMITS.visibleText)fail(`Reply exceeds ${LIMITS.visibleText} visible characters. Move long material to a linked artifact.`);
-  const label={complete:'Done',working:'Working',waiting:'Waiting',blocked:'Blocked'}[state];
-  const tone={complete:'ok',working:'active',waiting:'waiting',blocked:'error'}[state];
   const actionsHtml=actions.map(action=>{
     const className=`btn${action.primary?' primary':''}`;
     return action.send
@@ -361,16 +368,30 @@ export async function renderReply(data){
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
   const supporting=sections.filter(section=>section!==swimlaneSection);
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
-  const swimlaneHtml=renderSection(swimlaneSection,zone);
+  const swimlaneHtml=renderSection(swimlaneSection);
   if(overallPercent!==null&&swimlaneHtml.includes(`<small>${overallPercent}%</small>`))fail('The rail repeats the overall percentage. Keep the step number only when it differs from Progress.');
   const resultsHtml=results.length?resultGrid(results):'';
   const changesSection=supporting.find(section=>section.type==='changes');
-  const flowSections=supporting.filter(section=>section!==changesSection);
-  const flowHtml=`<div class="reply-flow" data-count="${flowSections.length}" data-fill="${flowSections.length%2?2:1}">${resultsHtml}${flowSections.map((section,index)=>renderSection({...section,span:pairSpans[flowSections.length][index]},zone)).join('')}</div>`;
-  const sideHtml=changesSection?`<div class="reply-side">${renderSection(changesSection,zone)}</div>`:'';
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}${flowHtml}${sideHtml}</section>`;
-  const metaHtml=`<div class="reply-meta">${pill(label,tone)}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</div>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${statusFooter({...status,state,milestones})}${sectionsHtml}</main></body></html>`;
+  const blockSections=supporting.filter(section=>section!==changesSection);
+  const blockSpans=blockSections.map((section,index)=>blockSections.length%2&&index===blockSections.length-1?2:1);
+  const blocksHtml=`<div class="bento-blocks" data-count="${blockSections.length}">${resultsHtml}${blockSections.map((section,index)=>renderSection({...section,span:blockSpans[index]})).join('')}</div>`;
+  const changePart=(kind)=>{
+    if(!changesSection)return '';
+    const items=kind==='done'?changesSection.done:changesSection.todo;
+    if(!items.length)return '';
+    const title=kind==='done'?'Done':'To do';
+    const span=kind==='done'&&!changesSection.todo.length?2:1;
+    const list=`<ul class="change-list">${items.map(item=>`<li><span class="dot ${kind==='done'?'done':'pending'}" aria-hidden="true"></span><span class="change-copy"><b>${e(item.title)}</b>${item.description?`<small>${e(item.description)}</small>`:''}</span></li>`).join('')}</ul>`;
+    return `<section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-change="${kind}" data-span="${span}"><div class="demo tile-body"><h2>${title}</h2><div class="reply-body"><div class="changes" data-kind="${kind}">${list}</div></div></div></section>`;
+  };
+  const progressHtml=progressBoard({...status,state,milestones});
+  const sectionsHtml=`<section class="bento" aria-label="Task layout">${swimlaneHtml}${progressHtml}${changePart('done')}${changePart('todo')}${blocksHtml}</section>`;
+  const wakeText=String(status.wake||'').trim();
+  const wakeOff=!wakeText||/^(?:not armed|not needed|off|none|unknown|unverified)$/i.test(wakeText);
+  const wakeLabel=wakeText.replace(/^on\s+/i,'');
+  const wakeChip=wakeOff?'':`<span class="wake-chip" title="Subscribed to ${e(wakeText)}">${icon('bell')}<span>${e(wakeLabel)}</span></span>`;
+  const metaHtml=`<div class="reply-meta">${wakeChip}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</div>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}</main></body></html>`;
 }
 
 export function assertRenderedReply(html){
@@ -379,10 +400,19 @@ export function assertRenderedReply(html){
   if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
   if(!/<section class="status-board"/.test(text))fail('Not a reply page: the status board is missing. Render reply JSON instead of writing HTML.');
   if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
-  if((text.match(/class="status-tile"/g)||[]).length<4)fail('Not a reply page: Progress, Next, ETA, and Wake are required.');
-  if(!/data-section-type="swimlane"/.test(text))fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
-  if(!/data-section-type="changes"/.test(text))fail('Not a reply page: the changes block is missing. Render reply JSON instead of writing HTML.');
-  if((text.match(/data-section-type="/g)||[]).length<3)fail('Not a reply page: it needs a swimlane, a changes block, and one supporting block.');
+  const tiles=[...text.matchAll(/<div class="status-tile"[\s\S]*?(?=<div class="status-tile"|<\/dl>)/g)].map(match=>match[0]);
+  if(!tiles.length)fail('Not a reply page: the Progress tile is missing.');
+  if(tiles.some(tile=>!/<dd>[^<]*\S[^<]*<\/dd>/.test(tile)))fail('Not a reply page: every status tile needs a value. Render reply JSON instead of writing HTML.');
+  const rail=text.match(/<ol class="swimlane">[\s\S]*?<\/ol>/);
+  if(!rail)fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
+  const steps=[...rail[0].matchAll(/<li class="[a-z]+">[\s\S]*?<\/li>/g)];
+  if(steps.length<5)fail('Not a reply page: the swimlane needs at least five filled steps.');
+  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label.');
+  const changeLists=[...text.matchAll(/<ul class="change-list">([\s\S]*?)<\/ul>/g)];
+  if(!changeLists.length||!changeLists.some(list=>/<li>[\s\S]*?<b>[^<]*\S[^<]*<\/b>/.test(list[1])))fail('Not a reply page: the changes block is empty. Render reply JSON instead of writing HTML.');
+  const types=[...text.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
+  if(!types.includes('swimlane')||!types.includes('changes'))fail('Not a reply page: it needs a swimlane and a changes block.');
+  if(types.length<3)fail('Not a reply page: it needs a swimlane, a changes block, and one supporting block.');
   if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
   return true;
 }

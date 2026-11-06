@@ -29,7 +29,7 @@ const markdown = text => text.split(/\n\n/).map(part => {
   const formatted=e(part).replace(/\*\*([^*]+)\*\*|\*([^*]+)\*/g,(_,a,b)=>`<strong>${a||b}</strong>`);
   return part.startsWith('## ')?`<h4>${e(part.slice(3))}</h4>`:`<p class="copy-text">${formatted}</p>`;
 }).join('');
-export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake='Not armed',state='working',milestones=[]}={}) {
+function statusModel({progress='Unknown',next='None',eta='Unknown',wake='Not armed',state='working',milestones=[]}={}) {
   const value=percentValue(progress,'Progress');
   const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
   const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
@@ -48,7 +48,37 @@ export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake=
   }).join('')}</div>`:'';
   const nextDone=/^(None|Done)$/i.test(next);
   const nextText=nextDone?(/^None$/i.test(next)?'None':'Done'):compact(next);
-  return `<section class="status-board" data-state="${e(state)}"><dl class="status-tiles" aria-label="Task status">${tile('Progress',done?'check':blocked?'circle-x':'activity',value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':''),tone,track+gates,'progress')}${tile('Next',nextDone?'check':'arrow-right',nextText,nextDone?'ok':'')}${tile('ETA',shortEta==='Done'?'check':'clock',shortEta,shortEta==='Unknown'?'waiting':done?'ok':'')}${tile('Wake',wakeOn?'bell':uncertain?'circle-help':'bell-off',shortWake,wakeOn?'ok':uncertain?'waiting':'muted')}</dl></section>`;
+  return {
+    state,
+    progress:tile('Progress',done?'check':blocked?'circle-x':'activity',value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':''),tone,track+gates,'progress'),
+    next:tile('Next',nextDone?'check':'arrow-right',nextText,nextDone?'ok':''),
+    eta:tile('ETA',shortEta==='Done'?'check':'clock',shortEta,shortEta==='Unknown'?'waiting':done?'ok':''),
+    wake:tile('Wake',wakeOn?'bell':uncertain?'circle-help':'bell-off',shortWake,wakeOn?'ok':uncertain?'waiting':'muted')
+  };
+}
+export function statusFooter(options={}) {
+  const m=statusModel(options);
+  return `<section class="status-board" data-state="${e(m.state)}"><dl class="status-tiles" aria-label="Task status">${m.progress}${m.next}${m.eta}${m.wake}</dl></section>`;
+}
+export function statusSplit(options={}) {
+  const m=statusModel(options);
+  return {
+    progress:`<section class="status-board" data-slot="progress" data-state="${e(m.state)}"><dl class="status-tiles" aria-label="Progress">${m.progress}</dl></section>`,
+    status:`<section class="status-board" data-slot="status" data-state="${e(m.state)}"><dl class="status-tiles" aria-label="Next, estimate, and wake">${m.next}${m.eta}${m.wake}</dl></section>`
+  };
+}
+export function progressBoard({progress='Unknown',eta='Unknown',state='working',milestones=[]}={}) {
+  const value=percentValue(progress,'Progress');
+  const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
+  const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
+  const shortEta=/unknown/i.test(eta)?'':/complete/i.test(eta)?'Done':String(eta).replace(/ estimate/i,'');
+  const track=`<div class="status-meter" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" ${value===null?'aria-valuetext="Unknown"':`aria-valuenow="${value}"`}><span style="--value:${value||0}%"></span></div>`;
+  const gates=milestones.length?`<div class="status-gates" aria-hidden="true">${milestones.map((label,index)=>{
+    const start=index/milestones.length*100,end=(index+1)/milestones.length*100;
+    const step=value===null?'pending':value>=end?'done':value>start?'active':'pending';
+    return `<span class="${step}">${e(label)}</span>`;
+  }).join('')}</div>`:'';
+  return `<section class="status-board" data-slot="progress" data-state="${e(state)}"><dl class="status-tiles" aria-label="Progress"><div class="status-tile" data-field="progress" data-tone="${tone}"><dt>${icon(done?'check':blocked?'circle-x':'activity')}<span>Progress</span>${shortEta?`<em class="status-eta">${e(shortEta)}</em>`:''}</dt><dd>${value===null?'Unknown':value+'%'}</dd>${track}${gates}</div></dl></section>`;
 }
 export function metric(value,label,note='') {
   return `<div class="metric"><p class="metric-label">${e(label)}</p><p class="metric-value">${e(value)}</p>${note?`<p class="metric-note">${e(note)}</p>`:''}</div>`;

@@ -5,7 +5,7 @@ description: "Render every T3 main-session update, question, and final reply as 
 
 # T3 HTML replies
 
-The layout is a bento grid: fixed-height tiles, one tall rail, one tall changes column, and a packed two column flow.
+The layout is a bento grid: fixed-height tiles, a tall stages column, a long Progress tile, a packed middle area, and a tall changes column.
 
 Apply this skill to every message shown to the user in a T3 main session, including progress updates and final answers. Subagents follow their own response contract.
 
@@ -25,21 +25,21 @@ The most common failure is an HTML fragment. It looks right in chat but fails gu
 
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
-- At 1024px the reply is three parts: the swimlane, a two column flow for results and supporting blocks, and a tall Changes column with Done above To do. Everything stacks on phones. The renderer chooses each block span and the block type when the type is omitted.
-- Start with the title and a one-line summary, then the status strip. Result facts open the flow beside the rail, above the supporting blocks.
-- Results and status use the Slim height. Reply sections share 184px. The swimlane is a tall side column. The renderer assigns every height, so rows always align.
+- At 1024px the reply is one bento grid: a tall swimlane on the left, a wide Progress tile with its ETA on top, Done and To do beneath it, and a packed middle for results and supporting blocks. Everything stacks on phones. The renderer chooses each block span and the block type when the type is omitted.
+- Start with the title and a one-line summary, then the grid. Result facts open the middle area above the supporting blocks.
+- Progress uses the Slim height and every other section shares 184px. Stages fill the left column for every row. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
 - Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.
 - Give every interactive control a real transport. A button either sends through the T3 HTML reply app or is a link. Never draw a control that only looks interactive.
 
 ## Status
 
-Show Progress, Next, ETA, and Wake for task updates.
+Show Progress with its ETA, and the wake chip only when a watch is armed.
 
 - Keep the progress bar inside the Progress tile, directly under the percentage. Draw it as a track plus one segment per milestone, with the milestone labels beneath.
 - Label estimates. Use Unknown when evidence is missing.
 - Reserve 100% for the fully verified outcome. Pending work stays below 100%.
-- Claim a wake only after host confirmation. Include time and timezone for a scheduled wake.
+- Claim a wake only after host confirmation. The header shows a bell chip with the event it watches; drop the chip when nothing is scheduled.
 - At 100%, lead with the verified result, implemented changes, and useful numbers. Use 3 or 4 short result facts when available.
 - Separate assessment progress from unresolved fix progress.
 
@@ -52,13 +52,13 @@ Carry authorized work end to end. Continue through implementation, checks, revie
 Every reply ships three required elements. The renderer rejects a reply without them.
 
 - The swimlane is a timeline of five to seven steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step shows its number only when it differs from overall progress; never repeat the same percentage in the rail and the Progress tile.
-- The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
+- The changes block splits into two tall blocks, Done and To do, each item a title over a description.
 - Two to four milestones label the segments of the progress bar.
-- Changes plus at least one flow block sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
+- Done, To do, and at least one flow block sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
 
 This gives every reply a visible past, present, and future. Do not replace the swimlane with prose.
 
-The grid never leaves a hole. Supporting blocks fill the three flow columns beside the swimlane and the renderer picks their spans. Never pad a reply with filler to fill space.
+The grid never leaves a hole. Supporting blocks fill the wide column beside the swimlane and the renderer picks their spans. Never pad a reply with filler to fill space.
 
 ## Validation
 

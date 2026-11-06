@@ -27,21 +27,19 @@ const base = {
   title: 'Layout check',
   state: 'working',
   progress: '55%',
-  next: 'Check limits',
   eta: '2 min',
   wake: 'Not armed',
-  zone: 'Asia/Bangkok',
   milestones: ['A', 'B', 'C'],
   sections: [
     {
       title: 'Stages',
       type: 'swimlane',
       items: [
-        { label: 'One', state: 'done' },
-        { label: 'Two', state: 'done' },
-        { label: 'Three', state: 'waiting', progress: '55%' },
-        { label: 'Four', state: 'pending' },
-        { label: 'Five', state: 'pending' }
+        { label: 'One', time: '09:00', state: 'done' },
+        { label: 'Two', time: '09:12', state: 'done' },
+        { label: 'Three', time: '09:30', state: 'waiting', progress: '55%' },
+        { label: 'Four', time: '09:50', state: 'pending' },
+        { label: 'Five', time: '10:10', state: 'pending' }
       ]
     },
     { title: 'Changes', type: 'changes', done: ['WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW'], todo: ['WWWWWWWWWWWWWWWWWW'] },
@@ -130,35 +128,39 @@ const inspect = async (url, width) => {
   const result = await send('Runtime.evaluate', {
     returnByValue: true,
     expression: `(() => {
-      const flow = document.querySelector('.reply-flow');
-      const tiles = [...flow.querySelectorAll(':scope > .reply-section-tile')];
+      const bento = document.querySelector('.bento');
       const box = (element) => element.getBoundingClientRect();
+      const tiles = [...document.querySelectorAll('.bento .reply-section-tile')];
       const clippedTiles = tiles.filter((tile) => {
         const body = tile.querySelector('.tile-body');
         return body.scrollHeight > body.clientHeight + 1 || body.scrollWidth > body.clientWidth + 1;
       });
-      const clipped = clippedTiles.length;
-      const clippedTypes = clippedTiles.map((tile) => tile.dataset.sectionType);
-      const spilled = [...document.querySelectorAll('.reply-section-tile *')]
+      const status = [...document.querySelectorAll('.bento .status-tile')];
+      const statusClipped = status.filter((tile) => tile.scrollHeight > tile.clientHeight + 1).map((tile) => tile.dataset.field || 'tile');
+      const spilledNodes = [...document.querySelectorAll('.bento .reply-section-tile *, .bento .status-tile *')]
         .filter((node) => node instanceof HTMLElement)
         .filter((node) => !node.closest('.table-wrap'))
-        .filter((node) => node.scrollWidth > node.clientWidth + 2 || node.scrollHeight > node.clientHeight + 2).length;
-      const flowBox = box(flow);
-      const rows = new Map();
-      for (const tile of tiles) {
+        .filter((node) => node.scrollWidth > node.clientWidth + 2 || node.scrollHeight > node.clientHeight + 2)
+        .map((node) => node.tagName.toLowerCase() + '.' + String(node.className).split(' ').filter(Boolean).join('.') + ' ' + node.scrollWidth + '/' + node.clientWidth + 'x' + node.scrollHeight + '/' + node.clientHeight);
+      const spilled = spilledNodes.length;
+      const blocks = [...document.querySelectorAll('.bento-blocks > .reply-section-tile')];
+      const blockRows = new Map();
+      for (const tile of blocks) {
         const rect = box(tile);
         const key = Math.round(rect.top);
-        const row = rows.get(key) || { left: Infinity, right: -Infinity, spans: 0 };
+        const row = blockRows.get(key) || { left: Infinity, right: -Infinity };
         row.left = Math.min(row.left, rect.left);
         row.right = Math.max(row.right, rect.right);
-        row.spans += Number(tile.dataset.span || 1);
-        rows.set(key, row);
+        blockRows.set(key, row);
       }
-      const holes = [...rows.values()].filter((row) =>
-        Math.abs(row.left - flowBox.left) > 1.5 || Math.abs(row.right - flowBox.right) > 1.5).length;
-      const columns = getComputedStyle(flow).gridTemplateColumns.split(' ').length;
-      const heights = [...new Set(tiles.map((tile) => Math.round(box(tile).height)))];
-      return JSON.stringify({ columns, clipped, clippedTypes, spilled, holes, heights });
+      const blocksBox = box(document.querySelector('.bento-blocks'));
+      const holes = [...blockRows.values()].filter((row) =>
+        Math.abs(row.left - blocksBox.left) > 1.5 || Math.abs(row.right - blocksBox.right) > 1.5).length;
+      const columns = getComputedStyle(bento).gridTemplateColumns.split(' ').length;
+      const heights = [...new Set(blocks.map((tile) => Math.round(box(tile).height)))];
+      const page = document.documentElement;
+      const overflowX = page.scrollWidth > page.clientWidth + 1;
+      return JSON.stringify({ columns, clipped: clippedTiles.length, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, spilled, spilledNodes, holes, heights, overflowX });
     })()`
   });
   ws.close();
@@ -177,12 +179,14 @@ try {
   for (const [name, url] of Object.entries(pages)) {
     for (const width of [1024, 728, 390]) {
       const report = await inspect(url, width);
-      const expected = width > 620 ? 2 : 1;
+      const expected = width > 900 ? 5 : 1;
       if (report.columns !== expected) failures.push(name + '@' + width + ': ' + report.columns + ' columns, expected ' + expected);
       if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles (' + report.clippedTypes.join(',') + ')');
-      if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes');
+      if (report.statusClipped.length) failures.push(name + '@' + width + ': status tiles clip (' + report.statusClipped.join(',') + ')');
+      if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes (' + report.spilledNodes.slice(0, 3).join(' | ') + ')');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
       if (report.heights.some((height) => height !== 184)) failures.push(name + '@' + width + ': non-184px flow tiles');
+      if (report.overflowX) failures.push(name + '@' + width + ': the page scrolls horizontally');
     }
   }
   if (failures.length) {

@@ -3,10 +3,8 @@
   "state": "complete",
   "summary": "Bounded batches keep every test and cut peak memory 39%.",
   "progress": "100%",
-  "next": "None",
   "eta": "Complete",
   "wake": "Not needed",
-  "zone": "Asia/Bangkok",
   "milestones": [
     "Scope",
     "Build",
@@ -76,9 +74,18 @@
       "title": "Changes",
       "type": "changes",
       "done": [
-        "Batching added",
-        "Same runner kept",
-        "Live flow verified"
+        {
+          "title": "Batching added",
+          "description": "Bounded batches cap peak memory"
+        },
+        {
+          "title": "Same runner kept",
+          "description": "Identical workload and setup"
+        },
+        {
+          "title": "Live flow verified",
+          "description": "Deployed and checked after release"
+        }
       ],
       "todo": []
     },

@@ -46,7 +46,6 @@ const reply = {
   state: 'working',
   summary: 'Exercises the rendered reply path.',
   progress: '40%',
-  next: 'Run checks',
   eta: '2 min',
   wake: 'Not armed',
   milestones: ['Read', 'Build', 'Ship'],
