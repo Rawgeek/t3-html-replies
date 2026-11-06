@@ -28,7 +28,7 @@ const markdown = text => text.split(/\n\n/).map(part => {
   const formatted=e(part).replace(/\*\*([^*]+)\*\*|\*([^*]+)\*/g,(_,a,b)=>`<strong>${a||b}</strong>`);
   return part.startsWith('## ')?`<h4>${e(part.slice(3))}</h4>`:`<p class="copy-text">${formatted}</p>`;
 }).join('');
-export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake='Not armed',state='working'}={}) {
+export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake='Not armed',state='working',milestones=[]}={}) {
   const matches=String(progress).match(/(\d+(?:\.\d+)?)\s*%/),value=matches?Math.max(0,Math.min(100,Number(matches[1]))):null;
   const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
   const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
@@ -39,9 +39,14 @@ export function statusFooter({progress='Unknown',next='None',eta='Unknown',wake=
   const shortWake=off?(/not needed/i.test(wake)?'None':'Off'):uncertain?'Unknown':/review|pr watch/i.test(wake)?'Review':compact(wake);
   const tile=(label,name,text,tileTone='',extra='',field='')=>`<div class="status-tile" data-field="${field}" data-tone="${tileTone}"><dt>${icon(name)}<span>${label}</span></dt><dd>${e(text)}</dd>${extra}</div>`;
   const track=`<div class="status-meter" role="progressbar" aria-label="Progress${/estimate/i.test(progress)?', estimate':''}" aria-valuemin="0" aria-valuemax="100" ${value===null?'aria-valuetext="Unknown"':`aria-valuenow="${value}"`}><span style="--value:${value||0}%"></span></div>`;
+  const gates=milestones.length?`<div class="status-gates" aria-hidden="true">${milestones.map((label,index)=>{
+    const start=index/milestones.length*100,end=(index+1)/milestones.length*100;
+    const step=value===null?'pending':value>=end?'done':value>start?'active':'pending';
+    return `<span class="${step}">${e(label)}</span>`;
+  }).join('')}</div>`:'';
   const nextDone=/^(None|Done)$/i.test(next);
   const nextText=nextDone?(/^None$/i.test(next)?'None':'Done'):compact(next);
-  return `<section class="status-board" data-state="${e(state)}"><dl class="status-tiles" aria-label="Task status">${tile('Progress',done?'check':blocked?'circle-x':'activity',value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':''),tone,track,'progress')}${tile('Next',nextDone?'check':'arrow-right',nextText,nextDone?'ok':'')}${tile('ETA',shortEta==='Done'?'check':'clock',shortEta,shortEta==='Unknown'?'waiting':done?'ok':'')}${tile('Wake',wakeOn?'bell':uncertain?'circle-help':'bell-off',shortWake,wakeOn?'ok':uncertain?'waiting':'muted')}</dl></section>`;
+  return `<section class="status-board" data-state="${e(state)}"><dl class="status-tiles" aria-label="Task status">${tile('Progress',done?'check':blocked?'circle-x':'activity',value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':''),tone,track+gates,'progress')}${tile('Next',nextDone?'check':'arrow-right',nextText,nextDone?'ok':'')}${tile('ETA',shortEta==='Done'?'check':'clock',shortEta,shortEta==='Unknown'?'waiting':done?'ok':'')}${tile('Wake',wakeOn?'bell':uncertain?'circle-help':'bell-off',shortWake,wakeOn?'ok':uncertain?'waiting':'muted')}</dl></section>`;
 }
 export function metric(value,label,note='') {
   return `<div class="metric"><p class="metric-label">${e(label)}</p><p class="metric-value">${e(value)}</p>${note?`<p class="metric-note">${e(note)}</p>`:''}</div>`;

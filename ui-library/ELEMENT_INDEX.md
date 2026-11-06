@@ -1,7 +1,7 @@
 # Element index
 
 Start with [the reply guide](AGENT_GUIDE.md) for the schema and hard limits.
-The reply renderer accepts facts, list, table, timeline, and bars, and assigns every block the same 184px height. Use these samples for visual reference; do not copy a sample height or long copy into a reply.
+The reply renderer accepts facts, list, table, swimlane, bars, changes, compare, and cards. Every block shares one 184px height except the full-width swimlane band. Use these samples for visual reference; do not copy a sample height or long copy into a reply.
 Pick the closest element below. Open its demo or logic, then run `node ui.mjs show <id>` for use and avoid guidance.
 
 - Elements (60)

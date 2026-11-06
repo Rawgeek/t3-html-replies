@@ -99,7 +99,7 @@
 .t3lib .status-tile dt { display: grid; grid-template-columns: 14px minmax(0,1fr); gap: 5px; align-items: center; color: var(--tone); font-size: 11px; line-height: 1.3; }
 .t3lib .status-tile dt .icon { width: 14px; height: 14px; }
 .t3lib .status-tile dd { font-size: 16px; font-weight: 550; line-height: 1.2; letter-spacing: -.025em; overflow-wrap: anywhere; }
-.t3lib .status-tile[data-field="progress"] { grid-template-rows: 14px auto auto; align-content: start; }
+.t3lib .status-tile[data-field="progress"] { grid-template-rows: 14px auto auto auto; align-content: start; }
 .t3lib .status-tile[data-field="progress"] dd { font-size: 18px; }
 .t3lib .status-tile[data-field="progress"] .status-meter { height: 6px; }
 .t3lib .status-meter { height: 4px; border-radius: 3px; background: color-mix(in srgb,var(--tone) 15%,transparent); overflow: hidden; }
@@ -179,6 +179,54 @@
 .t3lib .reply-bar-head strong { font-size:12px; font-variant-numeric:tabular-nums; }
 .t3lib .reply-bar-track { height:4px; border-radius:4px; overflow:hidden; background:var(--ui-secondary); }
 .t3lib .reply-bar-track span { display:block; height:100%; width:var(--value); border-radius:inherit; background:var(--ui-series-1); }
+.t3lib .changes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; height:100%; align-items:stretch; }
+.t3lib .change-col { display:grid; grid-template-rows:auto minmax(0,1fr); gap:4px; min-width:0; }
+.t3lib .change-head { font-size:9.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ui-muted); }
+.t3lib .change-list { display:grid; grid-auto-rows:1fr; gap:0; font-size:11.5px; line-height:1.3; }
+.t3lib .change-list li { display:grid; grid-template-columns:8px minmax(0,1fr); gap:7px; align-items:center; border-bottom:1px solid var(--ui-border); }
+.t3lib .change-list li:last-child { border-bottom:0; }
+.t3lib .change-list .dot { margin-top:0; width:6px; height:6px; }
+.t3lib .compare { display:grid; height:100%; grid-auto-rows:1fr; gap:6px; align-content:stretch; }
+.t3lib .compare-row { display:grid; align-content:center; gap:5px; min-width:0; }
+.t3lib .compare-line { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:6px; align-items:baseline; font-size:10.5px; }
+.t3lib .compare-label { color:var(--ui-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.t3lib .compare-delta { font-size:9.5px; color:var(--ui-ok); white-space:nowrap; }
+.t3lib .compare-values { display:grid; grid-template-columns:auto auto auto; gap:4px; align-items:baseline; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.t3lib .compare-values > span:first-child { color:var(--ui-muted); }
+.t3lib .compare-track { position:relative; height:6px; border-radius:3px; background:var(--ui-secondary); overflow:hidden; }
+.t3lib .compare-track .before, .t3lib .compare-track .after { position:absolute; inset:0 auto 0 0; border-radius:inherit; }
+.t3lib .compare-track .before { width:var(--before); background:color-mix(in srgb,var(--ui-muted) 40%,transparent); }
+.t3lib .compare-track .after { width:var(--after); background:var(--ui-series-1); }
+.t3lib.reply[data-state="complete"] .compare-track .after { background:var(--ui-ok); }
+.t3lib .reply-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); gap:6px; height:100%; align-content:stretch; }
+.t3lib .reply-card { display:grid; gap:4px; align-content:start; padding:7px; border:1px solid var(--ui-border); border-radius:7px; }
+.t3lib .reply-card h3 { font-size:11.5px; font-weight:600; line-height:1.25; }
+.t3lib .reply-card p { font-size:10px; color:var(--ui-muted); line-height:1.3; }
+.t3lib .reply-card .pill { font-size:9.5px; padding:2px 5px; }
+.t3lib .reply-card .pill .icon { width:10px; height:10px; }
+.t3lib .reply-section-tile[data-section-type="swimlane"] { grid-column:1 / -1; }
+.t3lib .swimlane { display:grid; grid-auto-rows:1fr; height:100%; }
+.t3lib .swimlane li { display:grid; grid-template-columns:9px minmax(0,1fr) 46px; grid-template-rows:auto; gap:2px 10px; align-content:center; align-items:center; position:relative; min-width:0; }
+.t3lib .swimlane li::before { content:""; position:absolute; left:3px; top:0; bottom:0; width:1px; background:var(--ui-border); }
+.t3lib .swimlane li:first-child::before { top:50%; }
+.t3lib .swimlane li:last-child::before { bottom:50%; }
+.t3lib .swimlane .dot { grid-column:1; margin:0; }
+.t3lib .swimlane-copy { grid-column:2; display:grid; gap:2px; min-width:0; }
+.t3lib .swimlane-copy b { font-size:12px; font-weight:550; line-height:1.25; }
+.t3lib .swimlane-copy small { font-size:10.5px; color:var(--ui-muted); line-height:1.3; }
+.t3lib .swimlane-step { grid-column:2 / -1; grid-row:2; display:grid; grid-template-columns:minmax(0,1fr) max-content; gap:6px; align-items:center; margin:1px 0 2px; }
+.t3lib .swimlane-meter { display:block; height:4px; border-radius:2px; background:var(--ui-secondary); overflow:hidden; }
+.t3lib .swimlane-meter i { display:block; height:100%; width:var(--value); background:var(--ui-series-1); }
+.t3lib .swimlane-step small { font-size:9.5px; color:var(--ui-series-1); font-variant-numeric:tabular-nums; }
+.t3lib .swimlane time { grid-column:3; font-size:10px; color:var(--ui-muted); text-align:right; }
+.t3lib .swimlane li.waiting .swimlane-copy b { color:var(--ui-series-1); }
+.t3lib .swimlane li.pending .swimlane-copy b { color:var(--ui-muted); }
+@media (max-width:620px) { .t3lib .swimlane li { grid-template-columns:9px minmax(0,1fr) 34px; gap:2px 7px; } }
+.t3lib .status-gates { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:3px; font-size:8.5px; line-height:1.2; color:var(--ui-muted); }
+.t3lib .status-gates span { display:grid; gap:2px; align-content:start; overflow:hidden; white-space:nowrap; }
+.t3lib .status-gates span::before { content:""; height:3px; border-radius:2px; background:var(--ui-secondary); }
+.t3lib .status-gates span.done::before { background:var(--ui-ok); }
+.t3lib .status-gates span.active::before { background:var(--ui-series-1); }
 .t3lib.reply[data-state="complete"] .status-tile { background:transparent; border-top:1px solid var(--ui-border); border-radius:0; }
 .t3lib.reply[data-state="complete"] .status-tile[data-field="progress"] { background:color-mix(in srgb,var(--ui-ok) 7%,transparent); border:1px solid var(--ui-border); border-radius:7px; }
 .t3lib.reply[data-state="complete"] .status-tile dd { font-size:13px; }

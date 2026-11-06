@@ -7,23 +7,21 @@ description: "Render every T3 main-session update, question, and final reply as 
 
 Apply this skill to every message shown to the user in a T3 main session, including progress updates and final answers. Subagents follow their own response contract.
 
-The complete reply library is bundled in `ui-library/`. Run commands from this skill directory.
-
 ## Contract
 
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
 - Use a dense 1024px grid with 3 or 4 columns and 8px gaps. Stack on phones.
-- Results and status use the Slim height. Every reply section uses one shared 184px height. The renderer assigns it, so rows always align and mixed block heights are impossible.
+- Results and status use the Slim height. Reply sections share 184px. The swimlane alone is a full-width Tall band. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
-- Keep the validated reply under the renderer limits. Render opaque machine values internally.
+- Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.
 - Give every interactive control a real transport. A button either sends through the T3 HTML reply app or is a link. Never draw a control that only looks interactive.
 
 ## Status
 
 Show Progress, Next, ETA, and Wake for task updates.
 
-- Keep the progress bar inside the Progress tile, directly under the percentage.
+- Keep the progress bar inside the Progress tile, directly under the percentage. Draw it as a track plus one segment per milestone, with the milestone labels beneath.
 - Label estimates. Use Unknown when evidence is missing.
 - Reserve 100% for the fully verified outcome. Pending work stays below 100%.
 - Claim a wake only after host confirmation. Include time and timezone for a scheduled wake.
@@ -34,26 +32,38 @@ Show Progress, Next, ETA, and Wake for task updates.
 
 Carry authorized work end to end. Continue through implementation, checks, review, and verification instead of stopping at a plan, diagnosis, or progress report. Decide routine, reversible details yourself. Ask only for missing authority or a preference that evidence cannot settle.
 
+## Swimlane, changes, and gates
+
+Every reply ships three required elements. The renderer rejects a reply without them.
+
+- The swimlane is a timeline of five or six steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step carries its own progress number.
+- The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
+- Two to four milestones label the segments of the progress bar.
+
+This gives every reply a visible past, present, and future. Do not replace the swimlane with prose.
+
 ## Validation
 
-The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits.
+The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](/Users/rawgeek/.codex/templates/t3-ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits.
 
 The renderer enforces the limits on every field before writing HTML. It rejects missing fields, unknown fields, long values, opaque references, expandable content, and replies above the total size limit. On failure, shorten the field or move the information into another block. Never bypass validation.
 
-Available visible block types are facts, list, table, timeline, and bars. Each block has a short title and the shared section height. The renderer rejects a per-section size or span field. The grid fills the last row automatically.
+Visible block types are facts, list, table, swimlane, bars, changes, compare, and cards. Each block has a short title and the shared section height. The renderer rejects a per-section size or span field. The grid fills the last row automatically.
+
+Numbers sit inside a visual. A before and after pair uses compare, a single measurement uses facts, and several comparable values use bars.
 
 ## Find an element
 
-Start at [ELEMENT_INDEX.md](ui-library/ELEMENT_INDEX.md). The tree is group, family, and sample. Each leaf has a one-line use case and links to its demo and logic file.
+Start at [ELEMENT_INDEX.md](/Users/rawgeek/.codex/templates/t3-ui-library/ELEMENT_INDEX.md). The tree is group, family, and sample. Each leaf has a one-line use case and links to its demo and logic file.
 
-Using the index first keeps replies consistent and avoids rewriting markup. Use `node ui-library/ui.mjs show ID` when the one-line description needs more context.
+Using the index first keeps replies consistent and avoids rewriting markup. Use node ui.mjs show ID when the one-line description needs more context.
 
 ## Workflow
 
-1. Read the reply guide. Apply your local unslop rules if installed.
+1. Read the reply guide and apply [unslop](/Users/rawgeek/.codex/skills/unslop/SKILL.md).
 2. Pick the closest element from the tree index.
-3. Write compact JSON. Split information across visible blocks. Use at most 8 sections and 1200 visible characters.
-4. Render with `node ui-library/ui.mjs reply data.json /absolute/path/reply.html`. The command prints the absolute path.
+3. Write compact JSON. Split information across visible blocks. Use at most 8 sections and 1600 visible characters.
+4. Render with node ui.mjs reply data.json /task/output/reply.html. The command prints the absolute path.
 5. Verify the path, then preview at 728px and 390px. Fix overflow, gaps, clipping, or unclear status.
 6. When the t3-html-replies render_reply MCP tool is available, call it with the absolute htmlPath. Otherwise call T3's html_render tool. Keep source markup out of model context.
 
@@ -89,6 +99,7 @@ or:
 - No field over its limit.
 - No clipping, overflow, or avoidable gap.
 - Progress, Next, ETA, and Wake are visible.
+- The swimlane shows done, current, and next steps, and the changes block shows done and to do work.
 - Completion shows the verified result and useful numbers.
 - Every control either has a working MCP action or an HTTPS link.
 

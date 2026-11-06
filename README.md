@@ -4,16 +4,18 @@ A Codex skill and UI kit for compact HTML replies in T3 Code.
 
 ![Reply examples](screenshots/overview.png)
 
-The renderer turns short JSON into one self-contained HTML page. Replies use a dense grid, fixed 184px blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
+The renderer turns short JSON into one self-contained HTML page. Replies use a dense grid, fixed-height blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
 
 ## What it does
 
 - 3-column grid at 1024px, 2 columns on tablets, 1 on phones.
-- Results and status use 88px tiles. Every reply section uses the same 184px height.
-- 8 sections max, 3 items per block, 1,200 visible characters.
+- Results and status use 88px tiles. Reply sections share 184px; the swimlane is a full-width 376px band.
+- 8 sections max, 3 items per block, 1,600 visible characters.
+- Every reply carries a swimlane of five or six steps, a done and to do changes block, and two to four progress milestones.
+- Numbers sit in a visual: compare bars for before and after, facts for single values, bars for groups.
 - 2-column tables, 3 rows. The last row fills automatically, so no orphan blocks.
-- Progress bar stays inside the Progress tile.
-- The renderer rejects long fields, unknown fields, mixed heights, and opaque IDs.
+- Progress shows one segment per milestone, labelled under the track.
+- The renderer rejects long fields, unknown fields, mixed heights, hashes, and opaque IDs.
 
 ## Install
 
@@ -29,7 +31,7 @@ Render an example:
 
 ```sh
 cd ~/.codex/skills/t3-html-replies
-node ui-library/ui.mjs reply ui-library/release-example.json output/release.html
+node ui-library/ui.mjs reply ui-library/reply-example.json output/reply.html
 ```
 
 Open `ui-library/index.html` for the full gallery.
@@ -75,7 +77,7 @@ Inside `ui-library/`:
 - `render-reply.mjs`: validated reply renderer.
 - `library.css`: shared styles and fixed heights.
 - `verify.mjs`: validation and generated-file checks.
-- `release-example.json`, `working-example.json`, `complete-example.json`: starting points.
+- `reply-example.json`, `complete-example.json`: starting points.
 
 ## Develop
 

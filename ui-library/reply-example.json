@@ -1,23 +1,110 @@
 {
-  "title": "Checks pass",
+  "title": "Checks pass, review open",
   "state": "waiting",
-  "summary": "Sample reply. Review and full CI remain.",
+  "summary": "Focused suite is green. Review and full CI remain.",
   "progress": "78% estimate",
   "next": "Finish the review",
   "eta": "Unknown",
   "wake": "PR watch 10m",
+  "milestones": [
+    "Scope",
+    "Build",
+    "Review",
+    "Ship"
+  ],
   "sections": [
     {
-      "title": "Open gates",
-      "type": "list",
-      "items": ["Review verdict", "Full CI"]
+      "title": "Stages",
+      "type": "swimlane",
+      "items": [
+        {
+          "label": "Scope read",
+          "note": "Four blocks chosen",
+          "time": "09:10",
+          "state": "done"
+        },
+        {
+          "label": "Renderer patched",
+          "note": "Focused suite green",
+          "time": "09:24",
+          "state": "done"
+        },
+        {
+          "label": "Review",
+          "note": "Waiting on the reader",
+          "time": "Now",
+          "state": "waiting",
+          "progress": "78%"
+        },
+        {
+          "label": "Full CI",
+          "note": "After the review",
+          "time": "Next",
+          "state": "pending"
+        },
+        {
+          "label": "Share post",
+          "note": "Then the announcement",
+          "time": "Later",
+          "state": "pending"
+        }
+      ]
     },
     {
-      "title": "Evidence",
-      "type": "timeline",
+      "title": "Changes",
+      "type": "changes",
+      "done": [
+        "Swimlane block added",
+        "Progress gates wired",
+        "Docs updated"
+      ],
+      "todo": [
+        "Finish the review",
+        "Run full CI"
+      ]
+    },
+    {
+      "title": "Build cost",
+      "type": "compare",
       "items": [
-        {"label": "Focused checks", "note": "Passed", "time": "09:18", "state": "done"},
-        {"label": "Review", "note": "Pending", "time": "Now", "state": "waiting"}
+        {
+          "label": "Build time",
+          "before": "148 s",
+          "after": "92 s",
+          "delta": "38% less"
+        },
+        {
+          "label": "Peak memory",
+          "before": "1.8 GB",
+          "after": "1.1 GB",
+          "delta": "39% less"
+        }
+      ]
+    },
+    {
+      "title": "Work",
+      "type": "cards",
+      "items": [
+        {
+          "label": "Renderer",
+          "state": "done",
+          "note": "Blocks and limits"
+        },
+        {
+          "label": "Docs",
+          "state": "done",
+          "note": "Guide and index"
+        },
+        {
+          "label": "Review",
+          "state": "waiting",
+          "note": "Reader pending"
+        },
+        {
+          "label": "CI",
+          "state": "pending",
+          "note": "After review"
+        }
       ]
     }
   ]

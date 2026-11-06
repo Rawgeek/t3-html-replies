@@ -99,7 +99,7 @@
 .t3lib .status-tile dt { display: grid; grid-template-columns: 14px minmax(0,1fr); gap: 5px; align-items: center; color: var(--tone); font-size: 11px; line-height: 1.3; }
 .t3lib .status-tile dt .icon { width: 14px; height: 14px; }
 .t3lib .status-tile dd { font-size: 16px; font-weight: 550; line-height: 1.2; letter-spacing: -.025em; overflow-wrap: anywhere; }
-.t3lib .status-tile[data-field="progress"] { grid-template-rows: 14px auto auto; align-content: start; }
+.t3lib .status-tile[data-field="progress"] { grid-template-rows: 14px auto auto auto; align-content: start; }
 .t3lib .status-tile[data-field="progress"] dd { font-size: 18px; }
 .t3lib .status-tile[data-field="progress"] .status-meter { height: 6px; }
 .t3lib .status-meter { height: 4px; border-radius: 3px; background: color-mix(in srgb,var(--tone) 15%,transparent); overflow: hidden; }
@@ -179,6 +179,54 @@
 .t3lib .reply-bar-head strong { font-size:12px; font-variant-numeric:tabular-nums; }
 .t3lib .reply-bar-track { height:4px; border-radius:4px; overflow:hidden; background:var(--ui-secondary); }
 .t3lib .reply-bar-track span { display:block; height:100%; width:var(--value); border-radius:inherit; background:var(--ui-series-1); }
+.t3lib .changes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; height:100%; align-items:stretch; }
+.t3lib .change-col { display:grid; grid-template-rows:auto minmax(0,1fr); gap:4px; min-width:0; }
+.t3lib .change-head { font-size:9.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ui-muted); }
+.t3lib .change-list { display:grid; grid-auto-rows:1fr; gap:0; font-size:11.5px; line-height:1.3; }
+.t3lib .change-list li { display:grid; grid-template-columns:8px minmax(0,1fr); gap:7px; align-items:center; border-bottom:1px solid var(--ui-border); }
+.t3lib .change-list li:last-child { border-bottom:0; }
+.t3lib .change-list .dot { margin-top:0; width:6px; height:6px; }
+.t3lib .compare { display:grid; height:100%; grid-auto-rows:1fr; gap:6px; align-content:stretch; }
+.t3lib .compare-row { display:grid; align-content:center; gap:5px; min-width:0; }
+.t3lib .compare-line { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:6px; align-items:baseline; font-size:10.5px; }
+.t3lib .compare-label { color:var(--ui-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.t3lib .compare-delta { font-size:9.5px; color:var(--ui-ok); white-space:nowrap; }
+.t3lib .compare-values { display:grid; grid-template-columns:auto auto auto; gap:4px; align-items:baseline; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.t3lib .compare-values > span:first-child { color:var(--ui-muted); }
+.t3lib .compare-track { position:relative; height:6px; border-radius:3px; background:var(--ui-secondary); overflow:hidden; }
+.t3lib .compare-track .before, .t3lib .compare-track .after { position:absolute; inset:0 auto 0 0; border-radius:inherit; }
+.t3lib .compare-track .before { width:var(--before); background:color-mix(in srgb,var(--ui-muted) 40%,transparent); }
+.t3lib .compare-track .after { width:var(--after); background:var(--ui-series-1); }
+.t3lib.reply[data-state="complete"] .compare-track .after { background:var(--ui-ok); }
+.t3lib .reply-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); gap:6px; height:100%; align-content:stretch; }
+.t3lib .reply-card { display:grid; gap:4px; align-content:start; padding:7px; border:1px solid var(--ui-border); border-radius:7px; }
+.t3lib .reply-card h3 { font-size:11.5px; font-weight:600; line-height:1.25; }
+.t3lib .reply-card p { font-size:10px; color:var(--ui-muted); line-height:1.3; }
+.t3lib .reply-card .pill { font-size:9.5px; padding:2px 5px; }
+.t3lib .reply-card .pill .icon { width:10px; height:10px; }
+.t3lib .reply-section-tile[data-section-type="swimlane"] { grid-column:1 / -1; }
+.t3lib .swimlane { display:grid; grid-auto-rows:1fr; height:100%; }
+.t3lib .swimlane li { display:grid; grid-template-columns:9px minmax(0,1fr) 46px; grid-template-rows:auto; gap:2px 10px; align-content:center; align-items:center; position:relative; min-width:0; }
+.t3lib .swimlane li::before { content:""; position:absolute; left:3px; top:0; bottom:0; width:1px; background:var(--ui-border); }
+.t3lib .swimlane li:first-child::before { top:50%; }
+.t3lib .swimlane li:last-child::before { bottom:50%; }
+.t3lib .swimlane .dot { grid-column:1; margin:0; }
+.t3lib .swimlane-copy { grid-column:2; display:grid; gap:2px; min-width:0; }
+.t3lib .swimlane-copy b { font-size:12px; font-weight:550; line-height:1.25; }
+.t3lib .swimlane-copy small { font-size:10.5px; color:var(--ui-muted); line-height:1.3; }
+.t3lib .swimlane-step { grid-column:2 / -1; grid-row:2; display:grid; grid-template-columns:minmax(0,1fr) max-content; gap:6px; align-items:center; margin:1px 0 2px; }
+.t3lib .swimlane-meter { display:block; height:4px; border-radius:2px; background:var(--ui-secondary); overflow:hidden; }
+.t3lib .swimlane-meter i { display:block; height:100%; width:var(--value); background:var(--ui-series-1); }
+.t3lib .swimlane-step small { font-size:9.5px; color:var(--ui-series-1); font-variant-numeric:tabular-nums; }
+.t3lib .swimlane time { grid-column:3; font-size:10px; color:var(--ui-muted); text-align:right; }
+.t3lib .swimlane li.waiting .swimlane-copy b { color:var(--ui-series-1); }
+.t3lib .swimlane li.pending .swimlane-copy b { color:var(--ui-muted); }
+@media (max-width:620px) { .t3lib .swimlane li { grid-template-columns:9px minmax(0,1fr) 34px; gap:2px 7px; } }
+.t3lib .status-gates { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:3px; font-size:8.5px; line-height:1.2; color:var(--ui-muted); }
+.t3lib .status-gates span { display:grid; gap:2px; align-content:start; overflow:hidden; white-space:nowrap; }
+.t3lib .status-gates span::before { content:""; height:3px; border-radius:2px; background:var(--ui-secondary); }
+.t3lib .status-gates span.done::before { background:var(--ui-ok); }
+.t3lib .status-gates span.active::before { background:var(--ui-series-1); }
 .t3lib.reply[data-state="complete"] .status-tile { background:transparent; border-top:1px solid var(--ui-border); border-radius:0; }
 .t3lib.reply[data-state="complete"] .status-tile[data-field="progress"] { background:color-mix(in srgb,var(--ui-ok) 7%,transparent); border:1px solid var(--ui-border); border-radius:7px; }
 .t3lib.reply[data-state="complete"] .status-tile dd { font-size:13px; }
@@ -267,7 +315,7 @@
   stroke-linejoin="round"
 >
   <path d="M20 6 9 17l-5-5" />
-</svg><span>Done</span></span></header><p class="reply-text">Bounded batches keep every test and cut peak memory 39%.</p><section class="tile-grid reply-results" aria-label="Results" style="--columns:4"><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Peak memory</p><p class="metric-value">1.1 GB</p><p class="metric-note">39% less</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Build time</p><p class="metric-value">92 s</p><p class="metric-note">was 148 s</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Tests</p><p class="metric-value">1,248</p><p class="metric-note">All pass</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Live flow</p><p class="metric-value">Verified</p><p class="metric-note">After release</p></div></div></section></section><section class="tile-grid reply-sections" aria-label="Supporting blocks"><section class="component-tile reply-section-tile" data-height="small" data-section-type="table"><div class="demo tile-body"><h2>Checks</h2><div class="reply-body"><div class="table-wrap"><table><thead><tr><th scope="col">Gate</th><th scope="col">Result</th></tr></thead><tbody><tr><td>Tests</td><td>1,248 pass</td></tr><tr><td>Build</td><td class="numeric">92 s</td></tr><tr><td>Live flow</td><td>Verified</td></tr></tbody></table></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="list"><div class="demo tile-body"><h2>Method</h2><div class="reply-body"><ul class="bullets"><li><span>Same runner</span></li><li><span>30 sample runs</span></li><li><span>Production input</span></li></ul></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="timeline"><div class="demo tile-body"><h2>Stages</h2><div class="reply-body"><ol class="timeline"><li><span class="dot done" aria-hidden="true"></span><div><p>Code merged</p><p class="muted small">Focused checks pass</p></div><time>09:10</time></li><li><span class="dot done" aria-hidden="true"></span><div><p>Review</p><p class="muted small">Sam approved</p></div><time>09:24</time></li><li><span class="dot done" aria-hidden="true"></span><div><p>Release</p><p class="muted small">Live flow verified</p></div><time>10:02</time></li></ol></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="bars"><div class="demo tile-body"><h2>Impact</h2><div class="reply-body"><div class="reply-bars"><div class="reply-bar"><div class="reply-bar-head"><span>Peak memory</span><strong>1.1</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:0.08814102564102565%"></span></div><p class="metric-note">39% less</p></div><div class="reply-bar"><div class="reply-bar-head"><span>Build time</span><strong>92</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:7.371794871794872%"></span></div><p class="metric-note">was 148 s</p></div><div class="reply-bar"><div class="reply-bar-head"><span>Tests</span><strong>1248</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:100%"></span></div><p class="metric-note">All pass</p></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="list"><div class="demo tile-body"><h2>Scope</h2><div class="reply-body"><ul class="bullets"><li><span>Batching only</span></li><li><span>Same runner</span></li><li><span>No test removed</span></li></ul></div></div></section></section><section class="status-board" data-state="complete"><dl class="status-tiles" aria-label="Task status"><div class="status-tile" data-field="progress" data-tone="ok"><dt><svg class="icon" aria-hidden="true" focusable="false"
+</svg><span>Done</span></span></header><p class="reply-text">Bounded batches keep every test and cut peak memory 39%.</p><section class="tile-grid reply-results" aria-label="Results" style="--columns:4"><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Peak memory</p><p class="metric-value">1.1 GB</p><p class="metric-note">39% less</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Build time</p><p class="metric-value">92 s</p><p class="metric-note">was 148 s</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Tests</p><p class="metric-value">1,248</p><p class="metric-note">All pass</p></div></div></section><section class="component-tile" data-height="slim"><div class="demo tile-body"><div class="metric"><p class="metric-label">Live flow</p><p class="metric-value">Verified</p><p class="metric-note">After release</p></div></div></section></section><section class="tile-grid reply-sections" aria-label="Supporting blocks"><section class="component-tile reply-section-tile" data-height="tall" data-section-type="swimlane"><div class="demo tile-body"><h2>Stages</h2><div class="reply-body"><ol class="swimlane"><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Scope read</b><small>Batching only</small></span><time>09:10</time></li><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Change built</b><small>Focused checks pass</small></span><time>09:24</time></li><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Review</b><small>Sam approved</small></span><time>09:40</time></li><li class="done"><span class="dot done" aria-hidden="true"></span><span class="swimlane-copy"><b>Release</b><small>Live flow verified</small></span><time>10:02</time></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Watch next red</b><small>After the first run</small></span><time>Later</time></li><li class="pending"><span class="dot pending" aria-hidden="true"></span><span class="swimlane-copy"><b>Retire old path</b><small>Next week</small></span><time>Later</time></li></ol></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="changes"><div class="demo tile-body"><h2>Changes</h2><div class="reply-body"><div class="changes"><div class="change-col done"><p class="change-head">Done</p><ul class="change-list"><li><span class="dot done" aria-hidden="true"></span><span>Batching added</span></li><li><span class="dot done" aria-hidden="true"></span><span>Same runner kept</span></li><li><span class="dot done" aria-hidden="true"></span><span>Live flow verified</span></li></ul></div><div class="change-col pending"><p class="change-head">To do</p><ul class="change-list"><li><span class="dot pending" aria-hidden="true"></span><span>Retire the old path</span></li><li><span class="dot pending" aria-hidden="true"></span><span>Watch the next run</span></li></ul></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="compare"><div class="demo tile-body"><h2>Cost</h2><div class="reply-body"><div class="compare"><div class="compare-row"><div class="compare-line"><span class="compare-label">Build time</span><span class="compare-delta">38% less</span><span class="compare-values"><span>148 s</span><span aria-hidden="true">→</span><b>92 s</b></span></div><div class="compare-track" style="--before:100%;--after:62.2%"><span class="before"></span><span class="after"></span></div></div><div class="compare-row"><div class="compare-line"><span class="compare-label">Peak memory</span><span class="compare-delta">39% less</span><span class="compare-values"><span>1.8 GB</span><span aria-hidden="true">→</span><b>1.1 GB</b></span></div><div class="compare-track" style="--before:100%;--after:61.1%"><span class="before"></span><span class="after"></span></div></div><div class="compare-row"><div class="compare-line"><span class="compare-label">Tests</span><span class="compare-delta">No change</span><span class="compare-values"><span>1,248</span><span aria-hidden="true">→</span><b>1,248</b></span></div><div class="compare-track" style="--before:100%;--after:100%"><span class="before"></span><span class="after"></span></div></div></div></div></div></section><section class="component-tile reply-section-tile" data-height="small" data-section-type="cards"><div class="demo tile-body"><h2>Gates</h2><div class="reply-body"><div class="reply-cards"><article class="reply-card"><h3>Checks</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
  
  
  
@@ -279,7 +327,43 @@
   stroke-linejoin="round"
 >
   <path d="M20 6 9 17l-5-5" />
-</svg><span>Progress</span></dt><dd>100%</dd><div class="status-meter" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span style="--value:100%"></span></div></div><div class="status-tile" data-field="" data-tone="ok"><dt><svg class="icon" aria-hidden="true" focusable="false"
+</svg><span>Checked</span></span><p>1,248 pass</p></article><article class="reply-card"><h3>Review</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 6 9 17l-5-5" />
+</svg><span>Checked</span></span><p>Approved</p></article><article class="reply-card"><h3>Release</h3><span class="pill" data-tone="ok"><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 6 9 17l-5-5" />
+</svg><span>Checked</span></span><p>Live verified</p></article></div></div></div></section></section><section class="status-board" data-state="complete"><dl class="status-tiles" aria-label="Task status"><div class="status-tile" data-field="progress" data-tone="ok"><dt><svg class="icon" aria-hidden="true" focusable="false"
+ 
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 6 9 17l-5-5" />
+</svg><span>Progress</span></dt><dd>100%</dd><div class="status-meter" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span style="--value:100%"></span></div><div class="status-gates" aria-hidden="true"><span class="done">Scope</span><span class="done">Build</span><span class="done">Release</span><span class="done">Verify</span></div></div><div class="status-tile" data-field="" data-tone="ok"><dt><svg class="icon" aria-hidden="true" focusable="false"
  
  
  
