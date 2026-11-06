@@ -2,7 +2,7 @@
 
 A Codex skill and UI kit for compact HTML replies in T3 Code.
 
-![Completed reply](screenshots/reply-desktop.png)
+![Reply examples](screenshots/overview.png)
 
 The renderer turns short JSON into one self-contained HTML page. Replies use a dense grid, fixed 184px blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
 
