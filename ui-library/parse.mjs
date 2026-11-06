@@ -1,10 +1,10 @@
 const fail = (message) => { throw Error(message); };
 
 export const percentValue = (text, name) => {
-  const match = String(text).match(/^(\d+(?:\.\d+)?)\s*%/);
+  const match = String(text).match(/^(\d+(?:\.\d+)?)\s*%(?:\s+(?:estimate|est\.))?$/i);
   if (!match) {
     if (/^unknown$/i.test(String(text).trim())) return null;
-    fail(name + ' must start with a number and a percent sign, such as 62% or 62% estimate.');
+    fail(name + ' must be a number and percent sign, such as 62% or 62% estimate.');
   }
   const value = Number(match[1]);
   if (!Number.isFinite(value) || value < 0 || value > 100) {

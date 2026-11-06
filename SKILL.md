@@ -22,9 +22,9 @@ If validation fails, shorten the field or use another block. If rendering fails,
 
 - One self-contained page, no text outside it.
 - Four columns at 1024px: Stages hold the left column; Progress and three or four result facts span the right three columns; Done, To do, and one supporting block share the next row; later blocks fill complete rows.
-- Stages are 376px and hold five or six timed steps. Progress and results are 88px. Supporting blocks are 184px; a trailing row containing only facts, cards, or list items is 88px. Below 900px the grid stacks with natural heights and no clipping.
+- Stages hold five or six timed steps with a 376px minimum height. Progress and results are 88px minimum. Supporting blocks are 184px minimum; a trailing row containing only facts, cards, or list items is 88px minimum. Rows grow only for accepted content, without clipping or internal scrolling. Below 900px the grid stacks with natural heights.
 - The header has the title, one summary line, an optional bell chip naming a confirmed wake, and optional actions. No separate status pill, Next tile, Wake tile, or footer.
-- Progress holds the percentage, meter, milestone labels, and ETA. Unknown ETA remains visible. Never repeat overall progress inside the current stage.
+- Progress holds a numeric percentage, meter, milestone labels, and ETA. Unknown is allowed only for ETA. Never repeat overall progress inside the current stage.
 - No expandable content, dropdowns, hover-only details, hidden notes, nested bordered cards, or truncated text.
 - Keep every field inside the shared limits and the reply under 1,200 visible characters. Never print hashes, short commit IDs, UUIDs, tokens, or encoded IDs.
 - Every control has a real transport: a T3 send action or an HTTPS link.
@@ -42,8 +42,8 @@ Read `AGENT_GUIDE.md` from the same UI directory for the exact schema and limits
 ## Stages and changes
 
 - Stages: five or six steps. Each needs a real 24-hour `HH:MM` time. Done steps come first, then one current waiting step, then pending steps. The current step alone carries progress. Do not repeat the overall percentage in the rail.
-- Done and To do: separate tall blocks below Progress. Each item has a short title (18) and description (22). An unfinished reply needs both lists; a complete reply has only Done and no pending work anywhere.
-- Milestones: two to four labels. The current stage stays active rather than appearing passed from a percentage threshold.
+- Done and To do: separate tall blocks below Progress. Each item requires a short title (18) and description (22). An unfinished reply needs both lists; a complete reply has only Done and no pending work anywhere.
+- Milestones: two to four labels. Only an exact or token match with the current stage advances them. Unmatched labels stay pending rather than appearing passed from a percentage threshold.
 
 ## Completion
 

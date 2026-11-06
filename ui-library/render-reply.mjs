@@ -80,10 +80,11 @@ const visibleChars=value=>{
 };
 
 function validateStatus(data,done){
-  const progress=field(data.progress??(done?'100%':'Unknown'),'Progress',LIMITS.progress);
+  const progress=field(data.progress??(done?'100%':undefined),'Progress',LIMITS.progress);
   const eta=field(data.eta??(done?'Complete':'Unknown'),'ETA',LIMITS.eta);
   const wake=field(data.wake??(done?'Not needed':'Not armed'),'Wake',LIMITS.wake);
   const value=percentValue(progress,'Progress');
+  if(value===null)fail('Progress needs a numeric percentage for unfinished work, such as 62%. Use Unknown for the ETA only.');
   if(done&&value!==100)fail('Complete replies require 100%.');
   if(!done&&value===100)fail('Pending work cannot be shown at 100%.');
   return {progress,eta,wake};
@@ -168,14 +169,12 @@ function validateSection(section,index){
       if(value.length>LIMITS.changeItems)fail(`${name} ${label} allows at most ${LIMITS.changeItems} items.`);
       return value.map((item,itemIndex)=>{
         const itemName=`${name} ${label} ${itemIndex+1}`;
-        if(item&&typeof item==='object'&&!Array.isArray(item)){
-          assertKeys(item,['title','description'],itemName);
-          return {
-            title:field(item.title,`${itemName} title`,LIMITS.changeTitle),
-            description:field(item.description,`${itemName} description`,LIMITS.changeDescription,{optional:true})
-          };
-        }
-        return {title:field(item,`${itemName} title`,LIMITS.changeTitle),description:''};
+        if(!item||typeof item!=='object'||Array.isArray(item))fail(`${itemName} must be an object with title and description.`);
+        assertKeys(item,['title','description'],itemName);
+        return {
+          title:field(item.title,`${itemName} title`,LIMITS.changeTitle),
+          description:field(item.description,`${itemName} description`,LIMITS.changeDescription)
+        };
       });
     };
     const done=lists(section.done,'done');
@@ -244,6 +243,7 @@ function validateSection(section,index){
     const items=array(section.items,`${name} items`,2,LIMITS.barsItems).map((item,itemIndex)=>{
       const itemName=`${name} item ${itemIndex+1}`;
       assertKeys(item,['label','value','note'],itemName);
+      if(typeof item.value==='boolean')fail(`${itemName} value must be a non-negative number, not a boolean.`);
       const number=Number(item.value);
       if(!Number.isFinite(number)||number<0||number>999999999)fail(`${itemName} value must be a non-negative number.`);
       return {
@@ -382,7 +382,7 @@ export async function renderReply(data){
   const groups=[];
   for(let index=1;index<blockSections.length;index+=4)groups.push(blockSections.slice(index,index+4));
   const extraHeights=groups.map(group=>group.every(section=>['facts','cards','list'].includes(section.type))?'slim':'small');
-  const gridRows=`repeat(2,var(--height-slim)) var(--height-small)${extraHeights.map(height=>` var(--height-${height})`).join('')}`;
+  const gridRows=`repeat(2,minmax(var(--height-slim),auto)) minmax(var(--height-small),auto)${extraHeights.map(height=>` minmax(var(--height-${height}),auto)`).join('')}`;
   const slot=(section,row,columns,span=1)=>renderSection({...section,span,slot:`grid-row:${row};grid-column:${columns}`});
   const firstHtml=blockSections.length?slot(blockSections[0],3,'4/5',1):'';
   const extraHtml=groups.map((group,groupIndex)=>{
@@ -407,7 +407,7 @@ export async function renderReply(data){
     const slot=`grid-row:3;grid-column:${columns}`;
     return `<section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-span="${span}" data-change="${kind}" style="${slot}"><div class="demo tile-body"><h2>${title}</h2><div class="reply-body"><div class="changes" data-kind="${kind}">${list}</div></div></div></section>`;
   };
-  const progressHtml=progressBoard({...status,state,milestones,currentStep:active?.label});
+  const progressHtml=progressBoard({...status,state,milestones,stages:swimlane.items});
   const sectionsHtml=`<section class="bento" aria-label="Task layout" style="grid-template-rows:${gridRows}">${swimlaneHtml}${progressHtml}${resultsHtml}${changePart('done')}${changePart('todo')}${firstHtml}${extraHtml}</section>`;
   const wakeText=String(status.wake||'').trim();
   const wakeOff=!wakeText||/^(?:not armed|not needed|off|none|unknown|unverified)$/i.test(wakeText);
@@ -456,7 +456,13 @@ export function assertRenderedReply(html){
     return true;
   }
   if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
-  if(!/<main class="t3lib reply" data-state="(?:complete|working|waiting|blocked)">/.test(text))fail('Not a reply page: the state is missing or invalid.');
+  const stateMatch=text.match(/<main class="t3lib reply" data-state="(complete|working|waiting|blocked)">/);
+  if(!stateMatch)fail('Not a reply page: the state is missing or invalid.');
+  const state=stateMatch[1];
+  if(/<[^>]+\shidden(?:\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
+  const styleBlock=[...text.matchAll(/<style>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
+  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selector,body])=>/(?:\bmain\b|\.bento\b|\.reply-section-tile\b|\.status-board\b|\.reply-results\b|\.swimlane\b)/i.test(selector)&&!selector.includes('::')&&/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i.test(';'+body));
+  if(hidesRequired)fail('Not a reply page: CSS hides required reply content.');
   if(!/<section class="status-board" data-slot="progress"/.test(text))fail('Not a reply page: the progress board is missing. Render reply JSON instead of writing HTML.');
   if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
   const progress=text.match(/<div class="status-tile" data-field="progress"[\s\S]*?<\/div>/);
@@ -473,9 +479,14 @@ export function assertRenderedReply(html){
   if(!rail)fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
   const steps=[...rail[0].matchAll(/<li class="[a-z]+">[\s\S]*?<\/li>/g)];
   if(steps.length<5||steps.length>6)fail('Not a reply page: the swimlane needs five or six filled steps.');
-  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])||!/<time>\d{1,2}:\d{2}<\/time>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label and clock time.');
+  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])||!/<time>(?:[01]\d|2[0-3]):[0-5]\d<\/time>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label and a valid 24-hour clock time.');
+  if(state==='complete'&&/<li class="(?:waiting|pending)">/.test(rail[0]))fail('A complete reply cannot contain waiting or pending swimlane steps.');
   const changeLists=[...text.matchAll(/<ul class="change-list">([\s\S]*?)<\/ul>/g)];
   if(!changeLists.length||!changeLists.some(list=>/<li>[\s\S]*?<b>[^<]*\S[^<]*<\/b>/.test(list[1])))fail('Not a reply page: the changes block is empty. Render reply JSON instead of writing HTML.');
+  const hasDone=/data-change="done"/.test(markup);
+  const hasTodo=/data-change="todo"/.test(markup);
+  if(state==='complete'&&hasTodo)fail('A complete reply cannot contain a To do block.');
+  if(state!=='complete'&&(!hasDone||!hasTodo))fail('An unfinished reply needs separate Done and To do blocks.');
   const types=[...markup.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
   if(!types.includes('swimlane')||!types.includes('changes'))fail('Not a reply page: it needs a swimlane and a changes block.');
   if(!types.some(type=>!['swimlane','changes'].includes(type)))fail('Not a reply page: it needs one additional supporting block.');

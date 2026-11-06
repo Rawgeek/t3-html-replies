@@ -17,11 +17,11 @@ Send the absolute JSON path to `render_reply` when that tool is available. Other
 
 At 1024px the reply is a four-column bento grid:
 
-- Stages occupy the left column at 376px.
-- Progress occupies the next three columns at 88px, with its ETA at the right.
-- Three or four result facts sit under Progress at 88px.
-- Done, To do, and one supporting block share the next row at 184px each.
-- Further supporting blocks use later 184px rows. A row containing only facts, cards, or list items uses 88px. One block spans all four columns; two split 2+2; three split 2+1+1; four split 1+1+1+1.
+- Stages occupy the left quarter, with a 376px minimum height.
+- Progress occupies the next three columns at 88px minimum, with its ETA at the right.
+- Three or four result facts sit under Progress at 88px minimum.
+- Done, To do, and one supporting block share the next row at 184px minimum each.
+- Further supporting blocks use later 184px rows. A row containing only facts, cards, or list items uses 88px minimum. Rows grow only when accepted content needs another line; content never clips or scrolls internally. One block spans all four columns; two split 2+2; three split 2+1+1; four split 1+1+1+1.
 
 The renderer assigns every span. Do not add a size, span, or layout field. At 900px and below everything stacks in source order, with Progress first inside the grid and natural content heights. At 620px results use two columns; a final odd result spans both.
 
@@ -36,7 +36,7 @@ Never hide content. Do not use expandable text, tooltips, truncation, or nested 
 | summary | Optional, up to 80 characters. |
 | results | Required, 3 or 4 facts. Label 12, value 8, optional note 18. |
 | sections | Required, 3 to 8 blocks. Exactly one swimlane and one changes block. |
-| progress | Up to 12 characters. Use `62%` or `62% estimate`. Complete replies require 100%. |
+| progress | Required for unfinished replies. Use `62%` or `62% estimate`. Complete replies require 100%. Unknown is allowed only for ETA. |
 | eta | Up to 16 characters. Use `Unknown` when no estimate exists. |
 | wake | Up to 20 characters. The visible bell chip shows the event; omit it with `Not armed`. |
 | milestones | Required, 2 to 4 labels of up to 8 characters. |
@@ -63,11 +63,11 @@ The type may be inferred from the object shape. Prefer an explicit type.
 
 Use five or six stages. Every stage carries a real clock time. Done steps must come first, followed by one current waiting step, then pending steps. The renderer derives a completed step's duration from the previous clock time; it does not print duration for pending work.
 
-The current step may show its own progress. When it equals overall progress, the renderer keeps the meter and omits the repeated number. Milestone labels follow the current stage, so a waiting Review cannot appear passed merely because the overall percentage crossed a threshold.
+The current step may show its own progress. When it equals overall progress, the renderer keeps the meter and omits the repeated number. Milestone labels follow an exact or token match with the current stage. An unmatched label stays pending; percentage alone never marks a gate done.
 
 ## Changes and completion
 
-An unfinished reply needs at least one Done item and one To do item. Each block is a separate tall tile below Progress; each item is a title over a description.
+An unfinished reply needs at least one Done item and one To do item. Each block is a separate tall tile below Progress. Every item requires a title and description.
 
 A complete reply has no waiting or pending stages, no pending cards, and no To do items. Use `state: complete`, `progress: 100%`, at least one Done item, and 3 or 4 verified result facts. Only then lead with the result.
 

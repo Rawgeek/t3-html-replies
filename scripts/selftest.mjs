@@ -66,7 +66,7 @@ const reply = {
         { label: 'Ship', note: 'Release follows', time: '09:50', state: 'pending' }
       ]
     },
-    { title: 'Changes', type: 'changes', done: ['Renderer updated'], todo: ['Run checks'] },
+    { title: 'Changes', type: 'changes', done: [{ title: 'Renderer updated', description: 'Templates synchronized' }], todo: [{ title: 'Run checks', description: 'Focused suite pending' }] },
     {
       title: 'Proof',
       type: 'facts',
@@ -115,6 +115,14 @@ try {
   if (inline.structuredContent?.html?.includes('Self test reply') !== true) {
     throw Error('Inline data rendering failed.');
   }
+
+  let extraRejected = false;
+  try {
+    await rpc('tools/call', { name: 'render_reply', arguments: { data: reply, html: '<script>alert(1)</script>' } });
+  } catch (error) {
+    extraRejected = /unsupported arguments: html/.test(error.message);
+  }
+  if (!extraRejected) throw Error('render_reply accepted unsupported arguments.');
 
   let rejected = false;
   try {

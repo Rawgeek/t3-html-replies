@@ -47,7 +47,7 @@ const base = {
         { label: 'Five', time: '10:10', state: 'pending' }
       ]
     },
-    { title: 'Changes', type: 'changes', done: ['WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW', 'WWWWWWWWWWWWWWWWWW'], todo: ['WWWWWWWWWWWWWWWWWW'] },
+    { title: 'Changes', type: 'changes', done: Array.from({ length: 3 }, () => ({ title: 'WWWWWWWWWWWWWWWWWW', description: 'WWWWWWWWWWWWWWWWWWWW' })), todo: [{ title: 'WWWWWWWWWWWWWWWWWW', description: 'WWWWWWWWWWWWWWWWWWWW' }] },
     {
       title: 'Cards',
       type: 'cards',
@@ -140,10 +140,54 @@ const actions = {
   ]
 };
 
+const W = (length) => 'W'.repeat(length);
+const maxSections = {
+  maxFacts: { type: 'facts', title: W(24), items: Array.from({ length: 4 }, () => ({ label: W(12), value: W(8), note: W(18) })) },
+  maxList: { type: 'list', title: W(24), items: [W(48), W(48), W(48)] },
+  maxTable: { type: 'table', title: W(24), columns: [W(14), W(14)], rows: Array.from({ length: 3 }, () => [W(18), W(18)]) },
+  maxTableActions: { type: 'table', title: W(24), columns: [W(14), W(14)], rows: Array.from({ length: 3 }, () => [W(18), { label: W(14), send: W(400), icon: 'check' }]) },
+  maxBars: { type: 'bars', title: W(23), items: Array.from({ length: 3 }, () => ({ label: W(18), note: W(13), value: 999999999 })) },
+  maxCompare: { type: 'compare', title: W(20), items: Array.from({ length: 3 }, () => ({ label: W(18), before: '99999999 s', after: '9999999 ms', delta: W(12) })) },
+  maxCards: { type: 'cards', title: W(24), items: Array.from({ length: 3 }, () => ({ label: W(12), note: W(18), state: 'done' })) }
+};
+const compactBase = structuredClone(base);
+compactBase.sections = compactBase.sections.slice(0, 3);
+const boundary = {};
+for (const [name, section] of Object.entries(maxSections)) {
+  const data = structuredClone(compactBase);
+  data.sections[2] = section;
+  boundary[name] = data;
+}
+for (const [name, section] of Object.entries({ compactFacts: maxSections.maxFacts, compactList: maxSections.maxList, compactCards: maxSections.maxCards })) {
+  const data = structuredClone(compactBase);
+  data.sections.push(structuredClone(compactBase.sections[2]), structuredClone(compactBase.sections[2]), section);
+  boundary[name] = data;
+}
+const maxStages = structuredClone(compactBase);
+maxStages.sections[0] = {
+  title: W(24),
+  type: 'swimlane',
+  items: Array.from({ length: 6 }, (_, index) => ({
+    label: W(18), note: W(20), time: '09:' + String(index * 10).padStart(2, '0'),
+    state: index < 3 ? 'done' : index === 3 ? 'waiting' : 'pending', ...(index === 3 ? { progress: '55%' } : {})
+  }))
+};
+boundary.maxStages = maxStages;
+const maxResults = structuredClone(compactBase);
+maxResults.results = Array.from({ length: 4 }, () => ({ label: W(12), value: W(8), note: W(18) }));
+boundary.maxResults = maxResults;
+const maxChanges = structuredClone(compactBase);
+maxChanges.sections[1] = { type: 'changes', title: W(24), done: Array.from({ length: 3 }, () => ({ title: W(18), description: W(22) })), todo: Array.from({ length: 3 }, () => ({ title: W(18), description: W(22) })) };
+boundary.maxChanges = maxChanges;
+
 const pages = {};
-for (const [name, data] of Object.entries({ boundary: base, dense, maximum, actions })) {
+for (const [name, data] of Object.entries({ base, dense, maximum, actions, ...boundary })) {
   const file = join(dir, name + '.html');
-  await writeFile(file, await renderReply(data));
+  try {
+    await writeFile(file, await renderReply(data));
+  } catch (error) {
+    throw Error(name + ' (' + (Array.isArray(data.sections) ? data.sections.length : '?') + ' sections): ' + error.message);
+  }
   pages[name] = pathToFileURL(file).href;
 }
 
@@ -189,6 +233,7 @@ const inspect = async (url, width) => {
       });
       const status = [...document.querySelectorAll('.bento .status-tile')];
       const statusClipped = status.filter((tile) => tile.scrollHeight > tile.clientHeight + 1).map((tile) => tile.dataset.field || 'tile');
+      const hidden = [...document.querySelectorAll('.bento *')].filter((node) => node.children.length === 0 && node.textContent.trim() && (getComputedStyle(node).display === 'none' || getComputedStyle(node).visibility === 'hidden')).length;
       const spilledNodes = [...document.querySelectorAll('.bento .reply-section-tile *, .bento .status-tile *')]
         .filter((node) => node instanceof HTMLElement)
         .filter((node) => node.scrollWidth > node.clientWidth + 2 || node.scrollHeight > node.clientHeight + 2)
@@ -214,6 +259,7 @@ const inspect = async (url, width) => {
       const holes = [...occupied.entries()].reduce((count, [row, cells]) =>
         count + (new Set(cells).size === columns ? 0 : 1), 0);
       const sectionHeights = tiles.map((tile) => Math.round(box(tile).height));
+      const sectionMeta = tiles.map((tile) => ({ type: tile.dataset.sectionType, height: tile.dataset.height, pixels: Math.round(box(tile).height) }));
       const resultTiles = [...document.querySelectorAll('.reply-results > .component-tile')];
       const resultMetrics = resultTiles.map((tile) => {
         const body = tile.querySelector('.tile-body');
@@ -225,7 +271,7 @@ const inspect = async (url, width) => {
       const orderOk = !progress || !stage || progress.getBoundingClientRect().top <= stage.getBoundingClientRect().top;
       const page = document.documentElement;
       const overflowX = page.scrollWidth > page.clientWidth + 1;
-      return JSON.stringify({ columns, clipped: clippedTiles.length, resultClip, resultMetrics, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, spilled, spilledNodes, holes, sectionHeights, orderOk, overflowX });
+      return JSON.stringify({ columns, clipped: clippedTiles.length, resultClip, resultMetrics, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, hidden, spilled, spilledNodes, holes, sectionHeights, sectionMeta, orderOk, overflowX });
     })()`
   });
   ws.close();
@@ -249,10 +295,15 @@ try {
       if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles (' + report.clippedTypes.join(',') + ')');
       if (report.resultClip) failures.push(name + '@' + width + ': ' + report.resultClip + ' clipped result tiles ' + JSON.stringify(report.resultMetrics));
       if (report.statusClipped.length) failures.push(name + '@' + width + ': status tiles clip (' + report.statusClipped.join(',') + ')');
+      if (report.hidden) failures.push(name + '@' + width + ': ' + report.hidden + ' visible text nodes are hidden');
       if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes (' + report.spilledNodes.slice(0, 3).join(' | ') + ')');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
       if (!report.orderOk) failures.push(name + '@' + width + ': Progress does not lead the layout');
-      if (width > 900 && report.sectionHeights.some((height) => ![88, 184, 376].includes(height))) failures.push(name + '@' + width + ': unexpected section heights ' + report.sectionHeights.join(','));
+      if (width > 900) {
+        const minimum = { slim: 88, small: 184, tall: 376 };
+        const short = report.sectionMeta.filter((tile) => tile.pixels + 1 < minimum[tile.height]);
+        if (short.length) failures.push(name + '@' + width + ': section below its minimum height (' + short.map((tile) => tile.type + ':' + tile.pixels).join(',') + ')');
+      }
       if (report.overflowX) failures.push(name + '@' + width + ': the page scrolls horizontally');
     }
   }

@@ -138,7 +138,11 @@ async function handle(message) {
           fail(id, -32602, 'Unknown tool.');
           return;
         }
-        const data = await resolveData(params.arguments ?? {});
+        const args = params.arguments ?? {};
+        if (!args || typeof args !== 'object' || Array.isArray(args)) throw Error('arguments must be one JSON object.');
+        const extra = Object.keys(args).filter((key) => !['data', 'dataPath'].includes(key));
+        if (extra.length) throw Error('render_reply has unsupported arguments: ' + extra.join(', ') + '.');
+        const data = await resolveData(args);
         const html = await renderReply(data);
         result(id, {
           content: [{ type: 'text', text: 'T3 HTML reply rendered.' }],
