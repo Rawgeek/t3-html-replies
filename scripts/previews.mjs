@@ -4,13 +4,14 @@ import { spawn } from 'node:child_process';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { tmpdir } from 'node:os';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const shots = join(root, 'screenshots');
 const chrome = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const port = 9400 + Math.floor(Math.random() * 400);
-const profile = join(root, '.preview-profile');
+const profile = join(tmpdir(), 't3-previews-' + process.pid);
 
 const shot = async (page, width, maxHeight, file) => {
   const target = await fetch(`http://127.0.0.1:${port}/json/new?` + encodeURIComponent(page), { method: 'PUT' }).then((r) => r.json());
