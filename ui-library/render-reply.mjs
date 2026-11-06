@@ -8,9 +8,9 @@ const LIMITS=Object.freeze({
   title:64,summary:80,results:4,resultLabel:12,resultValue:8,resultNote:18,
   sections:8,sectionTitle:24,
   factsItems:4,listItems:3,listItem:48,
-  tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,rowDetail:260,
-  swimlaneItems:7,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
-  changeItems:3,changeTitle:28,changeDescription:52,
+  tableColumns:2,tableRows:3,tableLabel:14,tableCell:18,
+  swimlaneItems:6,swimlaneLabel:18,swimlaneNote:20,swimlaneTime:5,swimlaneProgress:12,
+  changeItems:3,changeTitle:18,changeDescription:22,
   compareItems:3,compareLabel:18,compareValue:10,compareDelta:12,
   cardItems:3,cardLabel:12,cardNote:18,
   barsItems:3,barLabel:18,barNote:22,
@@ -25,6 +25,7 @@ const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes',
 const SECTION_HEIGHT='small';
 const TOP_KEYS=['title','state','summary','results','sections','progress','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
+const CLOCK=/^(?:[01]?\d|2[0-3]):[0-5]\d$/;
 
 const fail=message=>{throw Error(message);};
 const inferType=(section)=>{
@@ -73,7 +74,7 @@ const visibleChars=value=>{
   if(typeof value==='string'||typeof value==='number')return String(value).length;
   if(Array.isArray(value))return value.reduce((sum,item)=>sum+visibleChars(item),0);
   if(value&&typeof value==='object')return Object.entries(value)
-    .filter(([key])=>!['href','icon','type','height','state','primary','send','detail','beforeValue','afterValue'].includes(key))
+    .filter(([key])=>!['href','icon','type','height','state','primary','send','beforeValue','afterValue'].includes(key))
     .reduce((sum,[,item])=>sum+visibleChars(item),0);
   return 0;
 };
@@ -141,10 +142,9 @@ function validateSection(section,index){
     const rows=array(section.rows,`${name} rows`,2,LIMITS.tableRows).map((row,rowIndex)=>{
       const rowName=`${name} row ${rowIndex+1}`;
       const objectRow=row&&typeof row==='object'&&!Array.isArray(row);
-      if(objectRow)assertKeys(row,['cells','detail'],rowName);
+      if(objectRow)assertKeys(row,['cells'],rowName);
       const cells=objectRow?row.cells:row;
       if(!Array.isArray(cells)||cells.length!==columns.length)fail(`${rowName} must match the column count.`);
-      const detail=objectRow?field(row.detail,`${rowName} detail`,LIMITS.rowDetail,{optional:true}):'';
       const mapped=cells.map((cell,columnIndex)=>{
         const cellName=`${name} row ${rowIndex+1} cell ${columnIndex+1}`;
         if(cell&&typeof cell==='object'&&!Array.isArray(cell)){
@@ -157,7 +157,7 @@ function validateSection(section,index){
         }
         return field(cell,cellName,LIMITS.tableCell);
       });
-      return {cells:mapped,detail};
+      return {cells:mapped};
     });
     result={type,title,columns,rows};
   }else if(type==='changes'){
@@ -226,10 +226,12 @@ function validateSection(section,index){
       const progress=field(item.progress,`${itemName} progress`,LIMITS.swimlaneProgress,{optional:true});
       if(progress&&state!=='waiting')fail(`${itemName} progress belongs on the current step, the only waiting item.`);
       if(progress&&percentValue(progress,`${itemName} progress`)===null)fail(`${itemName} progress must include a percentage, for example 62%.`);
+      const time=field(item.time,`${itemName} time`,LIMITS.swimlaneTime);
+      if(!CLOCK.test(time))fail(`${itemName} time must be a 24-hour clock time such as 17:35.`);
       return {
         label:field(item.label,`${itemName} label`,LIMITS.swimlaneLabel),
         note:field(item.note,`${itemName} note`,LIMITS.swimlaneNote,{optional:true}),
-        time:field(item.time,`${itemName} time`,LIMITS.swimlaneTime),
+        time,
         state,
         progress
       };
@@ -256,7 +258,7 @@ function validateSection(section,index){
   const visible=visibleChars(result);
   if(visible>LIMITS.sectionText[type])fail(type==='changes'
     ?`${name} has ${visible} visible characters; changes allow ${LIMITS.sectionText[type]}. Shorten the items or move detail into a supporting block.`
-    :`${name} has ${visible} visible characters; ${type} blocks allow ${LIMITS.sectionText[type]}. Split it into another block.`);
+    :`${name} has ${visible} visible characters; ${type} blocks allow ${LIMITS.sectionText[type]}. Shorten this block or add a different supporting block.`);
   return {...result,height:type==='swimlane'?'tall':SECTION_HEIGHT};
 }
 
@@ -270,8 +272,7 @@ function renderSection(section){
     const hasActions=section.rows.some(row=>row.cells.some(cell=>cell&&typeof cell==='object'));
     const tableClass=hasActions?' class="has-actions"':'';
     body=`<div class="table-wrap${hasActions?' has-actions':''}"><table${tableClass}><thead><tr>${section.columns.map(column=>`<th scope="col">${e(column)}</th>`).join('')}</tr></thead><tbody>${section.rows.map(row=>{
-      const title=row.detail||row.cells.find(cell=>cell&&typeof cell==='object')?.send||'';
-      return `<tr${title?` class="has-detail" title="${e(title)}"`:''}>${row.cells.map(cell=>{
+      return `<tr>${row.cells.map(cell=>{
       if(cell&&typeof cell==='object'){
         return `<td class="cell-action"><button class="btn compact${cell.primary?' primary':''}" type="button" data-t3-send="${e(cell.send)}">${icon(cell.icon)}<span>${e(cell.label)}</span></button></td>`;
       }
@@ -279,12 +280,15 @@ function renderSection(section){
     }).join('')}</tr>`;
     }).join('')}</tbody></table></div>`;
   }else if(section.type==='swimlane'){
-    const clock=value=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(value||'').trim());return m?Number(m[1])*60+Number(m[2]):null;};
+    const clock=value=>{const m=CLOCK.exec(String(value||'').trim());return m?Number(m[0].slice(0,-3))*60+Number(m[0].slice(-2)):null;};
     const span=mins=>mins>=60?`${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`:`${mins}m`;
     section.items.forEach((item,index)=>{
       if(index===0)return;
       const prev=clock(section.items[index-1].time),cur=clock(item.time);
-      if(prev!==null&&cur!==null&&cur>prev&&cur-prev<24*60)item.took=span(cur-prev);
+      if(prev!==null&&cur!==null&&item.state==='done'){
+        const gap=(cur-prev+24*60)%(24*60);
+        if(gap>0)item.took=span(gap);
+      }
     });
     body=`<ol class="swimlane">${section.items.map(item=>{
       const percent=item.progress?Number(String(item.progress).match(/\d+(?:\.\d+)?/)[0]):null;
@@ -307,25 +311,26 @@ function renderSection(section){
     }).join('')}</div>`;
   }else if(section.type==='changes'){
     const column=(label,items,state)=>items.length?`<div class="change-col ${state}"><p class="change-head">${e(label)}</p><ul class="change-list">${items.map(item=>`<li><span class="dot ${state}" aria-hidden="true"></span><span class="change-copy"><b>${e(item.title)}</b>${item.description?`<small>${e(item.description)}</small>`:''}</span></li>`).join('')}</ul></div>`:'';
-    body=`<div class="changes"${section.done.length&&section.todo.length?'':' data-single'}>${column('Done',section.done,'done')}${column('To do',section.todo,'pending')}</div>`;
+    body=`<div class="changes">${column('Done',section.done,'done')}${column('To do',section.todo,'pending')}</div>`;
   }else{
     const max=Math.max(...section.items.map(item=>item.value),1);
     body=`<div class="reply-bars">${section.items.map(item=>`<div class="reply-bar"><div class="reply-bar-head"><span>${e(item.label)}</span><strong>${e(item.display)}</strong></div><div class="reply-bar-track" aria-hidden="true"><span style="--value:${item.value/max*100}%"></span></div>${item.note?`<p class="metric-note">${e(item.note)}</p>`:''}</div>`).join('')}</div>`;
   }
-  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span??1}"><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
+  return `<section class="component-tile reply-section-tile" data-height="${section.height}" data-section-type="${section.type}" data-span="${section.span||1}"${section.slot?` style="${section.slot}"`:''}><div class="demo tile-body"><h2>${e(section.title)}</h2><div class="reply-body">${body}</div></div></section>`;
 }
 
 export async function renderReply(data){
   const css=await readFile(new URL('./library.css',import.meta.url),'utf8');
   if(!data||typeof data!=='object'||Array.isArray(data))fail('Reply data must be an object.');
+  if(data.kind==='question')return renderQuestion(data,css);
   assertKeys(data,TOP_KEYS,'Reply');
   const state=data.state;
   if(!STATES.has(state))fail('State must be complete, working, waiting, or blocked.');
   const done=state==='complete';
   const title=field(data.title,'Title',LIMITS.title);
   const summary=field(data.summary,'Summary',LIMITS.summary,{optional:true});
-  const results=present(data.results)?facts(data.results,'Results',1):[];
-  if(done&&!results.length)fail('Complete replies require result facts.');
+  const results=present(data.results)?facts(data.results,'Results',3):[];
+  if(!results.length)fail('Every reply needs 3 or 4 result facts so the top band has evidence.');
   const sections=present(data.sections)?array(data.sections,'Sections',1,LIMITS.sections).map(validateSection):[];
   const swimlanes=sections.filter(section=>section.type==='swimlane');
   const changes=sections.filter(section=>section.type==='changes');
@@ -343,6 +348,7 @@ export async function renderReply(data){
   const active=swimlane.items.find(item=>item.state==='waiting');
   if(active&&!active.progress)fail('The current swimlane step needs its own progress, for example 62%.');
   if(done&&!changes[0].done.length)fail('A complete reply needs at least one done change.');
+  if(!done&&!changes[0].done.length)fail('A pending reply needs at least one done change.');
   if(!done&&!changes[0].todo.length)fail('A pending reply needs at least one to do change.');
   if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Remove the remaining items or keep the reply unfinished.');
   if(done){
@@ -368,24 +374,41 @@ export async function renderReply(data){
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
   const supporting=sections.filter(section=>section!==swimlaneSection);
   if(supporting.length<2)fail('Add at least two supporting blocks beside the swimlane so the grid stays full.');
-  const swimlaneHtml=renderSection(swimlaneSection);
+  const swimlaneHtml=renderSection({...swimlaneSection,slot:'grid-row:1/4;grid-column:1/2'});
   if(overallPercent!==null&&swimlaneHtml.includes(`<small>${overallPercent}%</small>`))fail('The rail repeats the overall percentage. Keep the step number only when it differs from Progress.');
-  const resultsHtml=results.length?resultGrid(results):'';
+  const resultsHtml=resultGrid(results);
   const changesSection=supporting.find(section=>section.type==='changes');
   const blockSections=supporting.filter(section=>section!==changesSection);
-  const blockSpans=blockSections.map((section,index)=>blockSections.length%2&&index===blockSections.length-1?2:1);
-  const blocksHtml=`<div class="bento-blocks" data-count="${blockSections.length}">${resultsHtml}${blockSections.map((section,index)=>renderSection({...section,span:blockSpans[index]})).join('')}</div>`;
+  const groups=[];
+  for(let index=1;index<blockSections.length;index+=4)groups.push(blockSections.slice(index,index+4));
+  const extraHeights=groups.map(group=>group.every(section=>section.type==='facts')?'slim':'small');
+  const gridRows=`repeat(2,var(--height-slim)) var(--height-small)${extraHeights.map(height=>` var(--height-${height})`).join('')}`;
+  const slot=(section,row,columns,span=1)=>renderSection({...section,span,slot:`grid-row:${row};grid-column:${columns}`});
+  const firstHtml=blockSections.length?slot(blockSections[0],3,'4/5',1):'';
+  const extraHtml=groups.map((group,groupIndex)=>{
+    const spans=group.length===1?[4]:group.length===2?[2,2]:group.length===3?[2,1,1]:[1,1,1,1];
+    const height=extraHeights[groupIndex];
+    let column=1;
+    return group.map((section,index)=>{
+      const width=spans[index];
+      const style=`grid-row:${4+groupIndex};grid-column:${column}/${column+width}`;
+      column+=width;
+      return renderSection({...section,span:width,height,slot:style});
+    }).join('');
+  }).join('');
   const changePart=(kind)=>{
     if(!changesSection)return '';
     const items=kind==='done'?changesSection.done:changesSection.todo;
     if(!items.length)return '';
     const title=kind==='done'?'Done':'To do';
-    const span=kind==='done'&&!changesSection.todo.length?2:1;
+    const columns=kind==='done'?(changesSection.todo.length?'2/3':'2/4'):'3/4';
     const list=`<ul class="change-list">${items.map(item=>`<li><span class="dot ${kind==='done'?'done':'pending'}" aria-hidden="true"></span><span class="change-copy"><b>${e(item.title)}</b>${item.description?`<small>${e(item.description)}</small>`:''}</span></li>`).join('')}</ul>`;
-    return `<section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-change="${kind}" data-span="${span}"><div class="demo tile-body"><h2>${title}</h2><div class="reply-body"><div class="changes" data-kind="${kind}">${list}</div></div></div></section>`;
+    const span=kind==='done'&&!changesSection.todo.length?2:1;
+    const slot=`grid-row:3;grid-column:${columns}`;
+    return `<section class="component-tile reply-section-tile" data-height="small" data-section-type="changes" data-span="${span}" data-change="${kind}" style="${slot}"><div class="demo tile-body"><h2>${title}</h2><div class="reply-body"><div class="changes" data-kind="${kind}">${list}</div></div></div></section>`;
   };
-  const progressHtml=progressBoard({...status,state,milestones});
-  const sectionsHtml=`<section class="bento" aria-label="Task layout">${swimlaneHtml}${progressHtml}${changePart('done')}${changePart('todo')}${blocksHtml}</section>`;
+  const progressHtml=progressBoard({...status,state,milestones,currentStep:active?.label});
+  const sectionsHtml=`<section class="bento" aria-label="Task layout" style="grid-template-rows:${gridRows}">${swimlaneHtml}${progressHtml}${resultsHtml}${changePart('done')}${changePart('todo')}${firstHtml}${extraHtml}</section>`;
   const wakeText=String(status.wake||'').trim();
   const wakeOff=!wakeText||/^(?:not armed|not needed|off|none|unknown|unverified)$/i.test(wakeText);
   const wakeLabel=wakeText.replace(/^on\s+/i,'');
@@ -394,25 +417,69 @@ export async function renderReply(data){
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}</main></body></html>`;
 }
 
+const QUESTION_KEYS=['kind','title','context','question','options','actions'];
+function renderQuestion(data,css){
+  assertKeys(data,QUESTION_KEYS,'Question');
+  const title=field(data.title,'Title',LIMITS.title);
+  const context=field(data.context,'Context',160);
+  const question=field(data.question,'Question',120);
+  const options=array(data.options,'Options',2,3).map((option,index)=>{
+    const name=`Options[${index}]`;
+    if(!option||typeof option!=='object'||Array.isArray(option))fail(`${name} must be an object.`);
+    assertKeys(option,['label','note','send','primary'],name);
+    if(!present(option.send))fail(`${name} needs the message to send when the user picks it.`);
+    return {
+      label:field(option.label,`${name} label`,28),
+      note:field(option.note,`${name} note`,60,{optional:true}),
+      send:field(option.send,`${name} send`,LIMITS.actionSend),
+      primary:Boolean(option.primary)
+    };
+  });
+  const actions=validateActions(data.actions);
+  const actionsHtml=actions.map(action=>action.send
+    ?`<button class="btn" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
+    :`<a class="btn" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`).join('');
+  const optionHtml=options.map((option,index)=>`<button class="ask-option${option.primary||index===0?' primary':''}" type="button" data-t3-send="${e(option.send)}"><span class="ask-copy"><b>${e(option.label)}</b>${option.note?`<small>${e(option.note)}</small>`:''}</span>${icon('arrow-right')}</button>`).join('');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply question"><header class="reply-head"><h1>${e(title)}</h1>${actionsHtml?`<div class="reply-meta"><div class="actions">${actionsHtml}</div></div>`:''}</header><p class="reply-text">${e(context)}</p><section class="ask" aria-label="Question"><p class="ask-question">${e(question)}</p><div class="ask-options">${optionHtml}</div></section></main></body></html>`;
+}
+
 export function assertRenderedReply(html){
   const text=String(html);
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
+  if(/<main class="t3lib reply question"/.test(text)){
+    if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a question page: the title is empty.');
+    if(!/<p class="reply-text">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the context is missing.');
+    if(!/<p class="ask-question">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the question is missing.');
+    const choices=[...text.matchAll(/<button class="ask-option[^"]*" type="button" data-t3-send="([^"]+)"><span class="ask-copy"><b>([^<]+)<\/b>/g)];
+    if(choices.length<2||choices.length>3||choices.some(choice=>!choice[1]||!choice[2].trim()))fail('Not a question page: it needs two or three filled answers with send actions.');
+    if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
+    return true;
+  }
   if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
-  if(!/<section class="status-board"/.test(text))fail('Not a reply page: the status board is missing. Render reply JSON instead of writing HTML.');
+  if(!/<main class="t3lib reply" data-state="(?:complete|working|waiting|blocked)">/.test(text))fail('Not a reply page: the state is missing or invalid.');
+  if(!/<section class="status-board" data-slot="progress"/.test(text))fail('Not a reply page: the progress board is missing. Render reply JSON instead of writing HTML.');
   if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
-  const tiles=[...text.matchAll(/<div class="status-tile"[\s\S]*?(?=<div class="status-tile"|<\/dl>)/g)].map(match=>match[0]);
-  if(!tiles.length)fail('Not a reply page: the Progress tile is missing.');
-  if(tiles.some(tile=>!/<dd>[^<]*\S[^<]*<\/dd>/.test(tile)))fail('Not a reply page: every status tile needs a value. Render reply JSON instead of writing HTML.');
+  const progress=text.match(/<div class="status-tile" data-field="progress"[\s\S]*?<\/div>/);
+  if(!progress||!/<dd>[^<]*\d+(?:\.\d+)?%\s*(?:est\.)?<\/dd>/.test(progress[0])||!/aria-valuenow="\d+(?:\.\d+)?"/.test(progress[0]))fail('Not a reply page: the Progress tile needs a percentage and meter.');
+  if(!/<section class="bento"/.test(text))fail('Not a reply page: the bento grid is missing.');
+  const markup=text.replace(/<style>[\s\S]*?<\/style>/i,'');
+  const resultStart=markup.indexOf('<section class="tile-grid reply-results"');
+  const changeStart=resultStart<0?-1:markup.indexOf('data-section-type="changes"',resultStart);
+  if(resultStart<0||changeStart<0||changeStart<=resultStart)fail('Not a reply page: result facts and changes are required.');
+  const resultBlock=markup.slice(resultStart,changeStart);
+  const resultTiles=(resultBlock.match(/<section class="component-tile" data-height="slim">/g)||[]).length;
+  if(resultTiles<3||resultTiles>4||(resultBlock.match(/class="metric-value">[^<]*\S[^<]*</g)||[]).length!==resultTiles)fail('Not a reply page: it needs three or four filled result facts.');
   const rail=text.match(/<ol class="swimlane">[\s\S]*?<\/ol>/);
   if(!rail)fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
   const steps=[...rail[0].matchAll(/<li class="[a-z]+">[\s\S]*?<\/li>/g)];
-  if(steps.length<5)fail('Not a reply page: the swimlane needs at least five filled steps.');
-  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label.');
+  if(steps.length<5||steps.length>6)fail('Not a reply page: the swimlane needs five or six filled steps.');
+  if(steps.some(step=>!/<b>[^<]*\S[^<]*<\/b>/.test(step[0])||!/<time>\d{1,2}:\d{2}<\/time>/.test(step[0])))fail('Not a reply page: every swimlane step needs a label and clock time.');
   const changeLists=[...text.matchAll(/<ul class="change-list">([\s\S]*?)<\/ul>/g)];
   if(!changeLists.length||!changeLists.some(list=>/<li>[\s\S]*?<b>[^<]*\S[^<]*<\/b>/.test(list[1])))fail('Not a reply page: the changes block is empty. Render reply JSON instead of writing HTML.');
-  const types=[...text.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
+  const types=[...markup.matchAll(/data-section-type="([a-z]+)"/g)].map(match=>match[1]);
   if(!types.includes('swimlane')||!types.includes('changes'))fail('Not a reply page: it needs a swimlane and a changes block.');
-  if(types.length<3)fail('Not a reply page: it needs a swimlane, a changes block, and one supporting block.');
+  if(!types.some(type=>!['swimlane','changes'].includes(type)))fail('Not a reply page: it needs one additional supporting block.');
+  if([...markup.matchAll(/<section class="component-tile reply-section-tile"[\s\S]*?<h2>[^<]*\S[^<]*<\/h2>/g)].length!==types.length)fail('Not a reply page: every section needs a title.');
   if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
   return true;
 }

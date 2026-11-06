@@ -30,6 +30,11 @@ const base = {
   eta: '2 min',
   wake: 'Not armed',
   milestones: ['A', 'B', 'C'],
+  results: [
+    { label: 'Checks', value: '1,248', note: 'All pass' },
+    { label: 'Review', value: 'Open', note: 'Reader pending' },
+    { label: 'Release', value: 'Next', note: 'After review' }
+  ],
   sections: [
     {
       title: 'Stages',
@@ -88,8 +93,55 @@ const dense = {
   ]
 };
 
+const maximum = {
+  title: 'Maximum content',
+  state: 'working',
+  summary: 'S'.repeat(80),
+  progress: '55% estimate',
+  eta: 'Unknown',
+  wake: 'Not armed',
+  milestones: ['M'.repeat(8), 'M'.repeat(8), 'M'.repeat(8), 'M'.repeat(8)],
+  results: Array.from({ length: 4 }, () => ({ label: 'L'.repeat(12), value: 'V'.repeat(8), note: 'N'.repeat(18) })),
+  sections: [
+    {
+      title: 'Stages',
+      type: 'swimlane',
+      items: [
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '09:00', state: 'done' },
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '09:30', state: 'done' },
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '10:00', state: 'waiting', progress: '55%' },
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '10:30', state: 'pending' },
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '11:00', state: 'pending' },
+        { label: 'W'.repeat(18), note: 'N'.repeat(20), time: '11:30', state: 'pending' }
+      ]
+    },
+    {
+      title: 'Changes',
+      type: 'changes',
+      done: Array.from({ length: 3 }, () => ({ title: 'T'.repeat(18), description: 'D'.repeat(22) })),
+      todo: Array.from({ length: 3 }, () => ({ title: 'T'.repeat(18), description: 'D'.repeat(22) }))
+    },
+    {
+      title: 'Cards',
+      type: 'cards',
+      items: Array.from({ length: 3 }, () => ({ label: 'L'.repeat(12), state: 'done', note: 'N'.repeat(18) }))
+    }
+  ]
+};
+
+const actions = {
+  ...base,
+  title: 'T'.repeat(64),
+  wake: 'W'.repeat(20),
+  actions: [
+    { label: 'L'.repeat(14), send: 'First action', icon: 'check' },
+    { label: 'M'.repeat(14), send: 'Second action', icon: 'play' },
+    { label: 'N'.repeat(14), send: 'Third action', icon: 'download' }
+  ]
+};
+
 const pages = {};
-for (const [name, data] of Object.entries({ boundary: base, dense })) {
+for (const [name, data] of Object.entries({ boundary: base, dense, maximum, actions })) {
   const file = join(dir, name + '.html');
   await writeFile(file, await renderReply(data));
   pages[name] = pathToFileURL(file).href;
@@ -139,28 +191,41 @@ const inspect = async (url, width) => {
       const statusClipped = status.filter((tile) => tile.scrollHeight > tile.clientHeight + 1).map((tile) => tile.dataset.field || 'tile');
       const spilledNodes = [...document.querySelectorAll('.bento .reply-section-tile *, .bento .status-tile *')]
         .filter((node) => node instanceof HTMLElement)
-        .filter((node) => !node.closest('.table-wrap'))
         .filter((node) => node.scrollWidth > node.clientWidth + 2 || node.scrollHeight > node.clientHeight + 2)
         .map((node) => node.tagName.toLowerCase() + '.' + String(node.className).split(' ').filter(Boolean).join('.') + ' ' + node.scrollWidth + '/' + node.clientWidth + 'x' + node.scrollHeight + '/' + node.clientHeight);
       const spilled = spilledNodes.length;
-      const blocks = [...document.querySelectorAll('.bento-blocks > .reply-section-tile')];
-      const blockRows = new Map();
-      for (const tile of blocks) {
-        const rect = box(tile);
-        const key = Math.round(rect.top);
-        const row = blockRows.get(key) || { left: Infinity, right: -Infinity };
-        row.left = Math.min(row.left, rect.left);
-        row.right = Math.max(row.right, rect.right);
-        blockRows.set(key, row);
-      }
-      const blocksBox = box(document.querySelector('.bento-blocks'));
-      const holes = [...blockRows.values()].filter((row) =>
-        Math.abs(row.left - blocksBox.left) > 1.5 || Math.abs(row.right - blocksBox.right) > 1.5).length;
       const columns = getComputedStyle(bento).gridTemplateColumns.split(' ').length;
-      const heights = [...new Set(blocks.map((tile) => Math.round(box(tile).height)))];
+      const occupied = new Map();
+      for (const child of bento.children) {
+        const style = getComputedStyle(child);
+        const rowStart = Number(style.gridRowStart);
+        const rowEndValue = Number(style.gridRowEnd);
+        const colStart = Number(style.gridColumnStart);
+        const colEndValue = Number(style.gridColumnEnd);
+        const rowEnd = Number.isFinite(rowEndValue) ? rowEndValue : rowStart + 1;
+        const colEnd = Number.isFinite(colEndValue) ? colEndValue : colStart + 1;
+        if (!Number.isFinite(rowStart) || !Number.isFinite(rowEnd) || !Number.isFinite(colStart) || !Number.isFinite(colEnd)) continue;
+        for (let row = rowStart; row < rowEnd; row += 1) {
+          const cells = occupied.get(row) || [];
+          for (let col = colStart; col < colEnd; col += 1) cells.push(col);
+          occupied.set(row, cells);
+        }
+      }
+      const holes = [...occupied.entries()].reduce((count, [row, cells]) =>
+        count + (new Set(cells).size === columns ? 0 : 1), 0);
+      const sectionHeights = tiles.map((tile) => Math.round(box(tile).height));
+      const resultTiles = [...document.querySelectorAll('.reply-results > .component-tile')];
+      const resultMetrics = resultTiles.map((tile) => {
+        const body = tile.querySelector('.tile-body');
+        return { width: Math.round(box(tile).width), scrollHeight: body.scrollHeight, clientHeight: body.clientHeight, scrollWidth: body.scrollWidth, clientWidth: body.clientWidth };
+      });
+      const resultClip = resultMetrics.filter((tile) => tile.scrollHeight > tile.clientHeight + 1 || tile.scrollWidth > tile.clientWidth + 1).length;
+      const progress = document.querySelector('.bento > .status-board[data-slot="progress"]');
+      const stage = document.querySelector('.bento > [data-section-type="swimlane"]');
+      const orderOk = !progress || !stage || progress.getBoundingClientRect().top <= stage.getBoundingClientRect().top;
       const page = document.documentElement;
       const overflowX = page.scrollWidth > page.clientWidth + 1;
-      return JSON.stringify({ columns, clipped: clippedTiles.length, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, spilled, spilledNodes, holes, heights, overflowX });
+      return JSON.stringify({ columns, clipped: clippedTiles.length, resultClip, resultMetrics, clippedTypes: clippedTiles.map((t) => t.dataset.sectionType), statusClipped, spilled, spilledNodes, holes, sectionHeights, orderOk, overflowX });
     })()`
   });
   ws.close();
@@ -179,13 +244,15 @@ try {
   for (const [name, url] of Object.entries(pages)) {
     for (const width of [1024, 728, 390]) {
       const report = await inspect(url, width);
-      const expected = width > 900 ? 5 : 1;
+      const expected = width > 900 ? 4 : 1;
       if (report.columns !== expected) failures.push(name + '@' + width + ': ' + report.columns + ' columns, expected ' + expected);
       if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles (' + report.clippedTypes.join(',') + ')');
+      if (report.resultClip) failures.push(name + '@' + width + ': ' + report.resultClip + ' clipped result tiles ' + JSON.stringify(report.resultMetrics));
       if (report.statusClipped.length) failures.push(name + '@' + width + ': status tiles clip (' + report.statusClipped.join(',') + ')');
       if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes (' + report.spilledNodes.slice(0, 3).join(' | ') + ')');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
-      if (report.heights.some((height) => height !== 184)) failures.push(name + '@' + width + ': non-184px flow tiles');
+      if (!report.orderOk) failures.push(name + '@' + width + ': Progress does not lead the layout');
+      if (width > 900 && report.sectionHeights.some((height) => ![88, 184, 376].includes(height))) failures.push(name + '@' + width + ': unexpected section heights ' + report.sectionHeights.join(','));
       if (report.overflowX) failures.push(name + '@' + width + ': the page scrolls horizontally');
     }
   }
@@ -193,7 +260,7 @@ try {
     process.stderr.write(failures.join('\n') + '\n');
     process.exitCode = 1;
   } else {
-    process.stdout.write('Layout check passed: 2 pages at 1024, 728, and 390 with no clips, spills, or holes.\n');
+    process.stdout.write('Layout check passed: ' + Object.keys(pages).length + ' pages at 1024, 728, and 390 with no clips, spills, or holes.\n');
   }
 } finally {
   quit();

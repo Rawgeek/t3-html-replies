@@ -14,16 +14,17 @@ async function save(html) {
 const item=()=>{const found=catalog.find(x=>x.id===id);if(!found)throw Error('Unknown example. Use list <type>.');return found;};
 const starter={
   title:'Task title',state:'waiting',summary:'One sentence on the outcome.',
-  progress:'40% estimate',next:'Next action',eta:'Unknown',wake:'Not armed',
+  progress:'40% estimate',eta:'Unknown',wake:'Not armed',
+  results:[{label:'Scope',value:'Ready',note:'Checked'},{label:'Checks',value:'12',note:'All pass'},{label:'Review',value:'Next',note:'Pending'}],
   milestones:['Scope','Build','Review','Ship'],
   sections:[
     {title:'Stages',type:'swimlane',items:[
       {label:'Step done',note:'Short note',time:'09:10',state:'done'},
       {label:'Step done',note:'Short note',time:'09:24',state:'done'},
-      {label:'Current step',note:'What is running',time:'Now',state:'waiting',progress:'40%'},
-      {label:'Next step',note:'What follows',time:'Next',state:'pending'},
-      {label:'Later step',note:'What closes it',time:'Later',state:'pending'}]},
-    {title:'Changes',type:'changes',done:['What shipped'],todo:['What is left']},
+      {label:'Current step',note:'What is running',time:'09:48',state:'waiting',progress:'40%'},
+      {label:'Next step',note:'What follows',time:'10:10',state:'pending'},
+      {label:'Later step',note:'What closes it',time:'10:30',state:'pending'}]},
+    {title:'Changes',type:'changes',done:[{title:'What shipped',description:'Focused checks passed'}],todo:[{title:'What is left',description:'Owned by next step'}]},
     {title:'Proof',type:'facts',items:[{label:'Metric',value:'1',note:'Compared with'},{label:'Metric',value:'2',note:'Compared with'}]},
     {title:'Work',type:'cards',items:[{label:'Area',state:'done',note:'Short note'},{label:'Area',state:'pending',note:'Short note'}]}
   ]

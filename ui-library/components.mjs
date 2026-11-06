@@ -67,18 +67,19 @@ export function statusSplit(options={}) {
     status:`<section class="status-board" data-slot="status" data-state="${e(m.state)}"><dl class="status-tiles" aria-label="Next, estimate, and wake">${m.next}${m.eta}${m.wake}</dl></section>`
   };
 }
-export function progressBoard({progress='Unknown',eta='Unknown',state='working',milestones=[]}={}) {
+export function progressBoard({progress='Unknown',eta='Unknown',state='working',milestones=[],currentStep=''}={}) {
   const value=percentValue(progress,'Progress');
   const done=value===100,blocked=state==='blocked',waiting=state==='waiting';
   const tone=done?'ok':blocked?'error':waiting?'waiting':'active';
-  const shortEta=/unknown/i.test(eta)?'':/complete/i.test(eta)?'Done':String(eta).replace(/ estimate/i,'');
+  const shortEta=/unknown/i.test(eta)?'Unknown':/complete/i.test(eta)?'Done':String(eta).replace(/ estimate/i,'');
   const track=`<div class="status-meter" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" ${value===null?'aria-valuetext="Unknown"':`aria-valuenow="${value}"`}><span style="--value:${value||0}%"></span></div>`;
-  const gates=milestones.length?`<div class="status-gates" aria-hidden="true">${milestones.map((label,index)=>{
+  const currentIndex=done?-1:milestones.findIndex(label=>currentStep&&String(currentStep).toLowerCase().includes(String(label).toLowerCase()));
+  const gates=milestones.length?`<div class="status-gates" aria-label="Milestones">${milestones.map((label,index)=>{
     const start=index/milestones.length*100,end=(index+1)/milestones.length*100;
-    const step=value===null?'pending':value>=end?'done':value>start?'active':'pending';
+    const step=done?'done':currentIndex>=0?(index<currentIndex?'done':index===currentIndex?'active':'pending'):value===null?'pending':value>=end?'done':value>start?'active':'pending';
     return `<span class="${step}">${e(label)}</span>`;
   }).join('')}</div>`:'';
-  return `<section class="status-board" data-slot="progress" data-state="${e(state)}"><dl class="status-tiles" aria-label="Progress"><div class="status-tile" data-field="progress" data-tone="${tone}"><dt>${icon(done?'check':blocked?'circle-x':'activity')}<span>Progress</span>${shortEta?`<em class="status-eta">${e(shortEta)}</em>`:''}</dt><dd>${value===null?'Unknown':value+'%'}</dd>${track}${gates}</div></dl></section>`;
+  return `<section class="status-board" data-slot="progress" data-state="${e(state)}"><dl class="status-tiles" aria-label="Progress"><div class="status-tile" data-field="progress" data-tone="${tone}"><dt>${icon(done?'check':blocked?'circle-x':'activity')}<span>Progress</span><em class="status-eta">${e(shortEta)}</em></dt><dd>${value===null?'Unknown':value+'%'+(/estimate/i.test(progress)?' est.':'')}</dd>${track}${gates}</div></dl></section>`;
 }
 export function metric(value,label,note='') {
   return `<div class="metric"><p class="metric-label">${e(label)}</p><p class="metric-value">${e(value)}</p>${note?`<p class="metric-note">${e(note)}</p>`:''}</div>`;

@@ -76,15 +76,15 @@
       "done": [
         {
           "title": "Batching added",
-          "description": "Bounded batches cap peak memory"
+          "description": "Caps peak memory"
         },
         {
           "title": "Same runner kept",
-          "description": "Identical workload and setup"
+          "description": "Same workload"
         },
         {
           "title": "Live flow verified",
-          "description": "Deployed and checked after release"
+          "description": "Checked after release"
         }
       ],
       "todo": []

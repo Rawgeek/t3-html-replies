@@ -4,18 +4,18 @@ A Codex skill and UI kit for compact HTML replies in T3 Code.
 
 ![Reply examples](screenshots/overview.png)
 
-The renderer turns short JSON into one self-contained HTML page. Replies use a dense bento grid, fixed-height blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
+The renderer turns short JSON into one self-contained HTML page. Replies use a dense bento grid, fixed-height blocks, slim result and progress tiles, and hard limits on text. There are no expandable sections, hover-only details, or hidden content.
 
 ## What it does
 
-- Four-column grid at 1024px: one rail and three flow columns. Two flow columns on tablets, one on phones.
-- Results and status use 88px tiles. Reply sections share 184px; the swimlane is a tall side rail at least 376px high.
-- 8 sections max, 3 items per block, 1,200 visible characters.
-- Every reply carries a swimlane of five to seven steps, a done and to do changes block, and two to four progress milestones.
+- Four-column grid at 1024px: Stages hold the left column; Progress and evidence span the right three columns; Done, To do, and one supporting block share the next row.
+- Progress and result facts use 88px tiles. Supporting blocks use 184px; Stages use 376px. Below 900px the grid stacks with natural heights.
+- 8 sections max, 1,200 visible characters, and three or four required result facts.
+- Every reply carries five or six clocked stages, one changes block, and two to four progress milestones. An unfinished reply has both Done and To do lists; a complete reply has only Done.
 - Numbers sit in a visual: compare bars for before and after, facts for single values, bars for groups.
 - The renderer picks each block span, so the flow fills every cell with no orphan blocks or holes.
 - Progress shows one segment per milestone, labelled under the track.
-- The renderer rejects long fields, unknown fields, mixed heights, hashes, and opaque IDs.
+- The renderer rejects long fields, unknown fields, hidden table details, invalid clocks, hashes, and opaque IDs.
 
 ## Install
 
@@ -94,6 +94,8 @@ The pre-commit hook rebuilds the library, runs verification and the MCP self-tes
 Set `CHROME_PATH` when Chrome lives elsewhere. Skip it with `git commit --no-verify`.
 
 ## Develop
+
+Use Node 22 or newer. Preview capture also needs Chrome; set `CHROME_PATH` when it is not in the default macOS location.
 
 ```sh
 cd ~/.codex/skills/t3-html-replies

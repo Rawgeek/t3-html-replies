@@ -49,16 +49,21 @@ const reply = {
   eta: '2 min',
   wake: 'Not armed',
   milestones: ['Read', 'Build', 'Ship'],
+  results: [
+    { label: 'Checks', value: '8', note: 'Passing' },
+    { label: 'Files', value: '3', note: 'Changed' },
+    { label: 'Review', value: 'Open', note: 'Pending' }
+  ],
   sections: [
     {
       title: 'Stages',
       type: 'swimlane',
       items: [
-        { label: 'Read', note: 'Done', time: '09:10', state: 'done' },
-        { label: 'Plan', note: 'Done', time: '09:20', state: 'done' },
-        { label: 'Build', note: 'Running', time: 'Now', state: 'waiting', progress: '40%' },
-        { label: 'Check', note: 'Next', time: 'Next', state: 'pending' },
-        { label: 'Ship', note: 'Later', time: 'Later', state: 'pending' }
+        { label: 'Read', note: 'Scope set', time: '09:10', state: 'done' },
+        { label: 'Plan', note: 'Blocks chosen', time: '09:20', state: 'done' },
+        { label: 'Build', note: 'Focused checks', time: '09:30', state: 'waiting', progress: '40%' },
+        { label: 'Check', note: 'Review queued', time: '09:40', state: 'pending' },
+        { label: 'Ship', note: 'Release follows', time: '09:50', state: 'pending' }
       ]
     },
     { title: 'Changes', type: 'changes', done: ['Renderer updated'], todo: ['Run checks'] },
@@ -118,7 +123,7 @@ try {
       arguments: { data: { title: 'Fake', state: 'working', progress: '40%' } }
     });
   } catch (error) {
-    rejected = /swimlane/i.test(error.message);
+    rejected = /result facts|swimlane/i.test(error.message);
   }
   if (!rejected) throw Error('render_reply accepted reply data without a swimlane.');
 

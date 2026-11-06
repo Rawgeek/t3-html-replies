@@ -11,6 +11,23 @@
     "Review",
     "Ship"
   ],
+  "results": [
+    {
+      "label": "Focused",
+      "value": "306",
+      "note": "All pass"
+    },
+    {
+      "label": "Review",
+      "value": "Open",
+      "note": "Reader pending"
+    },
+    {
+      "label": "Full CI",
+      "value": "Next",
+      "note": "After review"
+    }
+  ],
   "sections": [
     {
       "title": "Stages",
@@ -30,7 +47,7 @@
         },
         {
           "label": "Review",
-          "note": "Waiting on the reader",
+          "note": "Reader pending",
           "time": "09:40",
           "state": "waiting",
           "progress": "78%"
@@ -43,7 +60,7 @@
         },
         {
           "label": "Share post",
-          "note": "Then the announcement",
+          "note": "Then announce it",
           "time": "10:20",
           "state": "pending"
         }
@@ -55,25 +72,25 @@
       "done": [
         {
           "title": "Swimlane timed",
-          "description": "Every step carries a clock time"
+          "description": "Every step has a time"
         },
         {
           "title": "Gates wired",
-          "description": "Four milestones map to the bar"
+          "description": "Four gates on the bar"
         },
         {
           "title": "Docs updated",
-          "description": "Guide and index refreshed"
+          "description": "Guide kept current"
         }
       ],
       "todo": [
         {
           "title": "Finish review",
-          "description": "Reader verdict is pending"
+          "description": "Reader verdict pending"
         },
         {
           "title": "Run full CI",
-          "description": "Starts after the review"
+          "description": "Runs after review"
         }
       ]
     },
