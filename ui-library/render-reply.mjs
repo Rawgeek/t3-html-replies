@@ -285,10 +285,10 @@ function renderSection(section){
     }).join('')}</tr>`;
     }).join('')}</tbody></table></div>`;
   }else if(section.type==='swimlane'){
-    section.zoneLabel=section.items.some(item=>/^\d{1,2}:\d{2}$/.test(item.time||''))&&localZone?`Times ${localZone}`:'';
+    section.zoneLabel=[section.items.some(item=>/^\d{1,2}:\d{2}$/.test(item.time||''))&&localZone?`Times ${localZone}`:'',section.stepLabel||''].filter(Boolean).join(' · ');
     body=`<ol class="swimlane">${section.items.map(item=>{
       const percent=item.progress?Number(String(item.progress).match(/\d+(?:\.\d+)?/)[0]):null;
-      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span><small>${e(item.progress)}</small></span>`:''}</li>`;
+      return `<li class="${item.state}"><span class="dot ${item.state}" aria-hidden="true"></span><span class="swimlane-copy"><b>${e(item.label)}</b>${item.note?`<small>${e(item.note)}</small>`:''}</span>${item.time?`<time>${e(item.time)}</time>`:''}${item.progress?`<span class="swimlane-step"><span class="swimlane-meter" role="progressbar" aria-label="Current step progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="--value:${percent}%"></i></span></span>`:''}</li>`;
     }).join('')}</ol>`;
   }else if(section.type==='cards'){
     const tone={done:['Checked','ok','check'],waiting:['In progress','active','activity'],pending:['Next','waiting','arrow-right'],blocked:['Blocked','error','circle-x']};
@@ -346,6 +346,10 @@ export async function renderReply(data){
   if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Remove the remaining items or keep the reply unfinished.');
   const status=validateStatus(data,done);
   if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
+  const overallPercent=percentValue(status.progress,'Progress');
+  const currentStep=swimlane.items.find(item=>item.state==='waiting');
+  const stepPercent=currentStep&&currentStep.progress?percentValue(currentStep.progress,'Step progress'):null;
+  if(stepPercent!==null&&stepPercent!==overallPercent)swimlane.stepLabel=stepPercent+'% now';
   const milestones=data.milestones===undefined?[]:array(data.milestones,'Milestones',2,LIMITS.milestones).map((item,index)=>field(item,`Milestones ${index+1}`,LIMITS.milestoneLabel));
   if(!milestones.length)fail('Every reply needs 2 to 4 milestones so the progress bar can show its gates.');
   const actions=validateActions(data.actions);
