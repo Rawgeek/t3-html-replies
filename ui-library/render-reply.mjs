@@ -26,6 +26,7 @@ const SECTION_HEIGHT='small';
 const shortZone=timeZone=>{try{const parts=new Intl.DateTimeFormat('en',{timeZone,timeZoneName:'short'}).formatToParts(new Date());return parts.find(part=>part.type==='timeZoneName')?.value||'';}catch{return '';}};
 const localZone=shortZone(undefined);
 const flowSpans={2:[3,3],3:[2,1,3],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
+const pairSpans={1:[2],2:[2,2],3:[1,1,2],4:[1,1,1,1],5:[1,1,1,1,2],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,2]};
 const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions','zone'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 
@@ -363,8 +364,13 @@ export async function renderReply(data){
   const swimlaneHtml=renderSection(swimlaneSection,zone);
   if(overallPercent!==null&&swimlaneHtml.includes(`<small>${overallPercent}%</small>`))fail('The rail repeats the overall percentage. Keep the step number only when it differs from Progress.');
   const resultsHtml=results.length?resultGrid(results):'';
-  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}<div class="reply-flow" data-count="${supporting.length}">${resultsHtml}${supporting.map((section,index)=>renderSection({...section,span:flowSpans[supporting.length][index]},zone)).join('')}</div></section>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}">${statusFooter({...status,state,milestones})}<header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
+  const changesSection=supporting.find(section=>section.type==='changes');
+  const flowSections=supporting.filter(section=>section!==changesSection);
+  const flowHtml=`<div class="reply-flow" data-count="${flowSections.length}" data-fill="${flowSections.length%2?2:1}">${resultsHtml}${flowSections.map((section,index)=>renderSection({...section,span:pairSpans[flowSections.length][index]},zone)).join('')}</div>`;
+  const sideHtml=changesSection?`<div class="reply-side">${renderSection(changesSection,zone)}</div>`:'';
+  const sectionsHtml=`<section class="tile-grid reply-sections" data-layout="side" aria-label="Supporting blocks">${swimlaneHtml}${flowHtml}${sideHtml}</section>`;
+  const metaHtml=`<div class="reply-meta">${pill(label,tone)}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</div>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${statusFooter({...status,state,milestones})}${sectionsHtml}</main></body></html>`;
 }
 
 export function assertRenderedReply(html){
@@ -372,9 +378,11 @@ export function assertRenderedReply(html){
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
   if(!/<main class="t3lib reply"/.test(text))fail('Not a reply page: the main element is missing. Render reply JSON with node ui-library/ui.mjs reply.');
   if(!/<section class="status-board"/.test(text))fail('Not a reply page: the status board is missing. Render reply JSON instead of writing HTML.');
+  if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a reply page: the title is empty.');
+  if((text.match(/class="status-tile"/g)||[]).length<4)fail('Not a reply page: Progress, Next, ETA, and Wake are required.');
   if(!/data-section-type="swimlane"/.test(text))fail('Not a reply page: the swimlane is missing. Render reply JSON instead of writing HTML.');
   if(!/data-section-type="changes"/.test(text))fail('Not a reply page: the changes block is missing. Render reply JSON instead of writing HTML.');
-  if((text.match(/data-section-type="/g)||[]).length<4)fail('Not a reply page: it needs a swimlane, a changes block, and two supporting blocks.');
+  if((text.match(/data-section-type="/g)||[]).length<3)fail('Not a reply page: it needs a swimlane, a changes block, and one supporting block.');
   if(/<details|<summary/i.test(text))fail('Expandable content is not allowed. Remove details and summary elements.');
   return true;
 }

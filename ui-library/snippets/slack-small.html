@@ -126,7 +126,9 @@
 .t3lib .metric-label, .t3lib .metric-note { font-size: 11px; color: var(--ui-muted); }
 .t3lib.reply { gap:8px; padding-block:4px; }
 .t3lib .reply-head { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; }
-.t3lib.reply h1 { font-size:20px; }
+.t3lib .reply-meta { display:grid; grid-auto-flow:column; grid-auto-columns:max-content; gap:6px; align-items:center; justify-items:end; }
+.t3lib .reply-meta .actions { gap:6px; }
+.t3lib.reply h1 { font-size:20px; min-width:0; overflow-wrap:anywhere; }
 .t3lib .reply-text { font-size:13px; color:var(--ui-muted); overflow-wrap:anywhere; }
 .t3lib .reply-results .component-tile { padding:12px; }
 .t3lib .reply-results .metric-value { font-size:20px; }
@@ -180,7 +182,10 @@
 .t3lib .reply-bar-head strong { font-size:12px; font-variant-numeric:tabular-nums; }
 .t3lib .reply-bar-track { height:4px; border-radius:4px; overflow:hidden; background:var(--ui-secondary); }
 .t3lib .reply-bar-track span { display:block; height:100%; width:var(--value); border-radius:inherit; background:var(--ui-series-1); }
-.t3lib .changes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; height:auto; align-self:center; align-items:start; margin-block:auto; }
+.t3lib .reply-side { display:grid; min-width:0; }
+.t3lib .reply-side > .reply-section-tile { height:100%; }
+.t3lib .changes { display:grid; grid-template-columns:1fr; grid-template-rows:auto auto; gap:10px; height:100%; align-content:space-between; align-items:start; }
+.t3lib .changes[data-single] { align-content:center; }
 .t3lib .changes[data-single] { grid-template-columns:1fr; }
 .t3lib .change-col { display:grid; grid-template-rows:auto auto; align-content:start; gap:6px; min-width:0; }
 .t3lib .change-head { font-size:9.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ui-muted); }
@@ -193,7 +198,7 @@
 .t3lib .compare-line { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:baseline; font-size:10.5px; }
 .t3lib .compare-label { color:var(--ui-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .t3lib .compare-delta { font-size:9.5px; color:var(--ui-ok); white-space:nowrap; }
-.t3lib .compare-bar { display:grid; grid-template-columns:42px minmax(0,1fr); gap:6px; align-items:center; font-size:9.5px; line-height:1.15; }
+.t3lib .compare-bar { display:grid; grid-template-columns:50px minmax(0,1fr); gap:6px; align-items:center; font-size:9px; line-height:1.15; }
 .t3lib .compare-value { text-align:right; color:var(--ui-muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .t3lib .compare-bar.after .compare-value { color:var(--ui-text); font-weight:600; }
 .t3lib .compare-track { display:block; height:4px; border-radius:3px; background:var(--ui-secondary); overflow:hidden; }
@@ -209,13 +214,13 @@
 .t3lib .reply-card .pill .icon { width:10px; height:10px; }
 .t3lib .reply-section-tile[data-section-type="cards"] { container-type:inline-size; }
 @container (max-width: 260px) {
-  .t3lib .reply-cards { grid-template-columns:1fr; gap:4px; }
-  .t3lib .reply-card { padding:4px 6px; gap:1px 6px; grid-template-columns:minmax(0,1fr) auto; align-items:center; align-content:center; }
+  .t3lib .reply-cards { grid-template-columns:1fr; gap:3px; }
+  .t3lib .reply-card { padding:3px 5px; gap:1px 5px; grid-template-columns:minmax(0,1fr) auto; align-items:center; align-content:center; }
   .t3lib .reply-card h3 { font-size:10.5px; }
-  .t3lib .reply-card p { grid-column:1 / -1; font-size:9.5px; line-height:1.2; }
+  .t3lib .reply-card p { grid-column:1 / -1; font-size:9.5px; line-height:1.15; }
   .t3lib .reply-card .pill { font-size:8.5px; padding:1px 4px; }
 }
-.t3lib .reply-sections[data-layout="side"] { grid-template-columns:minmax(0,1fr) minmax(0,3fr); align-items:stretch; grid-auto-rows:auto; }
+.t3lib .reply-sections[data-layout="side"] { grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) minmax(0,1fr); align-items:stretch; grid-auto-rows:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile { grid-row:auto; grid-row-end:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { height:auto; min-height:376px; }
 .t3lib .reply-flow .reply-section-tile { height:184px; }
@@ -322,7 +327,7 @@
 
 /* Final layout contract: one rail, three flow columns, no stray spans. */
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile { grid-column:auto; }
-.t3lib .reply-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; align-content:start; }
+.t3lib .reply-flow { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-content:start; }
 @media (min-width:901px) {
   .t3lib .reply-flow > [data-span="2"] { grid-column:span 2; }
   .t3lib .reply-flow > [data-span="3"] { grid-column:span 3; }
@@ -331,16 +336,17 @@
   .t3lib .reply-sections[data-layout="side"] { grid-template-columns:1fr; }
   .t3lib .reply-flow { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .t3lib .reply-flow > .reply-section-tile[data-span] { grid-column:auto; }
-  .t3lib .reply-flow > .reply-section-tile:last-child:nth-child(odd) { grid-column:span 2; }
+  .t3lib .reply-flow[data-fill="2"] > .reply-section-tile:last-child { grid-column:span 2; }
+  .t3lib .reply-side > .reply-section-tile { height:184px; }
+  .t3lib .changes { grid-template-columns:repeat(2,minmax(0,1fr)); align-content:center; gap:12px; height:100%; }
   .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { min-height:0; }
   .t3lib .swimlane { align-content:start; }
-  .t3lib.reply > .status-board { order:3; }
-  .t3lib.reply > .reply-sections { order:4; }
-  .t3lib.reply > .actions { order:5; }
 }
 @media (max-width:620px) {
   .t3lib .reply-flow { grid-template-columns:1fr; }
-  .t3lib .reply-flow > .reply-section-tile:last-child:nth-child(odd) { grid-column:auto; }
+  .t3lib .reply-flow[data-fill="2"] > .reply-section-tile:last-child { grid-column:auto; }
+  .t3lib .reply-head { grid-template-columns:1fr; }
+  .t3lib .reply-meta { grid-auto-flow:row; grid-template-columns:repeat(auto-fit,max-content); justify-items:start; }
 }
 
 </style></head><body><main class="t3lib"><p class="muted small">Demo</p><section class="component-tile" data-height="medium"><div class="demo tile-body"><article class="message interactive"><div class="avatar" aria-hidden="true">MC</div><div class="stack"><div class="message-head"><strong>Morgan Chen</strong><time>10:24</time></div><p class="copy-text">The build fix is ready for review. The focused checks pass.</p><div class="actions"><button type="button" class="btn" data-demo-action="copy" data-copy-text="The build fix is ready for review. The focused checks pass."><svg class="icon" aria-hidden="true" focusable="false"

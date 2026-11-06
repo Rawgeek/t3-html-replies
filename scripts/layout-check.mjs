@@ -133,10 +133,12 @@ const inspect = async (url, width) => {
       const flow = document.querySelector('.reply-flow');
       const tiles = [...flow.querySelectorAll(':scope > .reply-section-tile')];
       const box = (element) => element.getBoundingClientRect();
-      const clipped = tiles.filter((tile) => {
+      const clippedTiles = tiles.filter((tile) => {
         const body = tile.querySelector('.tile-body');
         return body.scrollHeight > body.clientHeight + 1 || body.scrollWidth > body.clientWidth + 1;
-      }).length;
+      });
+      const clipped = clippedTiles.length;
+      const clippedTypes = clippedTiles.map((tile) => tile.dataset.sectionType);
       const spilled = [...document.querySelectorAll('.reply-section-tile *')]
         .filter((node) => node instanceof HTMLElement)
         .filter((node) => !node.closest('.table-wrap'))
@@ -156,7 +158,7 @@ const inspect = async (url, width) => {
         Math.abs(row.left - flowBox.left) > 1.5 || Math.abs(row.right - flowBox.right) > 1.5).length;
       const columns = getComputedStyle(flow).gridTemplateColumns.split(' ').length;
       const heights = [...new Set(tiles.map((tile) => Math.round(box(tile).height)))];
-      return JSON.stringify({ columns, clipped, spilled, holes, heights });
+      return JSON.stringify({ columns, clipped, clippedTypes, spilled, holes, heights });
     })()`
   });
   ws.close();
@@ -175,9 +177,9 @@ try {
   for (const [name, url] of Object.entries(pages)) {
     for (const width of [1024, 728, 390]) {
       const report = await inspect(url, width);
-      const expected = width > 900 ? 3 : width > 620 ? 2 : 1;
+      const expected = width > 620 ? 2 : 1;
       if (report.columns !== expected) failures.push(name + '@' + width + ': ' + report.columns + ' columns, expected ' + expected);
-      if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles');
+      if (report.clipped) failures.push(name + '@' + width + ': ' + report.clipped + ' clipped tiles (' + report.clippedTypes.join(',') + ')');
       if (report.spilled) failures.push(name + '@' + width + ': ' + report.spilled + ' overflowing nodes');
       if (report.holes) failures.push(name + '@' + width + ': ' + report.holes + ' packed rows do not reach both edges');
       if (report.heights.some((height) => height !== 184)) failures.push(name + '@' + width + ': non-184px flow tiles');

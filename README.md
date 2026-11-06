@@ -4,7 +4,7 @@ A Codex skill and UI kit for compact HTML replies in T3 Code.
 
 ![Reply examples](screenshots/overview.png)
 
-The renderer turns short JSON into one self-contained HTML page. Replies use a dense grid, fixed-height blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
+The renderer turns short JSON into one self-contained HTML page. Replies use a dense bento grid, fixed-height blocks, slim result and status tiles, and hard limits on text. There are no expandable sections or hidden content.
 
 ## What it does
 

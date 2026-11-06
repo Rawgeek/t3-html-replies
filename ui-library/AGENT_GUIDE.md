@@ -26,7 +26,9 @@ The swimlane shows history, the current step, and future steps. The changes bloc
 
 The swimlane sits in a tall left column. Supporting blocks fill the three flow columns beside it, and the renderer picks their spans so the flow never leaves a cell empty. Do not pad a reply with filler blocks.
 
-Status comes first, then the title and summary. Result facts open the flow beside the rail, above the supporting blocks.
+The title comes first, then a one-line summary, then the status strip. Result facts open the flow beside the rail, above the supporting blocks.
+
+Changes sits in a tall right column, with Done above To do. The flow between the rail and Changes uses two columns.
 
 ## Reply JSON
 
@@ -46,7 +48,7 @@ Top-level fields:
 | state | Required: complete, working, waiting, or blocked |
 | summary | Optional, up to 80 characters |
 | results | Optional, 1 to 4 facts. Completed replies need at least one. Label 12, value 8, note 18. |
-| sections | Required, 4 to 8 visible blocks: swimlane, changes, and at least two supporting blocks |
+| sections | Required, 3 to 8 visible blocks: swimlane, changes, and at least one flow block |
 | progress | Up to 12 characters. Completed replies must show 100%. |
 | next | Up to 18 characters |
 | eta | Up to 16 characters |
@@ -61,9 +63,9 @@ The renderer rejects replies above 1200 visible characters.
 
 ## Section blocks
 
-The page is always a four column grid at 1024px: the swimlane fills one column and three flow columns hold the supporting blocks. The renderer decides each block span and the flow never leaves a cell empty. Every section is a fixed 184px tile, and the renderer rejects a size or span field.
+The page is a three part grid at 1024px: the swimlane, a two column flow for results and supporting blocks, and a tall Changes column. The renderer decides each block span and the flow never leaves a cell empty. Every flow section is a fixed 184px tile, and the renderer rejects a size or span field.
 
-The flow fills every cell: two blocks stack full width, three use spans of 2, 1, and 3, and four use three single cells plus one full row. Up to seven blocks each get a span that fills the row. Below 900px the flow drops to two columns and pairs the last odd block across both. Below 620px it uses one column. Leave the arrangement to the renderer.
+The flow fills every cell: one block spans both columns, two stack full width, three use two cells then a full row, and four use two rows of two. Up to seven blocks each get a span that fills the row. Below 900px the rail, flow, and changes stack; below 620px the flow uses one column. Leave the arrangement to the renderer.
 
 Every block stays fully visible. Notes wrap inside cards; no block hides content to fit. Content keeps its natural height and centers inside the fixed tile, so padding stays even instead of stretching rows apart.
 

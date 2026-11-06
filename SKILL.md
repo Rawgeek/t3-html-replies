@@ -1,9 +1,11 @@
 ---
 name: t3-html-replies
-description: "Render every T3 main-session update, question, and final reply as validated, compact HTML with optional native chat actions. Keep subagent output contracts unchanged."
+description: "Render every T3 main-session update, question, and final reply as validated, compact bento-style HTML with optional native chat actions. Keep subagent output contracts unchanged."
 ---
 
 # T3 HTML replies
+
+The layout is a bento grid: fixed-height tiles, one tall rail, one tall changes column, and a packed two column flow.
 
 Apply this skill to every message shown to the user in a T3 main session, including progress updates and final answers. Subagents follow their own response contract.
 
@@ -23,8 +25,8 @@ The most common failure is an HTML fragment. It looks right in chat but fails gu
 
 - Send all user-facing information in one HTML page. Never append Markdown or plain text.
 - Use no expandable text. Never add disclosures, accordions, dropdowns, or hidden content.
-- Use a fixed four column grid at 1024px: one swimlane column and three flow columns with 8px gaps. Tablets use two flow columns and phones use one. The renderer chooses each block span and the block type when the type is omitted.
-- Put status first, then the title. Result facts open the flow beside the rail, above the supporting blocks.
+- At 1024px the reply is three parts: the swimlane, a two column flow for results and supporting blocks, and a tall Changes column with Done above To do. Everything stacks on phones. The renderer chooses each block span and the block type when the type is omitted.
+- Start with the title and a one-line summary, then the status strip. Result facts open the flow beside the rail, above the supporting blocks.
 - Results and status use the Slim height. Reply sections share 184px. The swimlane is a tall side column. The renderer assigns every height, so rows always align.
 - Keep fields short. When information will not fit, add another visible block instead of lengthening text.
 - Keep the validated reply under the renderer limits. Never show hashes, short commit IDs, UUIDs, tokens, or encoded IDs. Name the human referent instead.
@@ -52,7 +54,7 @@ Every reply ships three required elements. The renderer rejects a reply without 
 - The swimlane is a timeline of five to seven steps. At least two are done, exactly one is current for unfinished work, and at least two are pending. The current step shows its number only when it differs from overall progress; never repeat the same percentage in the rail and the Progress tile.
 - The changes block lists what is done and what is still to do, so the reader sees delivered and remaining work at a glance.
 - Two to four milestones label the segments of the progress bar.
-- At least two supporting blocks sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
+- Changes plus at least one flow block sit beside the swimlane. The renderer rejects a reply that would leave an empty cell.
 
 This gives every reply a visible past, present, and future. Do not replace the swimlane with prose.
 
