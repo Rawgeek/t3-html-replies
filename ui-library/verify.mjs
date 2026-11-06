@@ -103,7 +103,7 @@ const reply=await renderReply({...base,sections:[
   {title:'Cards',type:'cards',items:[{label:'Build',state:'done',note:'Checks pass'},{label:'Review',state:'pending',note:'Owner next'}]}
 ]});
 assert(reply.includes('aria-valuenow="100"')&&reply.includes('&lt;script&gt;'));
-assert(reply.includes('class="compare-track"')&&reply.includes('--after:62.2%'),'Compare bars scale to the larger value');
+assert(reply.includes('class="compare-bar before"')&&reply.includes('class="compare-bar after"')&&reply.includes('--value:62.2%'),'Compare draws one bar per value on a shared scale');
 assert(reply.includes('reply-card')&&reply.includes('>Checked<'),'Cards render a readable status pill');
 assert((reply.match(/class="status-gates"/g)||[]).length===1,'Progress tile carries milestone gates');
 const sectionHeights=[...reply.matchAll(/class="component-tile reply-section-tile" data-height="([a-z]+)"/g)].map(match=>match[1]);

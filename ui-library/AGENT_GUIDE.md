@@ -68,7 +68,7 @@ The grid fills the last row automatically. A lone final block spans the full wid
 | swimlane | title 24; 5 to 6 items; label 30, note 32, time 8; state done, waiting, or pending. Only the waiting item may carry progress, such as 62%. |
 | bars | title 24; 2 to 3 items; label 18, note 22, value up to 12 characters |
 | changes | title 24; done and todo lists with up to 3 items of 44 characters each. Two items minimum together. |
-| compare | title 24; 1 to 3 items; label 18, before 10, after 10, delta 12. Each item draws a before and after bar. |
+| compare | title 24; 1 to 3 items; label 18, before 10, after 10, delta 12. Each item draws a before bar and an after bar on one shared scale. |
 | cards | title 24; 2 to 3 items; label 18, note 40; state done, waiting, pending, or blocked. Each card shows a status pill. |
 
 When a block cannot hold the next fact, split it into another block. Do not shorten evidence into vague words.

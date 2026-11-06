@@ -258,8 +258,8 @@ function renderSection(section){
       const before=number(item.before),after=number(item.after);
       const max=Math.max(before??0,after??0)||1;
       const scale=value=>Math.round((value===null?100:value/max*100)*10)/10;
-      const widths=`--before:${scale(before)}%;--after:${scale(after)}%`;
-      return `<div class="compare-row"><div class="compare-line"><span class="compare-label">${e(item.label)}</span>${item.delta?`<span class="compare-delta">${e(item.delta)}</span>`:''}<span class="compare-values"><span>${e(item.before)}</span><span aria-hidden="true">→</span><b>${e(item.after)}</b></span></div><div class="compare-track" style="${widths}"><span class="before"></span><span class="after"></span></div></div>`;
+      const bar=(kind,value,width)=>`<div class="compare-bar ${kind}"><span class="compare-value">${e(value)}</span><span class="compare-track"><i style="--value:${width}%"></i></span></div>`;
+      return `<div class="compare-row"><div class="compare-line"><span class="compare-label">${e(item.label)}</span>${item.delta?`<span class="compare-delta">${e(item.delta)}</span>`:''}</div>${bar('before',item.before,scale(before))}${bar('after',item.after,scale(after))}</div>`;
     }).join('')}</div>`;
   }else if(section.type==='changes'){
     const column=(label,items,state)=>items.length?`<div class="change-col ${state}"><p class="change-head">${e(label)}</p><ul class="change-list">${items.map(item=>`<li><span class="dot ${state}" aria-hidden="true"></span><span>${e(item)}</span></li>`).join('')}</ul></div>`:'';
@@ -315,7 +315,7 @@ export async function renderReply(data){
       ?`<button class="${className}" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
       :`<a class="${className}" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`;
   }).join('');
-  const sectionsHtml=sections.length?`<section class="tile-grid reply-sections" aria-label="Supporting blocks">${sections.map(renderSection).join('')}</section>`:'';
+  const sectionsHtml=sections.length?`<section class="tile-grid reply-sections" data-layout="${sections.some(section=>section.type==='swimlane')?'side':'flow'}" aria-label="Supporting blocks">${sections.map(renderSection).join('')}</section>`:'';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}" data-columns="${columns}"><header class="reply-head"><h1>${e(title)}</h1>${pill(label,tone)}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${results.length?resultGrid(results):''}${sectionsHtml}${statusFooter({...status,state,milestones})}${actionsHtml?`<div class="actions">${actionsHtml}</div>`:''}</main></body></html>`;
 }
 
