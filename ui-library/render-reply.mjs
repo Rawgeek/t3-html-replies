@@ -11,7 +11,7 @@ const LIMITS=Object.freeze({
   swimlaneItems:6,swimlaneLabel:30,swimlaneNote:32,swimlaneTime:8,swimlaneProgress:12,
   changeItems:3,changeItem:44,
   compareItems:3,compareLabel:18,compareValue:10,compareDelta:12,
-  cardItems:4,cardLabel:18,cardNote:40,
+  cardItems:3,cardLabel:18,cardNote:40,
   barsItems:3,barLabel:18,barNote:22,
   progress:12,next:18,eta:16,wake:20,actions:3,actionLabel:14,actionSend:400,
   milestones:4,milestoneLabel:8,

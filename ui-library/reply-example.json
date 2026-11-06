@@ -99,11 +99,6 @@
           "label": "Review",
           "state": "waiting",
           "note": "Reader pending"
-        },
-        {
-          "label": "CI",
-          "state": "pending",
-          "note": "After review"
         }
       ]
     }

@@ -222,6 +222,7 @@
 .t3lib .swimlane li.waiting .swimlane-copy b { color:var(--ui-series-1); }
 .t3lib .swimlane li.pending .swimlane-copy b { color:var(--ui-muted); }
 @media (max-width:620px) { .t3lib .swimlane li { grid-template-columns:9px minmax(0,1fr) 34px; gap:2px 7px; } }
+@media (max-width:620px) { .t3lib .status-gates { font-size:0; gap:4px; } .t3lib .status-gates span::before { height:4px; } }
 .t3lib .status-gates { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:3px; font-size:8.5px; line-height:1.2; color:var(--ui-muted); }
 .t3lib .status-gates span { display:grid; gap:2px; align-content:start; overflow:hidden; white-space:nowrap; }
 .t3lib .status-gates span::before { content:""; height:3px; border-radius:2px; background:var(--ui-secondary); }
@@ -303,6 +304,7 @@
   .t3lib.reply[data-columns="2"] .reply-section-tile:last-child:nth-child(odd) { grid-column: span 2; }
 }
 @media (prefers-reduced-motion:reduce) { .t3lib .status-meter span, .t3lib .meter-fill { transition: none; } }
+@media (max-width:620px) { .t3lib .status-gates { font-size:0; gap:4px; } .t3lib .status-gates span::before { height:4px; } }
 </style></head><body><main class="t3lib"><p class="muted small">Demo</p><section class="component-tile" data-height="tall"><div class="demo tile-body"><article class="message interactive"><div class="avatar" aria-hidden="true">MC</div><div class="stack"><div class="message-head"><strong>Morgan Chen</strong><time>10:24</time></div><p class="copy-text">The build fix is ready for review.</p><p class="copy-text">Peak memory is 1.1 GB on the sample workload, down from 1.8 GB. The same tests still run.</p><p class="copy-text">Next: Morgan will review the change.</p><div class="actions"><button type="button" class="btn" data-demo-action="copy" data-copy-text="The build fix is ready for review.
 
 Peak memory is 1.1 GB on the sample workload, down from 1.8 GB. The same tests still run.
