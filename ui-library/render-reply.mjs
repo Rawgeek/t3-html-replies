@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { icon, pill, progressBoard, resultGrid, metric, escapeHTML as e } from './components.mjs';
@@ -28,6 +29,7 @@ const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[
 const CLOCK=/^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 const fail=message=>{throw Error(message);};
+const LIBRARY_CSS=readFileSync(new URL('./library.css',import.meta.url),'utf8');
 const inferType=(section)=>{
   if(Array.isArray(section.done)||Array.isArray(section.todo))return 'changes';
   if(Array.isArray(section.columns)&&Array.isArray(section.rows))return 'table';
@@ -448,15 +450,15 @@ function renderQuestion(data,css){
 export function assertRenderedReply(html){
   const text=String(html);
   if(!/^<!doctype html>/i.test(text.trim()))fail('Not a reply page: the file needs a doctype. A fragment such as <p>Text</p> is invalid.');
-  const inlineStyles=[...text.matchAll(/\sstyle=(?:"([^"]*)"|'([^']*)')/gi)].map(match=>match[1]??match[2]);
-  const hidesInline=/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*(?:0+(?:\.0*)?|\.0+)\s*(?:!important)?\s*(?:;|$)|font-size\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i;
-  if(inlineStyles.some(style=>hidesInline.test(style)))fail('Not a reply page: inline CSS hides required content. Remove the hiding style.');
-  const styleBlock=[...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(match=>match[1]).join('\n').replace(/\s+/g,' ');
-  const requiredSelector=/(?:\bmain\b|\.bento\b|\.reply-body\b|\.reply-text\b|\.reply-head\b|\.reply-meta\b|\.reply-section-tile\b|\.reply-results\b|\.reply-cards\b|\.reply-card\b|\.tile-body\b|\.status-board\b|\.status-tile\b|\.status-gates\b|\.swimlane\b|\.change-list\b|\.change-copy\b|\.change-head\b|\.change-col\b|\.changes\b|\.metric\b|\.ask\b|\.ask-question\b|\.ask-option\b|\bh1\b)/i;
-  const hiddenRule=/(?:^|;)\s*(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?\s*(?:!important)?\s*(?:;|$)|font-size\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$)|height\s*:\s*0(?:px)?\s*(?:!important)?\s*(?:;|$))/i;
-  const hidesRequired=[...styleBlock.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some(([,selectors,body])=>hiddenRule.test(';'+body)&&selectors.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!selector.includes('::')).some(selector=>requiredSelector.test(selector)));
-  if(hidesRequired)fail('Not a reply page: CSS hides required reply content.');
-  if(/<[^>]+\shidden(?:\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
+  if(/<(?:link|script|iframe|object|embed)\b/i.test(text))fail('Not a reply page: it must be self-contained with no linked or embedded content.');
+  const inlineStyles=[...text.matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)].map(match=>(match[1]??match[2]).trim());
+  if([...text.matchAll(/\sstyle\s*=/gi)].length!==inlineStyles.length)fail('Not a reply page: inline styles must be quoted layout variables only. Render reply JSON instead of writing HTML.');
+  const layoutStyle=/^(?:--columns:[1-4]|--value:-?\d+(?:\.\d+)?%|grid-row:\d+(?:\/\d+)?;grid-column:\d+(?:\/\d+)?|grid-template-rows:[a-z0-9(),. %-]+)$/i;
+  if(inlineStyles.some(style=>!layoutStyle.test(style)))fail('Not a reply page: inline styles must be layout variables only. Render reply JSON instead of writing HTML.');
+  const styleMatches=[...text.matchAll(/<style([^>]*)>([\s\S]*?)<\/style>/gi)];
+  if(styleMatches.length!==1||styleMatches[0][1].trim())fail('Not a reply page: it needs exactly one inline style block with no attributes.');
+  if(styleMatches[0][2].trim()!==LIBRARY_CSS.trim())fail('Not a reply page: the stylesheet must be the unmodified library CSS. Render reply JSON instead of writing HTML.');
+  if(/<[^>]+\shidden(?:\s*=|\s|>)/i.test(text))fail('Hidden content is not allowed. Remove the hidden attribute and render the content visibly.');
   if(/<main class="t3lib reply question"/.test(text)){
     if(!/<h1>[^<]+<\/h1>/.test(text))fail('Not a question page: the title is empty.');
     if(!/<p class="reply-text">[^<]*\S[^<]*<\/p>/.test(text))fail('Not a question page: the context is missing.');

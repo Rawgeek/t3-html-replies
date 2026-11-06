@@ -19,8 +19,8 @@ const starter={
   milestones:['Scope','Build','Review','Ship'],
   sections:[
     {title:'Stages',type:'swimlane',items:[
-      {label:'Step done',note:'Short note',time:'09:10',state:'done'},
-      {label:'Step done',note:'Short note',time:'09:24',state:'done'},
+      {label:'Scope read',note:'Short note',time:'09:10',state:'done'},
+      {label:'Build done',note:'Short note',time:'09:24',state:'done'},
       {label:'Current step',note:'What is running',time:'09:48',state:'waiting',progress:'40%'},
       {label:'Next step',note:'What follows',time:'10:10',state:'pending'},
       {label:'Later step',note:'What closes it',time:'10:30',state:'pending'}]},
