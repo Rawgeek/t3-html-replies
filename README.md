@@ -9,7 +9,7 @@ The renderer turns short JSON into one self-contained HTML page. Replies use a d
 ## What it does
 
 - Four-column grid at 1024px: Stages hold the left column; Progress and evidence span the right three columns; Done, To do, and one supporting block share the next row.
-- Progress and result facts use 88px tiles. Supporting blocks use 184px; Stages use 376px. Below 900px the grid stacks with natural heights.
+- Progress and result facts use 88px tiles. Supporting blocks use 184px; a trailing row containing only facts, cards, or list items uses 88px. Stages use 376px. Below 900px the grid stacks with natural heights.
 - 8 sections max, 1,200 visible characters, and three or four required result facts.
 - Every reply carries five or six clocked stages, one changes block, and two to four progress milestones. An unfinished reply has both Done and To do lists; a complete reply has only Done.
 - Numbers sit in a visual: compare bars for before and after, facts for single values, bars for groups.

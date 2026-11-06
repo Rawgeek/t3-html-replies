@@ -22,7 +22,7 @@ If validation fails, shorten the field or use another block. If rendering fails,
 
 - One self-contained page, no text outside it.
 - Four columns at 1024px: Stages hold the left column; Progress and three or four result facts span the right three columns; Done, To do, and one supporting block share the next row; later blocks fill complete rows.
-- Stages are 376px and hold five or six timed steps. Progress and results are 88px. Supporting blocks are 184px. Below 900px the grid stacks with natural heights and no clipping.
+- Stages are 376px and hold five or six timed steps. Progress and results are 88px. Supporting blocks are 184px; a trailing row containing only facts, cards, or list items is 88px. Below 900px the grid stacks with natural heights and no clipping.
 - The header has the title, one summary line, an optional bell chip naming a confirmed wake, and optional actions. No separate status pill, Next tile, Wake tile, or footer.
 - Progress holds the percentage, meter, milestone labels, and ETA. Unknown ETA remains visible. Never repeat overall progress inside the current stage.
 - No expandable content, dropdowns, hover-only details, hidden notes, nested bordered cards, or truncated text.

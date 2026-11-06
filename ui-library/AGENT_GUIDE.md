@@ -21,7 +21,7 @@ At 1024px the reply is a four-column bento grid:
 - Progress occupies the next three columns at 88px, with its ETA at the right.
 - Three or four result facts sit under Progress at 88px.
 - Done, To do, and one supporting block share the next row at 184px each.
-- Further supporting blocks use later 184px rows. One block spans all four columns; two split 2+2; three split 2+1+1; four split 1+1+1+1.
+- Further supporting blocks use later 184px rows. A row containing only facts, cards, or list items uses 88px. One block spans all four columns; two split 2+2; three split 2+1+1; four split 1+1+1+1.
 
 The renderer assigns every span. Do not add a size, span, or layout field. At 900px and below everything stacks in source order, with Progress first inside the grid and natural content heights. At 620px results use two columns; a final odd result spans both.
 

@@ -25,7 +25,7 @@ const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes',
 const SECTION_HEIGHT='small';
 const TOP_KEYS=['title','state','summary','results','sections','progress','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
-const CLOCK=/^(?:[01]?\d|2[0-3]):[0-5]\d$/;
+const CLOCK=/^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 const fail=message=>{throw Error(message);};
 const inferType=(section)=>{
@@ -381,7 +381,7 @@ export async function renderReply(data){
   const blockSections=supporting.filter(section=>section!==changesSection);
   const groups=[];
   for(let index=1;index<blockSections.length;index+=4)groups.push(blockSections.slice(index,index+4));
-  const extraHeights=groups.map(group=>group.every(section=>section.type==='facts')?'slim':'small');
+  const extraHeights=groups.map(group=>group.every(section=>['facts','cards','list'].includes(section.type))?'slim':'small');
   const gridRows=`repeat(2,var(--height-slim)) var(--height-small)${extraHeights.map(height=>` var(--height-${height})`).join('')}`;
   const slot=(section,row,columns,span=1)=>renderSection({...section,span,slot:`grid-row:${row};grid-column:${columns}`});
   const firstHtml=blockSections.length?slot(blockSections[0],3,'4/5',1):'';

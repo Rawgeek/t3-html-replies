@@ -144,7 +144,7 @@ const completeTemplate=await readFile(join(root,'complete-template.html'),'utf8'
 assert.equal(completeTemplate,await renderReply(JSON.parse(await readFile(join(root,'complete-example.json'),'utf8'))),'complete-template.html is regenerated from the current renderer and example');
 const sectionHeights=[...reply.matchAll(/class="component-tile reply-section-tile" data-height="([a-z]+)"/g)].map(match=>match[1]);
 assert.equal(sectionHeights.length,8,'Structured blocks render');
-assert.deepEqual(sectionHeights,['tall',...Array(7).fill('small')],'The swimlane is taller and every other block shares one height');
+assert.deepEqual(sectionHeights,['tall',...Array(6).fill('small'),'slim'],'The swimlane is taller and the final cards-only row is slim');
 const pendingReply=await renderReply({title:'Waiting',state:'waiting',results:base.results,progress:'78% estimate',eta:'Unknown',wake:'Not armed',milestones,sections:[swimlane,changes,cost]});
 const railOf=html=>html.slice(html.indexOf('<ol class="swimlane">'),html.indexOf('</ol>',html.indexOf('<ol class="swimlane">')));
 const rail=railOf(pendingReply);
