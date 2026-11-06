@@ -22,7 +22,7 @@ const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
-const flowSpans={2:[3,3],3:[1,1,1],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
+const flowSpans={2:[3,3],3:[2,1,3],4:[1,1,1,3],5:[1,1,1,2,1],6:[1,1,1,1,1,1],7:[1,1,1,1,1,1,3]};
 const TOP_KEYS=['title','state','summary','results','sections','progress','next','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 

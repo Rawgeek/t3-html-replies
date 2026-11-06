@@ -206,6 +206,14 @@
 .t3lib .reply-card p { font-size:10px; color:var(--ui-muted); line-height:1.3; }
 .t3lib .reply-card .pill { font-size:9.5px; padding:2px 5px; }
 .t3lib .reply-card .pill .icon { width:10px; height:10px; }
+.t3lib .reply-section-tile[data-section-type="cards"] { container-type:inline-size; }
+@container (max-width: 250px) {
+  .t3lib .reply-cards { grid-template-columns:1fr; gap:4px; }
+  .t3lib .reply-card { padding:5px 6px; gap:2px; grid-template-columns:minmax(0,1fr) auto; align-items:center; }
+  .t3lib .reply-card h3 { font-size:11px; }
+  .t3lib .reply-card p { display:none; }
+  .t3lib .reply-card .pill { font-size:9px; padding:1px 4px; }
+}
 .t3lib .reply-sections[data-layout="side"] { grid-template-columns:minmax(0,1fr) minmax(0,3fr); align-items:stretch; grid-auto-rows:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile { grid-row:auto; grid-row-end:auto; }
 .t3lib .reply-sections[data-layout="side"] > .reply-section-tile[data-section-type="swimlane"] { height:auto; min-height:376px; }
