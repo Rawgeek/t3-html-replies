@@ -47,7 +47,7 @@ The grid never leaves a hole. Supporting blocks fill the three flow columns besi
 
 ## Validation
 
-The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](/Users/rawgeek/.codex/templates/t3-ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits.
+The reply renderer is the only accepted path. Read [AGENT_GUIDE.md](ui-library/AGENT_GUIDE.md) for the current schema, block types, and exact field limits. In an installed skill the library lives at ~/.codex/templates/t3-ui-library.
 
 The renderer enforces the limits on every field before writing HTML. It rejects missing fields, unknown fields, long values, opaque references, expandable content, and replies above the total size limit. On failure, shorten the field or move the information into another block. Never bypass validation.
 
@@ -57,14 +57,14 @@ Numbers sit inside a visual. A before and after pair uses compare, a single meas
 
 ## Find an element
 
-Start at [ELEMENT_INDEX.md](/Users/rawgeek/.codex/templates/t3-ui-library/ELEMENT_INDEX.md). The tree is group, family, and sample. Each leaf has a one-line use case and links to its demo and logic file.
+Start at [ELEMENT_INDEX.md](ui-library/ELEMENT_INDEX.md). The tree is group, family, and sample. Each leaf has a one-line use case and links to its demo and logic file.
 
-Using the index first keeps replies consistent and avoids rewriting markup. Use node ui.mjs show ID when the one-line description needs more context.
+Using the index first keeps replies consistent and avoids rewriting markup. Use node ui-library/ui.mjs show ID when the one-line description needs more context.
 
 ## Workflow
 
-1. Apply [unslop](/Users/rawgeek/.codex/skills/unslop/SKILL.md).
-2. Run node ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
+1. Apply the unslop skill at ~/.codex/skills/unslop/SKILL.md.
+2. From the ui-library directory, run node ui.mjs new /task/output/reply.json for a valid starter, then fill the fields. Read the guide only for an unusual layout.
 3. Run node ui.mjs check to validate in one line, then node ui.mjs reply to render.
 4. Preview at 728px and 390px only when the reply is new or its layout changed.
 5. When the t3-html-replies render_reply MCP tool is available, call it with the absolute dataPath. The server validates the JSON and renders it. Otherwise call T3's html_render tool with the rendered file. Keep source markup out of model context.

@@ -226,6 +226,8 @@ function validateSection(section,index){
         progress
       };
     });
+    const order=items.map(item=>item.state).join('');
+    if(!/^(?:done)*(?:waiting)?(?:pending)*$/.test(order))fail(`${name} must list done steps first, then the current step, then pending steps.`);
     result={type,title,items};
   }else{
     assertKeys(section,['title','type','items'],name);
@@ -326,10 +328,17 @@ export async function renderReply(data){
   if(done&&!changes[0].done.length)fail('A complete reply needs at least one done change.');
   if(!done&&!changes[0].todo.length)fail('A pending reply needs at least one to do change.');
   if(done&&changes[0].todo.length)fail('A complete reply cannot keep a to do list. Remove the remaining items or keep the reply unfinished.');
+  if(done){
+    const open=sections.filter(section=>section.type==='cards').flatMap(section=>section.items).find(item=>item.state!=='done');
+    if(open)fail(`A complete reply cannot keep a ${open.state} card. Mark every card done or keep the reply unfinished.`);
+  }
   const status=validateStatus(data,done);
   if(done&&!/^none$/i.test(status.next))fail('A complete reply must set Next to None.');
   percentValue(status.progress,'Progress');
-  const zone=present(data.zone)?shortZone(field(data.zone,'Zone',32))||field(data.zone,'Zone',32):localZone;
+  const zoneInput=present(data.zone)?field(data.zone,'Zone',32):undefined;
+  const zoneLabel=zoneInput===undefined?localZone:shortZone(zoneInput);
+  if(!zoneLabel)fail('Zone must be an IANA name such as Asia/Bangkok.');
+  const zone=zoneLabel;
   const milestones=data.milestones===undefined?[]:array(data.milestones,'Milestones',2,LIMITS.milestones).map((item,index)=>field(item,`Milestones ${index+1}`,LIMITS.milestoneLabel));
   if(!milestones.length)fail('Every reply needs 2 to 4 milestones so the progress bar can show its gates.');
   const actions=validateActions(data.actions);

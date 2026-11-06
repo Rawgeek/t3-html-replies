@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { dirname, extname, join, resolve } from 'node:path';
+import { dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createInterface } from 'node:readline';
 
@@ -58,7 +58,7 @@ async function resolveData(args) {
 
   const dataPath = readString(args, 'dataPath', 4096);
   if (dataPath === undefined) throw Error('Pass reply data or an absolute dataPath.');
-  if (!dataPath.startsWith('/') || extname(dataPath).toLowerCase() !== '.json') {
+  if (!isAbsolute(dataPath) || extname(dataPath).toLowerCase() !== '.json') {
     throw Error('dataPath must be an absolute .json path.');
   }
 

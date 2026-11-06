@@ -5,8 +5,8 @@ Start with [ELEMENT_INDEX.md](ELEMENT_INDEX.md), then open the closest sample.
 ## Reply contract
 
 - Every T3 main-session message is one self-contained HTML page. Never append Markdown or plain text.
-- Use a fixed four column grid at 1024px: one swimlane column and three flow columns. Stack on phones. Use 8px gaps.
-- Results and status use the Slim height (88px). Every reply section uses one shared Small height (184px). The swimlane is the one exception: it is a full-width Tall band (376px) so five or six steps stay readable.
+- Use a fixed four column grid at 1024px: one swimlane column and three flow columns. Two flow columns on tablets and one on phones. Use 8px gaps.
+- Results and status use the Slim height (88px). Every reply section uses one shared Small height (184px). The swimlane is the one exception: it is a tall left column at least 376px high so five to seven steps stay readable.
 - The renderer assigns every height; the JSON has no per-section size.
 - Never use expandable text, disclosures, accordions, dropdowns, or hidden content.
 - Keep every field inside its limit. When a field is full, add another visible block. Never enlarge a paragraph.
@@ -92,7 +92,7 @@ Numbers appear with a visual. A before and after pair uses compare, a single mea
 
 ## Workflow
 
-Fast path, three commands:
+Fast path, three commands from this ui-library directory:
 
     node ui.mjs new /task/output/reply.json
     node ui.mjs check /task/output/reply.json
@@ -101,7 +101,7 @@ Fast path, three commands:
 1. Run new to write a valid starter, then fill the fields. No guide reading needed for a routine reply.
 2. Run check after each edit. It prints one line: valid, or the exact field that failed.
 3. Render, then preview at 728px and 390px only when the reply is new or changed layout.
-4. Send the absolute htmlPath to the t3-html-replies render_reply MCP tool when it is available. Otherwise use T3's HTML render tool. Keep the HTML source out of model context.
+4. Send the absolute dataPath to the t3-html-replies render_reply MCP tool when it is available. Otherwise use T3's HTML render tool. Keep the HTML source out of model context.
 
 Read [ELEMENT_INDEX.md](ELEMENT_INDEX.md) only when the starter blocks do not fit the content.
 

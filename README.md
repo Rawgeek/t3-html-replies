@@ -86,7 +86,7 @@ Inside `ui-library/`:
 
 ## Previews
 
-The pre-commit hook rebuilds the library, runs verification and the MCP self-test, then regenerates `screenshots/overview.png`, `screenshots/reply-mobile.png`, and `screenshots/gallery.png`. It stages only generated outputs:
+The pre-commit hook rebuilds the library, runs verification and the MCP self-test, then regenerates `screenshots/overview.png`, `screenshots/reply-mobile.png`, and `screenshots/gallery.png`. It refuses to run when library inputs have unstaged changes, so previews always match the staged snapshot. It stages only generated outputs:
 
     git config core.hooksPath hooks
     node scripts/previews.mjs

@@ -4,6 +4,10 @@ set -e
 root=$(git rev-parse --show-toplevel)
 cd "$root"
 if git diff --cached --name-only | grep -qE '^(ui-library/|scripts/|hooks/|SKILL\.md)'; then
+  if git diff --name-only -- ui-library scripts hooks SKILL.md | grep -q .; then
+    echo "Stage every ui-library, scripts, hooks, and SKILL.md change first; the hook rebuilds the staged snapshot." >&2
+    exit 1
+  fi
   node ui-library/build.mjs >/dev/null
   node ui-library/verify.mjs >/dev/null
   node scripts/selftest.mjs >/dev/null

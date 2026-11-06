@@ -108,7 +108,7 @@ const reply=await renderReply({...base,sections:[
   {title:'Table',type:'table',columns:['Gate','State'],rows:[['Tests','Pass'],['Review','Pass']]},
   {title:'Bars',type:'bars',items:[{label:'Before',value:148},{label:'After',value:92}]},
   {title:'Compare',type:'compare',items:[{label:'Build time',before:'148 s',after:'92 s',delta:'38% less'}]},
-  {title:'Cards',type:'cards',items:[{label:'Build',state:'done',note:'Checks pass'},{label:'Review',state:'pending',note:'Owner next'}]}
+  {title:'Cards',type:'cards',items:[{label:'Build',state:'done',note:'Checks pass'},{label:'Review',state:'done',note:'Approved'}]}
 ]});
 assert(reply.includes('aria-valuenow="100"')&&reply.includes('&lt;script&gt;'));
 assert(reply.includes('class="compare-bar before"')&&reply.includes('class="compare-bar after"')&&reply.includes('--value:62.2%'),'Compare draws one bar per value on a shared scale');
@@ -116,6 +116,9 @@ assert(reply.includes('reply-card')&&reply.includes('>Checked<'),'Cards render a
 assert((reply.match(/class="status-gates"/g)||[]).length===1,'Progress tile carries milestone gates');
 assert(reply.includes('data-layout="side"')&&reply.includes('class="reply-flow"'),'The swimlane sits beside one packed block area');
 assert(css.includes('.reply-flow > [data-span="3"]')&&css.includes('repeat(3,minmax(0,1fr))'),'A final lone block spans the three flow columns');
+assert(!/\.t3lib \.reply-section-tile:last-child/.test(css),'Layout depends on spans, not block position');
+assert(css.includes('[data-span="2"] .metric-grid')&&css.includes('[data-span="3"] .metric-grid'),'Wide facts use their own column rule');
+assert(/\.reply-card h3\s*\{[^}]*overflow-wrap:anywhere/.test(css),'Card labels wrap inside their track');
 assert(css.includes('min-height:376px'),'The swimlane matches two rows of supporting blocks');
 assert(reply.includes('data-count="7"'),'The flow records how many blocks it packs');
 const replyTemplate=await readFile(join(root,'reply-template.html'),'utf8');
@@ -136,6 +139,9 @@ assert(!/\.reply-card p\s*\{[^}]*display\s*:\s*none/.test(css),'No rule hides ca
 const zoned=await renderReply({title:'Waiting',state:'waiting',progress:'78%',next:'Finish the review',eta:'Unknown',wake:'Not armed',zone:'UTC',milestones,sections:[swimlane,changes,cost]});
 assert(zoned.includes('Times UTC'),'An explicit zone keeps generated output deterministic');
 await assert.rejects(renderReply({...base,next:'Deploy'}),/must set Next to None/);
+await assert.rejects(renderReply({...base,sections:[completeSwimlane,doneChanges,cost,{title:'Cards',type:'cards',items:[{label:'Build',state:'done'},{label:'Review',state:'pending'}]}]}),/cannot keep a pending card/);
+await assert.rejects(renderReply({...base,zone:'Mars/Olympus'}),/IANA name/);
+await assert.rejects(renderReply({...base,sections:[{title:'Steps',type:'swimlane',items:[{label:'One',state:'pending'},{label:'Two',state:'done'},{label:'Three',state:'done'},{label:'Four',state:'done'},{label:'Five',state:'done'}]},doneChanges,cost]}),/done steps first/);
 assert([...reply.matchAll(/data-span="(\d)"/g)].every(match=>['1','2','3'].includes(match[1])),'Every block declares a legal span');
 assert(css.includes(':last-child:nth-child(3n+1)')&&css.includes(':last-child:nth-child(3n+2)')&&css.includes(':last-child:nth-child(odd)'),'The last row fills automatically');
 assert(!reply.includes('<details>')&&!reply.includes('<summary')&&!reply.includes('wake-dot')&&!reply.includes('class="status-details"'));
