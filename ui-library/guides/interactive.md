@@ -7,7 +7,7 @@ Optional fields are `summary` and `css`. Other fields fail validation.
 
 Use 1 to 8 sections, each with `title` and `html`. An optional `description` allows 80 characters.
 The page title allows 64 characters. Section titles allow 24. Summary allows 80.
-Each section uses the same 184px minimum height. Sections stack on phones.
+Sections fit their content with compact padding. They stack on phones. Do not impose a shared minimum height.
 
 Write an HTML fragment per section, not a full document. Use a visible button or input and a local script.
 Give controls native labels or `aria-label`. Use inline SVG for graphs.

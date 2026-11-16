@@ -103,7 +103,7 @@ async function handle(message) {
         const requested = readString(params, 'protocolVersion', 64);
         result(id, {
           protocolVersion: requested ?? DEFAULT_PROTOCOL,
-          serverInfo: { name: 't3-html-replies', version: '1.2.0' },
+          serverInfo: { name: 't3-html-replies', version: '1.2.1' },
           capabilities: {
             tools: { listChanged: false },
             resources: { subscribe: false, listChanged: false }

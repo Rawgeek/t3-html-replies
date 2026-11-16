@@ -22,7 +22,8 @@ No stages, `state`, progress, milestones, or required result band.
 
 Apply Unslop. Maximum 12 words per sentence or text box, 90 words and 1200 visible characters total.
 The word budget estimates 30 seconds at 180 words per minute. Check comprehension visually; speed is not guaranteed.
-Sections use the same 184px minimum height and stack on phones. No hidden text, clipping, scrolling boxes, or expandable content.
+Sections fit their content, with compact padding, and stack on phones. Do not impose a shared minimum height.
+No hidden text, clipping, scrolling boxes, or expandable content.
 
 Optional actions use `{ "label": "Open source", "href": "https://example.com" }` or `{ "label": "Continue", "send": "Continue this task." }`.
 Labels allow 14 characters. Use at most 3 actions.
