@@ -64,7 +64,7 @@ const tool = {
   name: 'render_reply',
   title: 'Render T3 HTML reply',
   description:
-    'Choose replyType progress, data, or interactive, then validate and display reply JSON as a T3 app. This tool delivers the reply. Do not repeat its HTML or text in chat or call html_render for it. Leave the final message empty when the turn is complete. Missing replyType keeps progress compatibility. Chat controls stay disabled until T3 supports steering. Links and local controls work separately.',
+    'Choose replyType progress, data, or interactive, then validate and display reply JSON as a T3 app. Status rendered is the delivery receipt. Never repeat the call to inspect or confirm it. Do not repeat its HTML or text in chat or call html_render for it. When the task is complete, leave the final message empty. Missing replyType keeps progress compatibility. Chat controls stay disabled until T3 supports steering. Links and local controls work separately.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -132,7 +132,7 @@ async function handle(message) {
         const data = await resolveData(args);
         const html = await renderReply(data);
         result(id, {
-          content: [{ type: 'text', text: 'T3 displays this tool result as the reply. Do not repeat its HTML or text in chat or call html_render for it. If the turn is complete, leave the final message empty.' }],
+          content: [{ type: 'text', text: 'Delivery complete. Status rendered is the receipt. Do not call again to inspect or confirm it. Do not repeat its HTML or text in chat or use html_render. When the task is complete, end with an empty final message.' }],
           structuredContent: { status: 'rendered' },
           _meta: { html }
         });
