@@ -26,7 +26,8 @@ function interactiveRuntime() {
         const node=walker.currentNode;
         const text=node.textContent.trim();
         if(!text)continue;
-        const box=node.parentElement.closest('p,h1,h2,h3,h4,h5,h6,label,button,output,li,td,th,figcaption,text,div,section');
+        let box=node.parentElement;
+        while(box.parentElement&&['inline','inline-block','inline-flex','inline-grid','contents'].includes(getComputedStyle(box).display)&&!box.matches('label,button,output,svg text'))box=box.parentElement;
         const parts=boxes.get(box)||[];parts.push(text);boxes.set(box,parts);
         texts.push(text);
         for(let parent=node.parentElement;parent&&parent!==document.body;parent=parent.parentElement) {
@@ -50,7 +51,7 @@ function interactiveRuntime() {
         }
         if(!control.labels?.length&&!control.getAttribute('aria-label')&&!control.textContent.trim())throw Error('Name every control.');
       }
-      if(!controls.some(control=>!control.disabled))throw Error('Provide an enabled local control.');
+      if(!controls.some(control=>!control.matches(':disabled')&&!control.closest('[inert]')))throw Error('Provide an enabled local control.');
       if(document.documentElement.scrollWidth>innerWidth+2)throw Error('The report must fit the viewport.');
       window.__t3Audit={ok:true,words:text.split(/\s+/u).length};
     } catch(error) {
@@ -96,6 +97,7 @@ export function renderInteractive(data,css,embedData) {
     const html=section.html;
     if(typeof html!=='string'||!html.trim()||html.length>16000)throw Error('Section html must contain markup up to 16000 characters.');
     if(/<\s*\/?\s*(?:script|style|iframe|object|embed|link|meta|base|html|head|body|details|select|form|section)\b|\s(?:on\w+|hidden|srcdoc|href|src|formaction)\s*(?:=|>)/i.test(html))throw Error('Use visible local markup. Put CSS and JavaScript in css and script.');
+    if(/<(?:p|div|h[1-6]|li|td|th|figcaption)\b[^>]*\bstyle\s*=\s*["'][^"']*\bdisplay\s*:\s*(?:inline|contents)\b/i.test(html))throw Error('Keep text blocks in block layout.');
     const text=textFromHTML(html);
     const boxes=html.replace(/<\/?(?:p|div|h[1-6]|label|button|output|li|td|th|figcaption|text)\b[^>]*>/gi,'\n').split('\n').map(textFromHTML);
     for(const part of [heading,description,...boxes])if(part)conciseText(part);

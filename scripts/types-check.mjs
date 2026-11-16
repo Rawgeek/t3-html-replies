@@ -24,6 +24,8 @@ await assert.rejects(renderReply({...interactive,script:'function {'}),/Unexpect
 const longHTML='<p>One two three four five six seven <b>eight nine ten eleven twelve thirteen fourteen fifteen.</b></p>';
 await assert.rejects(renderReply({...interactive,sections:[{title:'Budget',html:longHTML+interactive.sections[0].html}]}),/15-word sentence/);
 await assert.rejects(renderReply({...interactive,sections:[{title:'Control',html:'<input type="hidden" aria-label="Jobs">'}]}),/visible and usable/);
+const inlineBox='<div>One two three four five six seven <div style="display:inline">eight nine ten eleven twelve thirteen fourteen fifteen.</div></div>';
+await assert.rejects(renderReply({...interactive,sections:[{title:'Budget',html:inlineBox+interactive.sections[0].html}]}),/block layout/);
 await assert.rejects(renderReply({...data,sections:[{type:'line',title:'Caption',labels:Array.from({length:8},(_,i)=>'Day '+i),values:Array(8).fill(1)}]}),/caption.*24-word sentence/);
 for(const values of [[0,0],[-1,3],[999999999,-999999999]])assertRenderedReply(await renderReply({...data,sections:[{type:'line',title:'Trend',labels:['A','B'],values}]}));
 for(const values of [[true,2],[NaN,2],[Infinity,2],['2',3]])await assert.rejects(renderReply({...data,sections:[{type:'line',title:'Trend',labels:['A','B'],values}]}),/finite numbers/);
@@ -111,7 +113,7 @@ try {
     assert.equal(await custom.evaluate("document.querySelector('output').textContent",context),'644 seconds');
     await custom.close();
   }
-  for(const mutation of ["document.querySelector('output').hidden=true", "document.querySelector('input').hidden=true", "document.querySelector('input').style.opacity='0'", "document.querySelector('output').textContent=Array(13).fill('word').join(' ')", `document.querySelector('output').innerHTML=${JSON.stringify(longHTML)}`, "document.querySelector('output').style.width='2000px'"]) {
+  for(const mutation of ["document.querySelector('output').hidden=true", "document.querySelector('input').hidden=true", "document.querySelector('input').style.opacity='0'", "document.querySelector('output').textContent=Array(13).fill('word').join(' ')", `document.querySelector('output').innerHTML=${JSON.stringify(longHTML)}`, `document.querySelector('output').innerHTML=${JSON.stringify(inlineBox)}`, "document.querySelector('.interactive-section').inert=true", "(()=>{const input=document.querySelector('input');const fieldset=document.createElement('fieldset');fieldset.disabled=true;input.before(fieldset);fieldset.append(input)})()", "document.querySelector('output').style.width='2000px'"]) {
     const client=await connect(await file('invalid-runtime',await renderReply(interactive)),390);
     const context=await childWorld(client);
     await client.evaluate(mutation,context);
