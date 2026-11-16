@@ -1,0 +1,11 @@
+{
+  "replyType": "data",
+  "title": "Build time fell",
+  "sections": [
+    {
+      "type": "compare",
+      "title": "Build time",
+      "items": [{"label": "Duration", "before": "148 s", "after": "92 s"}]
+    }
+  ]
+}

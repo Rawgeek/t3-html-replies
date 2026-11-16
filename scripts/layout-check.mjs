@@ -5,17 +5,9 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { existsSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { library } from './library-path.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const libraries = [
-  process.env.T3_UI_LIBRARY,
-  resolve(here, '../ui-library'),
-  join(homedir(), '.codex/templates/t3-ui-library')
-].filter(Boolean);
-const library = libraries.find((path) => existsSync(join(path, 'render-reply.mjs')));
-if (!library) throw Error('UI library not found. Set T3_UI_LIBRARY.');
 const { renderReply } = await import(pathToFileURL(join(library, 'render-reply.mjs')).href);
 
 const chrome = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

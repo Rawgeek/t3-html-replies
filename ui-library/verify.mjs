@@ -68,6 +68,25 @@ const doneChanges={title:'Changes',type:'changes',done:[{title:'Renderer patched
 const cost={title:'Cost',type:'compare',items:[{label:'Build time',before:'148 s',after:'92 s',delta:'38% less'}]};
 const milestones=['Scope','Build','Verify','Share'];
 const base={title:'Released',state:'complete',results:[{label:'Errors',value:0},{label:'Change',value:'<script>'},{label:'Scope',value:'All'}],milestones,sections:[completeSwimlane,doneChanges,cost]};
+const multiIssueSwimlane={...completeSwimlane,items:[{...completeSwimlane.items[0],note:'x'.repeat(21)},...completeSwimlane.items.slice(1)]};
+const multiIssueChanges={...doneChanges,done:[doneChanges.done[0],{...doneChanges.done[1],description:'x'.repeat(23)},...doneChanges.done.slice(2)]};
+await assert.rejects(renderReply({
+  ...base,
+  title:'x'.repeat(65),
+  summary:'x'.repeat(81),
+  results:[{label:'x'.repeat(13),value:'1'},base.results[1],base.results[2]],
+  sections:[multiIssueSwimlane,multiIssueChanges,cost]
+}),error=>{
+  assert.match(error.message,/Reply data has 5 issues/);
+  for(const pattern of [
+    /Title exceeds 64/,
+    /Summary exceeds 80/,
+    /Results\[0\] label exceeds 12/,
+    /Sections\[0\] item 1 note exceeds 20/,
+    /Sections\[1\] done 2 description exceeds 22/
+  ])assert.match(error.message,pattern);
+  return true;
+});
 const withBlocks=(...extra)=>({sections:[completeSwimlane,doneChanges,cost,...extra]});
 await assert.rejects(renderReply({title:'Pending',state:'waiting',results:base.results,progress:'100%',milestones,sections:[swimlane,changes,cost]}),/Pending work cannot be shown at 100%/);
 await assert.rejects(renderReply({title:'Pending',state:'waiting',results:base.results,milestones,sections:[swimlane,changes,cost]}),/Progress is required/);

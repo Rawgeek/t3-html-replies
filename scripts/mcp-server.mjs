@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
 import { dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createInterface } from 'node:readline';
+import { library } from './library-path.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP_PATH = resolve(HERE, '../assets/mcp-app.html');
@@ -14,18 +13,6 @@ const APP_MIME = 'text/html;profile=mcp-app';
 const MAX_DATA_BYTES = 256 * 1024;
 const DEFAULT_PROTOCOL = '2025-06-18';
 
-const libraries = [
-  process.env.T3_UI_LIBRARY,
-  resolve(HERE, '../ui-library'),
-  join(homedir(), '.codex/templates/t3-ui-library')
-].filter(Boolean);
-const library = libraries.find((path) => existsSync(join(path, 'render-reply.mjs')));
-if (!library) {
-  process.stderr.write(
-    't3-html-replies: UI library not found. Set T3_UI_LIBRARY to the t3-ui-library directory.\n'
-  );
-  process.exit(1);
-}
 const { renderReply } = await import(pathToFileURL(join(library, 'render-reply.mjs')).href);
 
 const send = (message) => process.stdout.write(JSON.stringify(message) + '\n');
@@ -77,7 +64,7 @@ const tool = {
   name: 'render_reply',
   title: 'Render T3 HTML reply',
   description:
-    'Validate reply data and render it as a native T3 MCP app. Pass reply JSON, not HTML. Buttons with data-t3-send send their instruction to the current thread through T3.',
+    'Choose replyType progress, data, or interactive, then validate and render reply JSON as a T3 app. Missing replyType keeps progress compatibility. Steering buttons show an icon and stay disabled while T3 only supports queued app messages. Links and local controls work separately.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -116,7 +103,7 @@ async function handle(message) {
         const requested = readString(params, 'protocolVersion', 64);
         result(id, {
           protocolVersion: requested ?? DEFAULT_PROTOCOL,
-          serverInfo: { name: 't3-html-replies', version: '1.1.0' },
+          serverInfo: { name: 't3-html-replies', version: '1.2.0' },
           capabilities: {
             tools: { listChanged: false },
             resources: { subscribe: false, listChanged: false }

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { icon, pill, progressBoard, resultGrid, metric, escapeHTML as e } from './components.mjs';
 import { percentValue, measure } from './parse.mjs';
+import { conciseText, renderInteractive } from './interactive.mjs';
 
 const LIMITS=Object.freeze({
   title:64,summary:80,results:4,resultLabel:12,resultValue:8,resultNote:18,
@@ -24,11 +25,18 @@ const STATES=new Set(['complete','working','waiting','blocked']);
 const SECTION_TYPES=new Set(['facts','list','table','swimlane','bars','changes','compare','cards']);
 // Every supporting block uses one shared height, so rows always align.
 const SECTION_HEIGHT='small';
-const TOP_KEYS=['title','state','summary','results','sections','progress','eta','wake','milestones','actions'];
+const TOP_KEYS=['replyType','title','state','summary','results','sections','progress','eta','wake','milestones','actions'];
 const OPAQUE=/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,}\b|[0-9a-f]{8}-[0-9a-f-]{20,}/i;
 const CLOCK=/^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const steerIcon=()=>'<svg class="icon" data-steer-icon="" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 10h6m6 0h6m-9 4v7"/></svg>';
+const steerButton=(action,className='btn')=>`<button class="${className}" type="button" disabled aria-disabled="true" data-t3-send="${e(action.send)}" aria-label="${e(action.label)}, steer current task">${steerIcon()}<span>${e(action.label)}</span></button>`;
 
+let lintIssues=null;
 const fail=message=>{throw Error(message);};
+const report=message=>{
+  if(lintIssues===null)fail(message);
+  if(!lintIssues.includes(message))lintIssues.push(message);
+};
 const LIBRARY_CSS=readFileSync(new URL('./library.css',import.meta.url),'utf8');
 const inferType=(section)=>{
   if(Array.isArray(section.done)||Array.isArray(section.todo))return 'changes';
@@ -46,21 +54,35 @@ const present=value=>value!==undefined&&value!==null&&String(value).trim()!=='';
 const assertKeys=(value,allowed,field)=>{
   if(!value||typeof value!=='object'||Array.isArray(value))fail(`${field} must be an object.`);
   const extra=Object.keys(value).filter(key=>!allowed.includes(key));
-  if(extra.length)fail(`${field} has unsupported fields: ${extra.join(', ')}.`);
+  if(extra.length)report(`${field} has unsupported fields: ${extra.join(', ')}.`);
 };
 const field=(value,name,max,{optional=false}={})=>{
   if(!present(value)){
     if(optional)return '';
-    fail(`${name} is required.`);
+    report(`${name} is required.`);
+    return 'Missing';
   }
-  if(typeof value==='object')fail(`${name} must be text.`);
+  if(typeof value==='object'){
+    report(`${name} must be text.`);
+    return 'Invalid';
+  }
   const text=String(value).trim();
-  if(text.length>max)fail(`${name} exceeds ${max} characters. Split it into another block.`);
-  if(OPAQUE.test(text))fail(`${name} contains a hash or machine ID. Replace it with a readable reference such as "PR 22687".`);
+  const opaque=OPAQUE.test(text);
+  if(text.length>max){
+    report(`${name} exceeds ${max} characters. Split it into another block.`);
+  }
+  if(opaque){
+    report(`${name} contains a hash or machine ID. Replace it with a readable reference such as "PR 22687".`);
+  }
+  if(text.length>max)return text.slice(0,max);
+  if(opaque)return 'Machine ID';
   return text;
 };
 const array=(value,name,min,max)=>{
-  if(!Array.isArray(value)||value.length<min||value.length>max)fail(`${name} must contain ${min} to ${max} items.`);
+  if(!Array.isArray(value)||value.length<min||value.length>max){
+    report(`${name} must contain ${min} to ${max} items.`);
+    return Array.isArray(value)?value.slice(0,max):[];
+  }
   return value;
 };
 const fact=(value,name)=>{
@@ -278,7 +300,7 @@ function renderSection(section){
     body=`<div class="table-wrap${hasActions?' has-actions':''}"><table${tableClass}><thead><tr>${section.columns.map(column=>`<th scope="col">${e(column)}</th>`).join('')}</tr></thead><tbody>${section.rows.map(row=>{
       return `<tr>${row.cells.map(cell=>{
       if(cell&&typeof cell==='object'){
-        return `<td class="cell-action"><button class="btn compact${cell.primary?' primary':''}" type="button" data-t3-send="${e(cell.send)}">${icon(cell.icon)}<span>${e(cell.label)}</span></button></td>`;
+        return `<td class="cell-action">${steerButton(cell,`btn compact${cell.primary?' primary':''}`)}</td>`;
       }
       return `<td${/^(?:[\d.,]+%|[\d.,]+ (?:s|ms|GB|MB))$/.test(cell)?' class="numeric"':''}>${e(cell)}</td>`;
     }).join('')}</tr>`;
@@ -330,14 +352,50 @@ function renderedVisible(html){
   return body.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[0-9a-f]+);/gi,'x').replace(/\s+/g,'').length;
 }
 function finishReply(html){
+  if(html.includes('data-t3-send='))html=html.replace('</main>','<p class="reply-text" role="status">Steering unavailable in this T3 version.</p></main>');
   if(renderedVisible(html)>LIMITS.visibleText)fail(`Reply exceeds ${LIMITS.visibleText} visible characters. Move long material to a linked artifact.`);
   return html;
 }
-export async function renderReply(data){return finishReply(renderReplyPage(data));}
+export function lintReply(data){
+  const previous=lintIssues;
+  lintIssues=[];
+  let failure=null;
+  try{
+    finishReply(renderReplyPage(data));
+  }catch(error){
+    if(lintIssues.length&&/^Reply exceeds \d+ visible characters/.test(error.message)){
+      if(!lintIssues.includes(error.message))lintIssues.push(error.message);
+    }else{
+      failure=error;
+    }
+  }
+  const issues=lintIssues;
+  lintIssues=previous;
+  if(failure&&!issues.includes(failure.message))issues.push(failure.message);
+  if(issues.length)return issues;
+  if(failure)throw failure;
+  return [];
+}
+export async function renderReply(data){
+  const issues=lintReply(data);
+  if(issues.length){
+    const label=issues.length===1?'issue':'issues';
+    const detail=issues.map(issue=>'- '+issue).join(String.fromCharCode(10));
+    fail('Reply data has '+issues.length+' '+label+':'+String.fromCharCode(10)+detail);
+  }
+  return finishReply(renderReplyPage(data));
+}
 function renderReplyPage(data){
   const css=LIBRARY_CSS;
   if(!data||typeof data!=='object'||Array.isArray(data))fail('Reply data must be an object.');
-  if(data.kind==='question')return renderQuestion(data,css);
+  if(data.kind==='question'){
+    if(data.replyType!==undefined)fail('Legacy questions cannot set replyType.');
+    return renderQuestion(data,css);
+  }
+  const replyType=data.replyType===undefined?'progress':data.replyType;
+  if(!['progress','data','interactive'].includes(replyType))fail('replyType must be progress, data, or interactive.');
+  if(replyType==='data')return renderDataReport(data,css);
+  if(replyType==='interactive')return renderInteractive(data,css,embedData);
   assertKeys(data,TOP_KEYS,'Reply');
   const state=data.state;
   if(!STATES.has(state))fail('State must be complete, working, waiting, or blocked.');
@@ -383,7 +441,7 @@ function renderReplyPage(data){
   const actionsHtml=actions.map(action=>{
     const className=`btn${action.primary?' primary':''}`;
     return action.send
-      ?`<button class="${className}" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
+      ?steerButton(action,className)
       :`<a class="${className}" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`;
   }).join('');
   const swimlaneSection=sections.find(section=>section.type==='swimlane');
@@ -432,6 +490,64 @@ function renderReplyPage(data){
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply" data-state="${state}"><header class="reply-head"><h1>${e(title)}</h1>${metaHtml}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}${sectionsHtml}</main>${embedData(data)}</body></html>`;
 }
 
+function renderDataReport(data,css){
+  const conciseField=(text,path)=>{try{conciseText(text);}catch(error){report(`${path}: ${error.message}`);}};
+  assertKeys(data,['replyType','title','summary','sections','actions'],'Data reply');
+  const title=field(data.title,'Title',64);
+  const summary=field(data.summary,'Summary',80,{optional:true});
+  const fragments=[title,summary];
+  const seen=new Set();
+  const sections=array(data.sections,'Sections',1,8).map((section,index)=>{
+    const name=`Sections[${index}]`;
+    assertKeys(section,['type','title','items','columns','rows','description','labels','values','unit'],name);
+    const type=section.type;
+    if(!['facts','bars','compare','table','text','line'].includes(type))fail(`${name} type must be facts, bars, compare, table, text, or line.`);
+    const heading=field(section.title,`${name} title`,24);
+    const key=heading.toLowerCase();
+    if(seen.has(key))fail(`${name} repeats a section title. Show each idea once.`);
+    seen.add(key);
+    let html;
+    if(type==='text'){
+      assertKeys(section,['type','title','description'],name);
+      const description=field(section.description,`${name} description`,80);
+      html=`<section class="component-tile reply-section-tile" data-height="small" data-section-type="text"><div class="demo tile-body"><h2>${e(heading)}</h2><p class="reply-text">${e(description)}</p></div></section>`;
+    }else if(type==='line'){
+      assertKeys(section,['type','title','labels','values','unit'],name);
+      const labels=array(section.labels,`${name} labels`,2,8).map((label,i)=>field(label,`${name} label ${i+1}`,12));
+      const values=array(section.values,`${name} values`,2,8);
+      if(labels.length!==values.length)fail(`${name} labels and values must have equal lengths.`);
+      if(values.some(value=>typeof value!=='number'||!Number.isFinite(value)||Math.abs(value)>999999999))fail(`${name} values must be finite numbers.`);
+      const unit=field(section.unit,`${name} unit`,8,{optional:true});
+      const low=Math.min(0,...values),high=Math.max(0,...values),range=high-low||1;
+      const points=values.map((value,i)=>`${24+i*252/(values.length-1)},${88-(value-low)/range*64}`).join(' ');
+      const ticks=labels.map((label,i)=>`<text x="${24+i*252/(labels.length-1)}" y="114" text-anchor="middle">${e(label)}</text>`).join('');
+      const readout=labels.map((label,i)=>`${label} ${values[i]}${unit}`).join(', ');
+      conciseField(readout,`${name} caption`);
+      html=`<section class="component-tile reply-section-tile" data-height="small" data-section-type="line"><div class="demo tile-body"><h2>${e(heading)}</h2><figure class="report-line"><svg viewBox="0 0 300 126" role="img" aria-label="${e(readout)}"><line x1="24" x2="276" y1="88" y2="88" stroke="var(--ui-border)"/><polyline points="${points}" fill="none" stroke="var(--ui-series-1)" stroke-width="2"/>${ticks}</svg><figcaption>${e(readout)}</figcaption></figure></div></section>`;
+    }else html=renderSection(validateSection(section,index));
+    // Count each authored text box, then count the whole page without treating it as one sentence.
+    const text=html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+    fragments.push(text);
+    const strings=(value,path)=>{
+      if(typeof value==='string')return [{text:value,path}];
+      if(Array.isArray(value))return value.flatMap((item,i)=>strings(item,`${path}[${i}]`));
+      if(value&&typeof value==='object')return Object.entries(value).filter(([key])=>!['type','send','href','icon'].includes(key)).flatMap(([key,item])=>strings(item,`${path}.${key}`));
+      return [];
+    };
+    strings(section,name).forEach(({text,path})=>conciseField(text,path));
+    return html;
+  });
+  if(!data.sections.some(section=>section.type!=='text'))fail('Data reports need a chart, facts, comparison, or table.');
+  const actions=validateActions(data.actions);
+  actions.forEach(action=>fragments.push(action.label));
+  if(actions.some(action=>action.send))fragments.push('Steering unavailable in this T3 version.');
+  conciseField(title,'Title');if(summary)conciseField(summary,'Summary');
+  const text=fragments.join(' ');
+  if(text.length>1200||text.split(/\s+/u).length>90)fail('Data report exceeds 90 words or 1200 characters. Keep reading under 30 seconds.');
+  const actionHTML=actions.map(action=>action.send?steerButton(action):`<a class="btn" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`).join('');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply data-report"><header class="reply-head"><h1>${e(title)}</h1>${actionHTML?`<div class="actions">${actionHTML}</div>`:''}</header>${summary?`<p class="reply-text">${e(summary)}</p>`:''}<div class="report-grid">${sections.join('')}</div></main>${embedData(data)}</body></html>`;
+}
+
 const QUESTION_KEYS=['kind','title','context','question','options','actions'];
 function renderQuestion(data,css){
   assertKeys(data,QUESTION_KEYS,'Question');
@@ -452,9 +568,9 @@ function renderQuestion(data,css){
   });
   const actions=validateActions(data.actions);
   const actionsHtml=actions.map(action=>action.send
-    ?`<button class="btn" type="button" data-t3-send="${e(action.send)}">${icon(action.icon)}<span>${e(action.label)}</span></button>`
+    ?steerButton(action)
     :`<a class="btn" href="${e(action.href)}">${icon(action.icon)}<span>${e(action.label)}</span></a>`).join('');
-  const optionHtml=options.map((option,index)=>`<button class="ask-option${option.primary||index===0?' primary':''}" type="button" data-t3-send="${e(option.send)}"><span class="ask-copy"><b>${e(option.label)}</b>${option.note?`<small>${e(option.note)}</small>`:''}</span>${icon('arrow-right')}</button>`).join('');
+  const optionHtml=options.map((option,index)=>`<button class="ask-option${option.primary||index===0?' primary':''}" type="button" disabled aria-disabled="true" data-t3-send="${e(option.send)}" aria-label="${e(option.label)}, steer current task"><span class="ask-copy"><b>${e(option.label)}</b>${option.note?`<small>${e(option.note)}</small>`:''}</span>${steerIcon()}</button>`).join('');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style></head><body><main class="t3lib reply question"><header class="reply-head"><h1>${e(title)}</h1>${actionsHtml?`<div class="reply-meta"><div class="actions">${actionsHtml}</div></div>`:''}</header><p class="reply-text">${e(context)}</p><section class="ask" aria-label="Question"><p class="ask-question">${e(question)}</p><div class="ask-options">${optionHtml}</div></section></main>${embedData(data)}</body></html>`;
 }
 

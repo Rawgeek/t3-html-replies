@@ -12,6 +12,7 @@ if git diff --cached --name-only | grep -qE '^(ui-library/|scripts/|assets/|hook
   node ui-library/verify.mjs >/dev/null
   node scripts/selftest.mjs >/dev/null
   node scripts/layout-check.mjs >/dev/null
+  node scripts/types-check.mjs >/dev/null
   node scripts/previews.mjs >/dev/null
   git add \
     ui-library/reply-template.html \
