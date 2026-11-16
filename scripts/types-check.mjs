@@ -131,16 +131,19 @@ try {
   // Exercise the real app shell with a mock host. No chat message may leave any button.
   const app=await readFile(new URL('../assets/mcp-app.html',import.meta.url),'utf8');
   const question={kind:'question',title:'Pick one',context:'One choice steers.',question:'Choose a path.',options:[{label:'First',send:'First.'},{label:'Second',send:'Second.'}]};
-  for(const sample of [{...progress,actions},{...data,actions},question,interactive]) {
+  for(const carrier of ['metadata','legacy'])for(const sample of [{...progress,actions},{...data,actions},question,interactive]) {
     const page=await renderReply(sample);
-    const host=`<!doctype html><html><body style="margin:0"><iframe id="app" style="width:100%;height:1200px;border:0" srcdoc="${app.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"></iframe><script>window.calls=[];addEventListener('message',event=>{const m=event.data;if(!m?.method)return;calls.push(m);const frame=document.getElementById('app');if(m.method==='ui/initialize'){frame.contentWindow.postMessage({jsonrpc:'2.0',id:m.id,result:{hostContext:{theme:'dark'}}},'*');frame.contentWindow.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:{structuredContent:{html:${JSON.stringify(page).replace(/</g,'\\u003c')}}}},'*');}else if(m.id)frame.contentWindow.postMessage({jsonrpc:'2.0',id:m.id,result:{}},'*');});</script></body></html>`;
+    const payload=carrier==='metadata'?{structuredContent:{status:'rendered'},_meta:{html:page}}:{structuredContent:{html:page}};
+    const host=`<!doctype html><html><body style="margin:0"><iframe id="app" style="width:100%;height:1200px;border:0" srcdoc="${app.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"></iframe><script>window.calls=[];addEventListener('message',event=>{const m=event.data;if(!m?.method)return;calls.push(m);const frame=document.getElementById('app');if(m.method==='ui/initialize'){frame.contentWindow.postMessage({jsonrpc:'2.0',id:m.id,result:{hostContext:{theme:'dark'}}},'*');for(let i=0;i<2;i++)frame.contentWindow.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:${JSON.stringify(payload).replace(/</g,'\\u003c')}},'*');}else if(m.id)frame.contentWindow.postMessage({jsonrpc:'2.0',id:m.id,result:{}},'*');});</script></body></html>`;
     const client=await connect(await file('host',host),728);
     const context=await childWorld(client);
     await client.evaluate('new Promise(resolve=>setTimeout(resolve,100))',context);
     if(sample.replyType==='interactive') {
+      assert.equal(await client.evaluate("document.querySelectorAll('iframe[data-t3-interactive]').length",context),1,'Repeated delivery must mount exactly one interactive frame');
       const nested=await childWorld(client,2);
       assert.match(await client.evaluate("document.body.innerText",nested),/92 seconds/);
     }else {
+      assert.equal(await client.evaluate("document.querySelectorAll('#reply > main').length",context),1,'Repeated delivery must mount exactly one reply');
       assert(await client.evaluate("[...document.querySelectorAll('[data-t3-send]')].every(button=>button.disabled&&button.querySelector('[data-steer-icon]'))",context));
       await client.evaluate("document.querySelectorAll('[data-t3-send]').forEach(button=>button.click());document.querySelector('a')?.click()",context);
       const calls=await client.evaluate('calls');assert(!calls.some(call=>call.method==='ui/message'));

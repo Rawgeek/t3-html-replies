@@ -220,8 +220,8 @@ body { padding: 0 0 1px; }
     if (message.method === 'ui/notifications/tool-input') return;
     if (message.method === 'ui/notifications/tool-result') {
       const params = message.params || {};
-      const structured = params.structuredContent || {};
-      const html = typeof structured.html === 'string' ? structured.html : undefined;
+      // Old tool results keep working when a thread reloads after an upgrade.
+      const html = params._meta?.html ?? params.structuredContent?.html;
       if (html) render(html);
       return;
     }

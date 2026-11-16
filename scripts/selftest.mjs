@@ -42,6 +42,18 @@ function rpc(method, params = {}) {
   });
 }
 
+function assertDelivery(value, expected) {
+  if (!value._meta?.html?.includes(expected)) throw Error('App HTML payload is missing.');
+  if (value.structuredContent?.status !== 'rendered'
+      || Object.keys(value.structuredContent).length !== 1
+      || value.content?.length !== 1
+      || value.content[0].type !== 'text'
+      || value.content[0].text.length > 240
+      || /<\/?(?:html|main|body)\b/.test(value.content[0].text)) {
+    throw Error('Model-facing reply must contain only a short delivery receipt.');
+  }
+}
+
 const reply = {
   title: 'Self test reply',
   state: 'working',
@@ -109,20 +121,19 @@ try {
   await writeFile(dataPath, JSON.stringify(reply));
 
   const fromPath = await rpc('tools/call', { name: 'render_reply', arguments: { dataPath } });
-  if (fromPath.structuredContent?.html?.includes('Self test reply') !== true) {
-    throw Error('dataPath rendering failed.');
-  }
+  assertDelivery(fromPath, 'Self test reply');
   const inline = await rpc('tools/call', { name: 'render_reply', arguments: { data: reply } });
-  if (inline.structuredContent?.html?.includes('Self test reply') !== true) {
-    throw Error('Inline data rendering failed.');
-  }
+  assertDelivery(inline, 'Self test reply');
   for (const name of ['data', 'interactive']) {
     const data = JSON.parse(await readFile(join(library, name + '-example.json'), 'utf8'));
     const typed = await rpc('tools/call', { name: 'render_reply', arguments: { data } });
-    if (!typed.structuredContent?.html?.includes(name === 'data' ? 'report-grid' : 'data-t3-interactive')) {
-      throw Error(name + ' MCP rendering failed.');
-    }
+    assertDelivery(typed, name === 'data' ? 'report-grid' : 'data-t3-interactive');
   }
+  const question = await rpc('tools/call', { name: 'render_reply', arguments: {
+    data: { kind: 'question', title: 'Pick one', context: 'One choice steers.', question: 'Choose a path.',
+      options: [{ label: 'First', send: 'First.' }, { label: 'Second', send: 'Second.' }] }
+  } });
+  assertDelivery(question, 'Choose a path.');
 
   let extraRejected = false;
   try {

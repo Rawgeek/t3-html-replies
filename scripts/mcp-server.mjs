@@ -64,7 +64,7 @@ const tool = {
   name: 'render_reply',
   title: 'Render T3 HTML reply',
   description:
-    'Choose replyType progress, data, or interactive, then validate and render reply JSON as a T3 app. Missing replyType keeps progress compatibility. Steering buttons show an icon and stay disabled while T3 only supports queued app messages. Links and local controls work separately.',
+    'Choose replyType progress, data, or interactive, then validate and display reply JSON as a T3 app. This tool delivers the reply. Do not repeat its HTML or text in chat or call html_render for it. Leave the final message empty when the turn is complete. Missing replyType keeps progress compatibility. Chat controls stay disabled until T3 supports steering. Links and local controls work separately.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -103,7 +103,7 @@ async function handle(message) {
         const requested = readString(params, 'protocolVersion', 64);
         result(id, {
           protocolVersion: requested ?? DEFAULT_PROTOCOL,
-          serverInfo: { name: 't3-html-replies', version: '1.2.1' },
+          serverInfo: { name: 't3-html-replies', version: '1.2.2' },
           capabilities: {
             tools: { listChanged: false },
             resources: { subscribe: false, listChanged: false }
@@ -132,8 +132,9 @@ async function handle(message) {
         const data = await resolveData(args);
         const html = await renderReply(data);
         result(id, {
-          content: [{ type: 'text', text: 'T3 HTML reply rendered.' }],
-          structuredContent: { html }
+          content: [{ type: 'text', text: 'T3 displays this tool result as the reply. Do not repeat its HTML or text in chat or call html_render for it. If the turn is complete, leave the final message empty.' }],
+          structuredContent: { status: 'rendered' },
+          _meta: { html }
         });
         return;
       }
