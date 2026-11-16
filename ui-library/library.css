@@ -1,4 +1,12 @@
 :root { color-scheme: light dark; }
+.t3lib .report-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.t3lib .report-grid > :last-child:nth-child(odd) { grid-column:1/-1; }
+.t3lib .report-grid .reply-section-tile { height:auto; min-height:184px; }
+.t3lib .report-line { display:grid; gap:4px; }
+.t3lib .report-line svg { display:block; width:100%; height:126px; }
+.t3lib .report-line svg text { fill:var(--ui-muted); font:10px var(--ui-font); }
+.t3lib .report-line figcaption { font-size:11px; color:var(--ui-muted); }
+@media (max-width:620px) { .t3lib .report-grid { grid-template-columns:1fr; } }
 .t3lib.reply.question { max-width:720px; gap:10px; }
 .t3lib .ask { display:grid; gap:12px; padding:16px; border:1px solid var(--ui-border); border-radius:var(--ui-radius); background:var(--ui-surface-grad); box-shadow:inset 0 1px 0 var(--ui-hairline); }
 .t3lib .ask-question { font-size:15px; font-weight:550; line-height:1.35; letter-spacing:-.01em; overflow-wrap:anywhere; }

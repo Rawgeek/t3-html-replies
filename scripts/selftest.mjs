@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { library } from './library-path.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const server = spawn(process.execPath, [resolve(here, 'mcp-server.mjs')], {
@@ -115,6 +116,13 @@ try {
   if (inline.structuredContent?.html?.includes('Self test reply') !== true) {
     throw Error('Inline data rendering failed.');
   }
+  for (const name of ['data', 'interactive']) {
+    const data = JSON.parse(await readFile(join(library, name + '-example.json'), 'utf8'));
+    const typed = await rpc('tools/call', { name: 'render_reply', arguments: { data } });
+    if (!typed.structuredContent?.html?.includes(name === 'data' ? 'report-grid' : 'data-t3-interactive')) {
+      throw Error(name + ' MCP rendering failed.');
+    }
+  }
 
   let extraRejected = false;
   try {
@@ -134,6 +142,33 @@ try {
     rejected = /result facts|swimlane/i.test(error.message);
   }
   if (!rejected) throw Error('render_reply accepted reply data without a swimlane.');
+
+  let aggregated = '';
+  try {
+    await rpc('tools/call', {
+      name: 'render_reply',
+      arguments: {
+        data: {
+          ...reply,
+          title: 'x'.repeat(65),
+          sections: reply.sections.map((section, index) => index === 0 ? {
+            ...section,
+            items: section.items.map((item, itemIndex) => itemIndex === 2 ? {
+              ...item,
+              note: 'x'.repeat(21)
+            } : item)
+          } : section)
+        }
+      }
+    });
+  } catch (error) {
+    aggregated = error.message;
+  }
+  if (!/Reply data has 2 issues/.test(aggregated)
+      || !/Title exceeds 64/.test(aggregated)
+      || !/Sections\[0\] item 3 note exceeds 20/.test(aggregated)) {
+    throw Error('render_reply did not report every field issue in one response.');
+  }
 
   const resource = await rpc('resources/read', {
     uri: 'ui://t3-html-replies/reply.html'

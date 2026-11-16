@@ -1,0 +1,12 @@
+{
+  "replyType": "interactive",
+  "state": "complete",
+  "title": "Estimate build time",
+  "sections": [
+    {
+      "title": "Try a workload",
+      "html": "<label for=\"jobs\">Jobs</label><input id=\"jobs\" type=\"range\" min=\"1\" max=\"8\" value=\"1\"><output id=\"duration\" aria-live=\"polite\">92 seconds</output>"
+    }
+  ],
+  "script": "const jobs=document.getElementById('jobs');const duration=document.getElementById('duration');jobs.addEventListener('input',()=>{duration.textContent=Number(jobs.value)*92+' seconds';});"
+}

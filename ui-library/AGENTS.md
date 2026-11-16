@@ -1,6 +1,7 @@
 # Reply library
 
-Read applicable agent instructions, then [AGENT_GUIDE.md](AGENT_GUIDE.md).
+Read applicable agent instructions. Choose `replyType` first, then read only its guide in `guides/`.
+Use [AGENT_GUIDE.md](AGENT_GUIDE.md) when the type is unclear.
 
 This directory is the UI library in the t3-html-replies repository. A personal install can keep the same files at ~/.codex/templates/t3-ui-library.
 
