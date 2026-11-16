@@ -15,6 +15,8 @@ Legacy `kind: "question"` remains supported. Do not mix `kind` with `replyType`.
 
 Edit the starter, then call `render_reply` with the absolute JSON path. The tool validates and renders in one call.
 Without MCP, run `node ui.mjs reply input.json output.html` and send the generated page through T3.
+The display tool delivers the reply. Do not copy its HTML or text into chat, or use a second display tool.
+When the turn is complete, leave the final message empty.
 Use `check` for a dry run. Use `guard` to compare an existing page with a fresh canonical render.
 
 All types keep at most 8 sections and 1200 visible characters. Apply Unslop and show each idea once.

@@ -68,6 +68,8 @@ node ui-library/ui.mjs reply output/data.json output/data.html
 ```
 
 With MCP, pass `dataPath` to `render_reply` instead of running `reply`. Both validate and render in one call.
+`render_reply` displays the reply in its app. Do not send the same page through `html_render` or paste its body into chat.
+Leave the final assistant message empty after delivery. The app payload travels in `_meta.html`; the normal result is a short receipt.
 Custom scripts are trusted agent-authored code. Layout audits detect mistakes; they do not contain hostile scripts or prevent self-navigation.
 
 ## More examples
