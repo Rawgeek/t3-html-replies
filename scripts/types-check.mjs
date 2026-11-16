@@ -96,10 +96,17 @@ try {
   for(const width of [1024,728,390]) {
     const client=await connect(await file('data',await renderReply(report)),width);
     const result=await client.evaluate(audit);assert(!result.overflow&&!result.clipped,JSON.stringify(result));await client.close();
+    const compact={replyType:'data',title:'Read the final review and open the published release',actions:[{label:'Open release',href:'https://example.com/release'},{label:'Merged PR',href:'https://example.com/pr'}],sections:[{type:'facts',title:'Checks',items:[{label:'Types',value:'3'},{label:'Result',value:'Passed'}]},{type:'text',title:'Next',description:'Restart the provider session.'}]};
+    const density=await connect(await file('compact',await renderReply(compact)),width);
+    const heights=await density.evaluate("[...document.querySelectorAll('.report-grid>section')].map(section=>section.getBoundingClientRect().height)");
+    assert(heights.every(height=>height>30&&height<140),'Sparse report cards must fit their content: '+heights);
+    assert(await density.evaluate("[...document.querySelectorAll('.reply-head .btn')].every(button=>button.scrollWidth<=button.clientWidth+2&&button.scrollHeight<=button.clientHeight+2)"),'Header actions must fit without clipping');
+    const denseLayout=await density.evaluate(audit);assert(!denseLayout.overflow&&!denseLayout.clipped,JSON.stringify(denseLayout));await density.close();
     const custom=await connect(await file('custom',await renderReply(interactive)),width);
     const context=await childWorld(custom);
     await custom.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))',context);
     assert.match((await custom.evaluate(audit,context)).text,/92 seconds/);
+    assert(await custom.evaluate("[...document.querySelectorAll('.interactive-section')].every(section=>section.getBoundingClientRect().height<160)",context),'Simple interactive cards must fit their controls');
     for(let jobs=1;jobs<=8;jobs++) {
       const text=await custom.evaluate(`(()=>{const input=document.querySelector('input');input.value=${jobs};input.dispatchEvent(new Event('input',{bubbles:true}));return document.querySelector('output').textContent})()`,context);
       assert.equal(text,`${jobs*92} seconds`);

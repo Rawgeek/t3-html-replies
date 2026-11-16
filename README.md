@@ -14,6 +14,7 @@ The renderer turns short JSON into one self-contained HTML page. Replies use a d
 - `interactive` delivers trusted custom HTML and local JavaScript in an isolated frame, for final outputs only.
 - All replies allow 8 sections and 1,200 visible characters. Data and interactive replies also allow 90 words and 12 words per sentence.
 - Only progress replies require stages, result facts, changes, and milestones.
+- Data and interactive cards fit their content with compact padding. Short notes no longer occupy a full-height tile.
 - Numbers sit in a visual: compare bars for before and after, facts for single values, bars for groups.
 - The renderer picks each block span, so the flow fills every cell with no orphan blocks or holes.
 - Progress shows one segment per milestone, labelled under the track.

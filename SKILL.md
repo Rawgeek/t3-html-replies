@@ -32,7 +32,7 @@ On failure, fix reported issues together. Never bypass validation with hand-writ
 - Use at most 8 sections and 1200 visible characters. No hashes, tokens, or machine IDs.
 - Keep text visible. No expandable content, dropdowns, hover-only details, clipping, or internal scrolling.
 - Data and interactive replies allow 90 words total and 12 words per sentence or text box. Aim for 30-second comprehension.
-- Data sections and custom sections share a 184px minimum height. They stack on phones.
+- Data and custom sections fit their content. Keep padding compact. Stack sections on phones.
 - Chat buttons and choices always steer. Never offer queue or silently fall back to queue.
 - Steering buttons show a steering icon beside their label. Links, PRs, attachments, and local controls keep their own behavior.
 - The current T3 bridge queues app messages. Chat controls stay disabled until T3 provides a verified steer transport.
